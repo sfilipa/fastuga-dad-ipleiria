@@ -1,38 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <link rel="icon" href="/favicon.png">
+    <title>Admin One - Vue.js 3 Tailwind dashboard template</title>
 
-<head>
-  <meta charset="UTF-8" />
-  <link rel="icon" href="/favicon.ico" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Materio - Vuetify Vuejs Admin Template</title>
-  <link rel="stylesheet" type="text/css" href="/loader.css" />
-</head>
+    <meta name="description" content="Admin One - free Vue.js 3 Tailwind dashboard">
 
-<body>
-  <div id="app">
-    <div id="loading-bg">
-      <div class="loading-logo">
-        <img src="/logo.png" height="50" alt="Logo" />
-      </div>
-      <div class="loading">
-        <div class="effect-1 effects"></div>
-        <div class="effect-2 effects"></div>
-        <div class="effect-3 effects"></div>
-      </div>
-    </div>
-  </div>
-  <script type="module" src="/src/main.js"></script>
-  <script>
-    const loaderColor = localStorage.getItem('Materio-initial-loader-bg') || '#FFFFFF'
-    const primaryColor = localStorage.getItem('Materio-initial-loader-color') || '#9155FD'
+    <meta property="og:url" content="https://justboil.github.io/admin-one-vue-tailwind/">
+    <meta property="og:site_name" content="JustBoil.me">
+    <meta property="og:title" content="Admin One Vue.js 3 Tailwind free">
+    <meta property="og:description" content="Admin One - free Vue.js 3 Tailwind dashboard with dark mode. Vite or Nuxt or Laravel">
+    <meta property="og:image" content="https://static.justboil.me/templates/one/repo-tailwind-vue.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1920">
+    <meta property="og:image:height" content="960">
 
-    if (loaderColor)
-      document.documentElement.style.setProperty('--initial-loader-bg', loaderColor)
-    if (primaryColor)
-      document.documentElement.style.setProperty('--initial-loader-color', primaryColor)
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Admin One Vue.js 3 Tailwind free">
+    <meta property="twitter:description" content="Admin One - free Vue.js 3 Tailwind dashboard with dark mode. Vite or Nuxt or Laravel">
+    <meta property="twitter:image:src" content="https://static.justboil.me/templates/one/repo-tailwind-vue.png">
+    <meta property="twitter:image:width" content="1920">
+    <meta property="twitter:image:height" content="960">
 
-  </script>
-</body>
-
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-130795909-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-130795909-1');
+    </script>
+  </head>
+  <body>
+    <noscript>
+      <strong>We're sorry but this app doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+    </noscript>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+    <!-- built files will be auto injected -->
+  </body>
 </html>

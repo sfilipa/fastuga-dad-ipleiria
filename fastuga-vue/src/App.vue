@@ -1,12 +1,7 @@
 <script setup>
-import BuyNow from '@core/components/BuyNow.vue'
+import { RouterView } from "vue-router";
 </script>
 
 <template>
-  <VApp>
-    <VLayout class="layout-wrapper layout-nav-type-vertical">
-      <RouterView />
-      <BuyNow />
-    </VLayout>
-  </VApp>
+  <RouterView />
 </template>
