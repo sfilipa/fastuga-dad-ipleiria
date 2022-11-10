@@ -3,36 +3,32 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Models\OrderItems;
+use App\Models\Product;
 use Illuminate\Http\Request;
 
-class UserController extends Controller
+class ProductController extends Controller
 {
-    public function getOrders(User $user)
-    {
-        return $user->orders;
+    public function getProduct(int $id) {
+        return Product::find($id);
     }
 
-    public function getCustomer(User $user) {
-        return $user->customer;
+    public function getOrderItems(Product $product) {
+        return $product->orderItems;
     }
 
-    public function getOrderItems(User $user) {
-        return $user->orderItems;
-    }
-
-    public function getUser(int $id) {
-        return User::find($id);
+    public function getOrderItem(Product $product, OrderItems $orderItem) {
+        return $product->orderItems->find($orderItem->id);
     }
 
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Database\Eloquent\Collection|\Illuminate\Http\Response
+     * @return \Illuminate\Http\Response
      */
     public function index()
     {
-        return User::all();
+        return Product::all();
     }
 
     /**
