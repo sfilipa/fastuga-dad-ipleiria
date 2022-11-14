@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -13,16 +14,14 @@ class UserController extends Controller
         return $user->orders;
     }
 
-    public function getCustomer(User $user) {
+    public function getCustomer(User $user)
+    {
         return $user->customer;
     }
 
-    public function getOrderItems(User $user) {
+    public function getOrderItems(User $user)
+    {
         return $user->orderItems;
-    }
-
-    public function getUser(int $id) {
-        return User::find($id);
     }
 
     /**
@@ -32,7 +31,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        return User::all();
+        return UserResource::collection(User::all());
     }
 
     /**
@@ -54,7 +53,7 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        //
+        return new UserResource(User::findOrFail($id));
     }
 
     /**
