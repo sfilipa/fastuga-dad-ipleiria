@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CustomerResource;
 use App\Models\Customer;
 use App\Models\Order;
 use Illuminate\Http\Request;
@@ -14,15 +15,18 @@ class CustomerController extends Controller
         return $customer->user;
     }
 
-    public function getOrders(Customer $customer) {
+    public function getOrders(Customer $customer)
+    {
         return $customer->orders;
     }
 
-    public function getCustomer(int $id) {
+    public function getCustomer(int $id)
+    {
         return Customer::find($id);
     }
 
-    public function getOrder(Customer $customer, Order $order) {
+    public function getOrder(Customer $customer, Order $order)
+    {
         return $customer->orders->find($order->id);
     }
 
@@ -33,7 +37,7 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        return Customer::all();
+        return CustomerResource::collection(Customer::all());
     }
 
     /**
