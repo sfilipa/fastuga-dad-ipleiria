@@ -23,7 +23,7 @@ class CustomerResource extends JsonResource
             'default_payment_type' => $this->default_payment_type,
             'default_payment_reference' => $this->default_payment_reference,
             'custom' => $this->custom,
-            'user_id' => new UserResource(User::findOrFail($this->user_id))
+            'user_id' => new UserResource(User::find($this->user_id))
         ];
     }
 }

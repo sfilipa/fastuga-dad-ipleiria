@@ -39,7 +39,7 @@ Route::get('customers/{customer}/orders/{order}', [CustomerController::class, 'g
 
 // Order Routes
 Route::get('orders', [OrderController::class, 'index']);
-Route::get('orders/{order}', [OrderController::class, 'getOrder']);
+Route::get('orders/{order}', [OrderController::class, 'show']);
 Route::get('orders/{order}/customer', [OrderController::class, 'getCostumer']);
 Route::get('orders/{order}/user', [OrderController::class, 'getUser']);
 Route::get('orders/{order}/orderItems', [OrderController::class, 'getOrderItems']);

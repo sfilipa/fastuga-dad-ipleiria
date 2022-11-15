@@ -3,25 +3,25 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\OrderResource;
 use App\Models\Order;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    public function getCostumer(Order $order) {
+    public function getCostumer(Order $order)
+    {
         return $order->customer;
     }
 
-    public function getUser(Order $order) {
+    public function getUser(Order $order)
+    {
         return $order->user;
     }
 
-    public function getOrderItems(Order $order) {
+    public function getOrderItems(Order $order)
+    {
         return $order->orderItems;
-    }
-
-    public function getOrder(int $id) {
-        return Order::find($id);
     }
 
     /**
@@ -31,7 +31,7 @@ class OrderController extends Controller
      */
     public function index()
     {
-        return Order::all();
+        return OrderResource::collection(Order::all());
     }
 
     /**
@@ -53,7 +53,7 @@ class OrderController extends Controller
      */
     public function show($id)
     {
-        //
+        return new OrderResource(Order::findOrFail($id));
     }
 
     /**
