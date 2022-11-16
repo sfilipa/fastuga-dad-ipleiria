@@ -32,7 +32,7 @@ Route::get('users/{user}/orderItems', [UserController::class, 'getOrderItems']);
 
 // Customer Routes
 Route::get('customers', [CustomerController::class, 'index']);
-Route::get('customers/{customer}', [CustomerController::class, 'getCustomer']);
+Route::get('customers/{customer}', [CustomerController::class, 'show']);
 Route::get('customers/{customer}/user', [CustomerController::class, 'getUser']);
 Route::get('customers/{customer}/orders', [CustomerController::class, 'getOrders']);
 Route::get('customers/{customer}/orders/{order}', [CustomerController::class, 'getOrder']);
@@ -46,10 +46,10 @@ Route::get('orders/{order}/orderItems', [OrderController::class, 'getOrderItems'
 
 // OrderItems Routes
 Route::get('orderItems', [OrderItemsController::class, 'index']);
-Route::get('orderItems/{orderItem}', [OrderItemsController::class, 'getOrderItems']);
+Route::get('orderItems/{orderItem}', [OrderItemsController::class, 'show']);
 
 // Product Routes
 Route::get('products', [ProductController::class, 'index']);
-Route::get('products/{product}', [ProductController::class, 'getProduct']);
+Route::get('products/{product}', [ProductController::class, 'show']);
 Route::get('products/{product}/orderItems', [ProductController::class, 'getOrderItems']);
 Route::get('products/{product}/orderItems/{orderItem}', [ProductController::class, 'getOrderItem']);

@@ -3,15 +3,12 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\OrderItemsResource;
 use App\Models\OrderItems;
 use Illuminate\Http\Request;
 
 class OrderItemsController extends Controller
 {
-    public function getOrderItems(int $id) {
-        return OrderItems::find($id);
-    }
-
     /**
      * Display a listing of the resource.
      *
@@ -41,7 +38,7 @@ class OrderItemsController extends Controller
      */
     public function show($id)
     {
-        //
+        return new OrderItemsResource(OrderItems::findOrFail($id));
     }
 
     /**

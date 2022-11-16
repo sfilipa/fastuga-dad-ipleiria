@@ -20,11 +20,6 @@ class CustomerController extends Controller
         return $customer->orders;
     }
 
-    public function getCustomer(int $id)
-    {
-        return Customer::find($id);
-    }
-
     public function getOrder(Customer $customer, Order $order)
     {
         return $customer->orders->find($order->id);
@@ -37,7 +32,7 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        return CustomerResource::collection(Customer::all());
+        return Customer::all();
     }
 
     /**
@@ -59,7 +54,7 @@ class CustomerController extends Controller
      */
     public function show($id)
     {
-        //
+        return Customer::find($id);
     }
 
     /**

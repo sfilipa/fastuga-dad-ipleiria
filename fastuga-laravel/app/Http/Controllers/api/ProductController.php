@@ -3,21 +3,20 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ProductResource;
 use App\Models\OrderItems;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    public function getProduct(int $id) {
-        return Product::find($id);
-    }
-
-    public function getOrderItems(Product $product) {
+    public function getOrderItems(Product $product)
+    {
         return $product->orderItems;
     }
 
-    public function getOrderItem(Product $product, OrderItems $orderItem) {
+    public function getOrderItem(Product $product, OrderItems $orderItem)
+    {
         return $product->orderItems->find($orderItem->id);
     }
 
@@ -50,7 +49,7 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        //
+        return new ProductResource(Product::findOrFail($id));
     }
 
     /**
