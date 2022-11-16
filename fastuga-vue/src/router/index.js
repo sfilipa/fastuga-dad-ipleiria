@@ -11,6 +11,7 @@ import User from "../components/users/User.vue"
 import ProjectTasks from "../components/projects/ProjectTasks.vue"
 import Task from "../components/tasks/Task.vue"
 import Project from "../components/projects/Project.vue"
+import Menu from "../components/menu/Menu.vue"
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -35,6 +36,18 @@ const router = createRouter({
       name: 'Dashboard',
       component: Dashboard
     },
+    {
+      path: '/menu',
+      name: 'Menu',
+      component: Menu,
+      props: { menuTitle: 'Menu' }
+    },
+    // {
+    //   path: '/notifications',
+    //   name: 'Notifications',
+    //   component: Notifications,
+    //   props: { menuTitle: 'Notifications' }
+    // },
     {
       path: '/tasks',
       name: 'Tasks',

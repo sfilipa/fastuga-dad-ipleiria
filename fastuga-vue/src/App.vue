@@ -30,7 +30,7 @@ onMounted(() => {
           height="24"
           class="d-inline-block align-text-top"
         />
-        App name
+        Fastuga
       </a>
       <button
         id="buttonSidebarExpandId"
@@ -132,33 +132,40 @@ onMounted(() => {
                 :to="{ name: 'Dashboard' }"
               >
                 <i class="bi bi-house"></i>
-                Dashboard
+                Public Board
               </router-link>
             </li>
-            <li class="nav-item">
+            <!-- <li class="nav-item">
               <router-link
                 class="nav-link"
                 :class="{ active: $route.name === 'CurrentTasks' }"
                 :to="{ name: 'CurrentTasks' }"
               >
                 <i class="bi bi-list-stars"></i>
-                Current Tasks
+                Menu
+              </router-link>
+            </li> -->
+            <li class="nav-item">
+              <router-link
+                class="nav-link"
+                :class="{ active: $route.name === 'Menu' }"
+                :to="{ name: 'Menu' }"
+              >
+                <i class="bi bi-list-stars"></i>
+                Menu
               </router-link>
             </li>
-            <li class="nav-item d-flex justify-content-between align-items-center pe-3">
+            <li class="nav-item">
               <router-link
-                class="nav-link w-100 me-3"
+                class="nav-link"
                 :class="{ active: $route.name === 'Tasks' }"
                 :to="{ name: 'Tasks' }"
               >
                 <i class="bi bi-list-check"></i>
-                Tasks
-              </router-link>
-              <router-link class="link-secondary" :to="{ name: 'NewTask'}" aria-label="Add a new task">
-                <i class="bi bi-xs bi-plus-circle"></i>
+                Notifications
               </router-link>
             </li>
-            <li class="nav-item">
+            <!-- <li class="nav-item">
               <router-link
                 class="nav-link"
                 :class="{ active: $route.name === 'Projects' }"
@@ -177,11 +184,11 @@ onMounted(() => {
                 <i class="bi bi-people"></i>
                 Team Members
               </router-link>
-            </li>
+            </li> -->
             <li class="nav-item">
               <a class="nav-link" href="#">
                 <i class="bi bi-bar-chart-line"></i>
-                Reports
+                Statistics
               </a>
             </li>
           </ul>
@@ -189,7 +196,7 @@ onMounted(() => {
           <h6
             class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"
           >
-            <span>My Projects</span>
+            <span>My Orders</span>
             <router-link class="link-secondary" :to="{ name: 'NewProject'}" aria-label="Add a new project">
               <i class="bi bi-xs bi-plus-circle"></i>
             </router-link>
