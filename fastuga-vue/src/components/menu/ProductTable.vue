@@ -96,7 +96,7 @@ const deleteClick = (product) => {
     <tbody>
       <tr v-for="product in props.products" :key="product.id">
         <td>
-            <img src="{{product.photo_url}}"/>
+            <img :src='"http://localhost:8081/storage/products/"+product.photo_url' />
         </td>
         <td>
             {{product.name}}
@@ -189,5 +189,10 @@ const deleteClick = (product) => {
 button {
   margin-left: 3px;
   margin-right: 3px;
+}
+
+img, svg {
+  vertical-align: middle;
+  width: 55px;
 }
 </style>

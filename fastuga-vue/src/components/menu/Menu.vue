@@ -5,11 +5,14 @@
 
   const axios = inject('axios')
   const router = useRouter()
+  const products = ref([])
 
   const LoadProducts = () => {
     axios.get(`/products`)
       .then((response) => {
-        products.value = response.data.data
+        console.log(response)
+        products.value = response.data
+        console.log(products)
       })
       .catch((error) => {
         console.log(error)
@@ -23,7 +26,7 @@
     }
   })
 
-  const products = ref([])
+  
   
   onMounted (() => {
     LoadProducts()

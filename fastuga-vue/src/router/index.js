@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 
-import Dashboard from "../components/Dashboard.vue"
+import PublicBoard from "../components/PublicBoard.vue"
 import Login from "../components/auth/Login.vue"
 import ChangePassword from "../components/auth/ChangePassword.vue"
 import Tasks from "../components/tasks/Tasks.vue"
@@ -32,9 +32,9 @@ const router = createRouter({
       component: ChangePassword
     },
     {
-      path: '/dashboard',
-      name: 'Dashboard',
-      component: Dashboard
+      path: '/publicboard',
+      name: 'PublicBoard',
+      component: PublicBoard
     },
     {
       path: '/menu',

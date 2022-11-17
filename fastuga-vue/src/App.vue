@@ -6,14 +6,14 @@ const axios = inject("axios");
 const workInProgressProjects = ref([]);
 
 onMounted(() => {
-  const userId = 1
-  axios.get("users/" + userId + "/projects/inprogress")
-    .then((response) => {
-      workInProgressProjects.value = response.data.data;
-    })
-    .catch((error) => {
-      console.log(error);
-    })
+  // const userId = 1
+  // axios.get("users/" + userId + "/projects/inprogress")
+  //   .then((response) => {
+  //     workInProgressProjects.value = response.data.data;
+  //   })
+  //   .catch((error) => {
+  //     console.log(error);
+  //   })
 })
 </script>
 
@@ -128,8 +128,8 @@ onMounted(() => {
             <li class="nav-item">
               <router-link
                 class="nav-link"
-                :class="{ active: $route.name === 'Dashboard' }"
-                :to="{ name: 'Dashboard' }"
+                :class="{ active: $route.name === 'PublicBoard' }"
+                :to="{ name: 'PublicBoard' }"
               >
                 <i class="bi bi-house"></i>
                 Public Board
@@ -151,7 +151,7 @@ onMounted(() => {
                 :class="{ active: $route.name === 'Menu' }"
                 :to="{ name: 'Menu' }"
               >
-                <i class="bi bi-list-stars"></i>
+                <i class="bi bi-cup-straw"></i>
                 Menu
               </router-link>
             </li>
@@ -161,7 +161,7 @@ onMounted(() => {
                 :class="{ active: $route.name === 'Tasks' }"
                 :to="{ name: 'Tasks' }"
               >
-                <i class="bi bi-list-check"></i>
+                <i class="bi bi-bell"></i>
                 Notifications
               </router-link>
             </li>
