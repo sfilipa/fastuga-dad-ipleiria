@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreUpdateProductRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\OrderItems;
 use App\Models\Product;
@@ -24,9 +25,10 @@ class ProductController extends Controller
         return Product::all();
     }
 
-    public function store(Request $request)
+    public function store(StoreUpdateProductRequest $request)
     {
-        //
+        $newProduct = Product::create($request->validated());
+        return new ProductResource($newProduct);
     }
 
     public function show(Product $product)
@@ -34,13 +36,14 @@ class ProductController extends Controller
         return new ProductResource($product);
     }
 
-    public function update(Request $request, $id)
+    public function update(StoreUpdateProductRequest $request, Product $product)
     {
-        //
+        $product->update($request->validated());
+        return new ProductResource($product);
     }
 
-    public function destroy($id)
+    public function destroy(Product $product)
     {
-        //
+        $product->softDeletes();
     }
 }
