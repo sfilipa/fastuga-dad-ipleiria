@@ -5,10 +5,15 @@ namespace App\Http\Controllers\api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
+    public function getOrdersOfUser(User $user) {
+        return OrderResource::collection($user->orders->sortByDesc('id'));
+    }
+
     public function getCostumer(Order $order)
     {
         return $order->customer;

@@ -5,10 +5,15 @@ namespace App\Http\Controllers\api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderItemsResource;
 use App\Models\OrderItems;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class OrderItemsController extends Controller
 {
+    public function getOrderItemsOfUser(User $user) {
+        return OrderItemsResource::collection($user->orderItems->sortByDesc('id'));
+    }
+
     /**
      * Display a listing of the resource.
      *

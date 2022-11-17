@@ -25,9 +25,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 // User Routes
 Route::apiResource("users",UserController::class);
-Route::get('users/{user}/orders', [UserController::class, 'getOrders']);
-Route::get('users/{user}/customer', [UserController::class, 'getCustomer']);
-Route::get('users/{user}/orderItems', [UserController::class, 'getOrderItems']);
+Route::get('users/{user}/orders', [OrderController::class, 'getOrdersOfUser']);
+Route::get('users/{user}/customer', [CustomerController::class, 'getCustomerOfUser']);
+Route::get('users/{user}/order-items', [OrderItemsController::class, 'getOrderItemsOfUser']);
 
 // Customer Routes
 Route::apiResource("customers",CustomerController::class);
@@ -45,6 +45,7 @@ Route::get('orders/{order}/orderItems', [OrderController::class, 'getOrderItems'
 Route::apiResource("order-items", OrderItemsController::class);
 
 // Product Routes
+Route::get('products/types', [ProductController::class, 'getProductsTypes']);
 Route::apiResource("products", ProductController::class);
 Route::get('products/{product}', [ProductController::class, 'show']);
 Route::get('products/{product}/orderItems', [ProductController::class, 'getOrderItems']);
