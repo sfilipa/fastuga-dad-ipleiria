@@ -7,6 +7,7 @@
   const router = useRouter()
   const products = ref([])
   const productTypes = ref([])
+  const filterByType = ref(null)
 
   const LoadProducts = () => {
     axios.get(`/products`)
@@ -36,8 +37,6 @@
     }
   })
 
-  
-  
   onMounted (() => {
     LoadProducts()
     LoadProductTypes()
@@ -63,9 +62,11 @@
         class="form-select"
         id="selectType"
         v-model="filterByType"
-        
       >
-        <option :value='index' v-for="(type, index) in productTypes">{{type}}</option>
+        <option  @click="filterByType='any'" value="any">any</option>
+        <option  v-for="filterByType in productTypes" :value="filterByType">
+          {{filterByType}}
+          </option>
       </select>
     </div>
     <div class="mx-2 mt-2 flex-grow-1 filter-div">
@@ -95,6 +96,7 @@
     @edit="editProduct"
     @deleted="deletedProduct"
     @add="addProductToOrder"
+    :filterByType="filterByType"
   ></product-table>
 </template>
 
