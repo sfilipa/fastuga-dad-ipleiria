@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreUpdateCustomerRequest;
 use App\Http\Resources\CustomerResource;
 use App\Models\Customer;
 use App\Models\Order;
@@ -21,9 +22,10 @@ class CustomerController extends Controller
         return Customer::all();
     }
 
-    public function store(Request $request)
+    public function store(StoreUpdateCustomerRequest $request)
     {
-        //
+        $newCustomer = Customer::create($request->validated());
+        return new CustomerResource($newCustomer);
     }
 
     public function show(Customer $customer)
@@ -31,13 +33,14 @@ class CustomerController extends Controller
         return new CustomerResource($customer);
     }
 
-    public function update(Request $request, $id)
+    public function update(StoreUpdateCustomerRequest $request, Customer $customer)
     {
-        //
+        $customer->update($request->validated());
+        return new CustomerResource($customer);
     }
 
-    public function destroy($id)
+    public function destroy(Customer $customer)
     {
-        //
+        $customer->softDeletes();
     }
 }
