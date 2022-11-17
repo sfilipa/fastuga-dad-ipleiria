@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue'
 
 import PublicBoard from "../components/PublicBoard.vue"
 import Login from "../components/auth/Login.vue"
+import Register from "../components/auth/Register.vue"
 import ChangePassword from "../components/auth/ChangePassword.vue"
 import Tasks from "../components/tasks/Tasks.vue"
 import Projects from "../components/projects/Projects.vue"
@@ -12,6 +13,7 @@ import ProjectTasks from "../components/projects/ProjectTasks.vue"
 import Task from "../components/tasks/Task.vue"
 import Project from "../components/projects/Project.vue"
 import Menu from "../components/menu/Menu.vue"
+import EmployeesMenu from "../components/users/EmployeesMenu.vue"
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -25,6 +27,11 @@ const router = createRouter({
       path: '/login',
       name: 'Login',
       component: Login
+    },
+    {
+      path: '/register',
+      name: 'Register',
+      component: Register
     },
     {
       path: '/password',
@@ -41,6 +48,11 @@ const router = createRouter({
       name: 'Menu',
       component: Menu,
       props: { menuTitle: 'Menu' }
+    },
+    {
+      path: '/employeesMenu',
+      name: 'EmployeesMenu',
+      component: EmployeesMenu
     },
     // {
     //   path: '/notifications',

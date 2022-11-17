@@ -48,10 +48,14 @@ onMounted(() => {
       <div class="collapse navbar-collapse justify-content-end">
         <ul class="navbar-nav">
           <li class="nav-item">
-            <a class="nav-link" href="#"
-              ><i class="bi bi-person-check-fill"></i>
+            <router-link
+              class="nav-link"
+              :class="{ active: $route.name === 'Register' }"
+              :to="{ name: 'Register' }"
+            >
+              <i class="bi bi-box-arrow-in-right"></i>
               Register
-            </a>
+            </router-link>
           </li>
           <li class="nav-item">
             <router-link
@@ -163,6 +167,16 @@ onMounted(() => {
               >
                 <i class="bi bi-bell"></i>
                 Notifications
+              </router-link>
+            </li>
+            <li class="nav-item">
+              <router-link
+                class="nav-link"
+                :class="{ active: $route.name === 'EmployeesMenu' }"
+                :to="{ name: 'EmployeesMenu' }"
+              >
+                <i class="bi bi-person-workspace"></i>
+                Employees
               </router-link>
             </li>
             <!-- <li class="nav-item">

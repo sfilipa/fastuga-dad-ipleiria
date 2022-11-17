@@ -2,7 +2,7 @@
   import { ref } from 'vue'
 
   const credentials = ref({
-        username: '',
+        email: '',
         password: ''
     })
 
@@ -10,7 +10,11 @@
 
   const login = () => {
       // FALTA FAZER O LOGIN
-      emit('login')
+      if(credentials.email != "" && credentials.password != "") {
+      }else{
+        console.log("odeio isto")
+      }
+      //emit('login')
   }
 </script>
 
@@ -20,45 +24,52 @@
     novalidate
     @submit.prevent="login"
   >
-    <h3 class="mt-5 mb-3">Login</h3>
+    <h3 class="mt-4">Login</h3>
     <hr>
-    <div class="mb-3">
-      <div class="mb-3">
-        <label
-          for="inputUsername"
-          class="form-label"
-        >Username</label>
+    <div class="mb-2">
+      <div class="col-md-offset-5 col-md-4" id="center" >
         <input
           type="text"
           class="form-control"
-          id="inputUsername"
+          id="inputEmail" placeholder="Enter Email"
           required
-          v-model="credentials.username"
+          v-model="credentials.email"
         >
+      </div> 
       </div>
-    </div>
-    <div class="mb-3">
-      <div class="mb-3">
-        <label
-          for="inputPassword"
-          class="form-label"
-        >Password</label>
+    <div class="mb-2">
+      <div class="col-md-offset-5 col-md-4"  id="center">
         <input
           type="password"
           class="form-control"
           id="inputPassword"
+          placeholder="Enter Password"
           required
           v-model="credentials.password"
         >
       </div>
     </div>
     <div class="mb-3 d-flex justify-content-center">
+      <p v-if="validated">Hey You got the error</p>
       <button
         type="button"
-        class="btn btn-primary px-5"
+        class="btn btn-success px-5"
         @click="login"
       >Login</button>
     </div>
   </form>
+  
+      <div class="mb-3 d-flex justify-content-center">
+        <p>
+        <RouterLink to="/register"> Create a new account </RouterLink>
+      </p>
+    </div>
 </template>
 
+<style scoped>
+#center {
+  display: block;
+  margin-right: auto;
+  margin-left: auto;
+}
+</style>
