@@ -6,11 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\CustomerResource;
 use App\Models\Customer;
 use App\Models\Order;
+use App\Models\User;
 use Cassandra\Custom;
 use Illuminate\Http\Request;
 
 class CustomerController extends Controller
 {
+    public function getCustomerOfUser(User $user) {
+        return new CustomerResource(optional($user->customer));
+    }
+
     public function getUser(Customer $customer)
     {
         return $customer->user;
