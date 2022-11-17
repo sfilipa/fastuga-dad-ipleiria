@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreUpdateOrderRequest;
 use App\Http\Resources\OrderItemsResource;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
@@ -21,9 +22,10 @@ class OrderController extends Controller
         return Order::all();
     }
 
-    public function store(Request $request)
+    public function store(StoreUpdateOrderRequest $request)
     {
-        //
+        $newOrder = Order::create($request->validated());
+        return new OrderResource($newOrder);
     }
 
     public function show(Order $order)
@@ -31,13 +33,14 @@ class OrderController extends Controller
         return new OrderResource($order);
     }
 
-    public function update(Request $request, $id)
+    public function update(StoreUpdateOrderRequest $request, Order $order)
     {
-        //
+        $order->update($request->validated());
+        return new OrderResource($order);
     }
 
-    public function destroy($id)
+    public function destroy(Order $order)
     {
-        //
+        $order->delete();
     }
 }

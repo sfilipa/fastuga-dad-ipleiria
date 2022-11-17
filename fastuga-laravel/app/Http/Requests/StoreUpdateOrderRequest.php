@@ -30,7 +30,7 @@ class StoreUpdateOrderRequest extends FormRequest
             'total_price' => 'required|numeric|between:0,99.99',
             'total_paid' => 'required|numeric|between:0,99.99',
             'total_paid_with_points' => 'required|numeric|between:0,99.99',
-            'points_gained' => 'required|digits',
+            'points_gained' => 'required|digits|min:0',
             'points_used_to_pay' => 'required|digits',
             'payment_type' => 'required|in:visa,paypal,mbway',
             'payment_reference' => 'required',
