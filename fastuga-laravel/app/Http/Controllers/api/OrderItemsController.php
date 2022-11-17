@@ -12,7 +12,7 @@ class OrderItemsController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Database\Eloquent\Collection
      */
     public function index()
     {
@@ -33,12 +33,12 @@ class OrderItemsController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param OrderItems $orderItems
+     * @return OrderItemsResource
      */
-    public function show($id)
+    public function show(OrderItems $orderItems)
     {
-        return new OrderItemsResource(OrderItems::findOrFail($id));
+        return new OrderItemsResource($orderItems);
     }
 
     /**
