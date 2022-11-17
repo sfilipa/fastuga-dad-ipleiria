@@ -6,6 +6,7 @@ import Login from "../components/auth/Login.vue"
 import Register from "../components/auth/Register.vue"
 import ChangePassword from "../components/auth/ChangePassword.vue"
 import Tasks from "../components/tasks/Tasks.vue"
+import Orders from "../components/orders/Orders.vue"
 import Projects from "../components/projects/Projects.vue"
 import Users from "../components/users/Users.vue"
 import User from "../components/users/User.vue"
@@ -48,6 +49,11 @@ const router = createRouter({
       name: 'Menu',
       component: Menu,
       props: { menuTitle: 'Menu' }
+    },
+    {
+      path: '/orders',
+      name: 'Orders',
+      component: Orders,
     },
     // {
     //   path: '/employeesMenu',

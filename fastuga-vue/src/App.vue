@@ -159,6 +159,18 @@ onMounted(() => {
                 Menu
               </router-link>
             </li>
+
+            <li class="nav-item">
+              <router-link
+                class="nav-link"
+                :class="{ active: $route.name === 'Orders' }"
+                :to="{ name: 'Orders' }"
+              >
+                <i class="bi bi-list-stars"></i>
+                Orders
+              </router-link>
+            </li>
+
             <li class="nav-item">
               <router-link
                 class="nav-link"
