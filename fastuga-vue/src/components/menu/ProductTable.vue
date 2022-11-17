@@ -22,6 +22,7 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  filterByType: String
 })
 
 const emit = defineEmits(["edit", "deleted"])
@@ -94,7 +95,7 @@ const deleteClick = (product) => {
       </tr>
     </thead>
     <tbody>
-      <tr v-for="product in props.products" :key="product.id">
+      <tr v-for="product in props.products.filter(product => props.filterByType==null||props.filterByType==='any' ? true : product.type===props.filterByType)" :key="product.id">
         <td>
             <img :src='"http://localhost:8081/storage/products/"+product.photo_url' />
         </td>
@@ -137,49 +138,7 @@ const deleteClick = (product) => {
           </div>
         </td>
       </tr>
-      <tr >
-        <td>
-            <img src=""/>
-            aa
-        </td>
-        <td>name</td>
-        <td>
-          <span >teste</span>
-        </td>
-        <td>t1</td>
-        <td>3€</td>
-        
-        <td
-          class="text-end"
-          v-if="showEditButton || showDeleteButton || showAddButton"
-        >
-          <div class="d-flex justify-content-end">
-            <button
-              class="btn btn-xs btn-light"
-              @click="addClick(product)"
-              v-if="showAddButton"
-            >
-              <i class="bi bi-xs bi-cart-check"></i>
-            </button>
-
-            <button
-              class="btn btn-xs btn-light"
-              @click="editClick(product)"
-              v-if="showEditButton"
-            >
-              <i class="bi bi-xs bi-pencil"></i>
-            </button>
-
-            <button
-              class="btn btn-xs btn-light"
-              @click="deleteClick(product)"
-              v-if="showDeleteButton"
-            >
-              <i class="bi bi-xs bi-x-square-fill"></i>
-            </button>
-          </div>
-        </td>
-      </tr>
+      
     </tbody>
   </table>
 </template>
