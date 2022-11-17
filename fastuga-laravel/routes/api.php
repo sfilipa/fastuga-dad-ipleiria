@@ -50,6 +50,7 @@ Route::get('orderItems/{orderItem}', [OrderItemsController::class, 'show']);
 
 // Product Routes
 Route::get('products', [ProductController::class, 'index']);
+Route::get('products/types', [ProductController::class, 'getProductsTypes']);
 Route::get('products/{product}', [ProductController::class, 'show']);
 Route::get('products/{product}/orderItems', [ProductController::class, 'getOrderItems']);
 Route::get('products/{product}/orderItems/{orderItem}', [ProductController::class, 'getOrderItem']);

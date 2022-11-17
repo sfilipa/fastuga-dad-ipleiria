@@ -14,6 +14,8 @@ class Product extends Model
         'price'
     ];
 
+    protected $types = array('type');
+
     public function orderItems() {
         return $this->hasMany(OrderItems::class,'product_id');
     }

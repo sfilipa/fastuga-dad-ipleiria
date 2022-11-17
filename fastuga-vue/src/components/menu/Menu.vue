@@ -6,13 +6,23 @@
   const axios = inject('axios')
   const router = useRouter()
   const products = ref([])
+  const productTypes = ref([])
 
   const LoadProducts = () => {
     axios.get(`/products`)
       .then((response) => {
-        console.log(response)
         products.value = response.data
-        console.log(products)
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+  }
+
+  const LoadProductTypes = () => {
+    axios.get(`/products/types`)
+      .then((response) => {
+        productTypes.value = response.data
+        console.log(productTypes);
       })
       .catch((error) => {
         console.log(error)
@@ -30,6 +40,7 @@
   
   onMounted (() => {
     LoadProducts()
+    LoadProductTypes()
   })
 </script>
 
@@ -52,12 +63,9 @@
         class="form-select"
         id="selectType"
         v-model="filterByType"
+        
       >
-        <option value="-1">Any</option>
-        <option value="0">Hot dish</option>
-        <option value="1">Cold dish</option>
-        <option value="2">Drink</option>
-        <option value="3">Dessert</option>
+        <option :value='index' v-for="(type, index) in productTypes">{{type}}</option>
       </select>
     </div>
     <div class="mx-2 mt-2 flex-grow-1 filter-div">
@@ -100,5 +108,11 @@
 }
 .btn-addproduct {
   margin-top: 1.85rem;
+  background-color: #a52222;
+}
+
+.btn-addproduct:hover {
+  margin-top: 1.85rem;
+  background-color: #821c1c;
 }
 </style>

@@ -10,6 +10,11 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
+    public function getProductsTypes()
+    {
+        return Product::groupBy('type')->pluck('type');
+    }
+
     public function getOrderItems(Product $product)
     {
         return $product->orderItems;
