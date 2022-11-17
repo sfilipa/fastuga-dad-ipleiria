@@ -13,7 +13,8 @@ class OrderItems extends Model
         'status',
         'price',
         'preparation_by',
-        'notes'
+        'notes',
+        'custom'
     ];
 
     public function getStatus()
