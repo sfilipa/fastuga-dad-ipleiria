@@ -13,7 +13,7 @@ import ProjectTasks from "../components/projects/ProjectTasks.vue"
 import Task from "../components/tasks/Task.vue"
 import Project from "../components/projects/Project.vue"
 import Menu from "../components/menu/Menu.vue"
-import EmployeesMenu from "../components/users/EmployeesMenu.vue"
+// import EmployeesMenu from "../components/users/EmployeesMenu.vue"
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -49,11 +49,11 @@ const router = createRouter({
       component: Menu,
       props: { menuTitle: 'Menu' }
     },
-    {
-      path: '/employeesMenu',
-      name: 'EmployeesMenu',
-      component: EmployeesMenu
-    },
+    // {
+    //   path: '/employeesMenu',
+    //   name: 'EmployeesMenu',
+    //   component: EmployeesMenu
+    // },
     // {
     //   path: '/notifications',
     //   name: 'Notifications',

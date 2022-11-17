@@ -169,7 +169,7 @@ onMounted(() => {
                 Notifications
               </router-link>
             </li>
-            <li class="nav-item">
+            <!-- <li class="nav-item">
               <router-link
                 class="nav-link"
                 :class="{ active: $route.name === 'EmployeesMenu' }"
@@ -178,7 +178,7 @@ onMounted(() => {
                 <i class="bi bi-person-workspace"></i>
                 Employees
               </router-link>
-            </li>
+            </li> -->
             <!-- <li class="nav-item">
               <router-link
                 class="nav-link"
