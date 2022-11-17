@@ -1,8 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 
-import Dashboard from "../components/Dashboard.vue"
+import PublicBoard from "../components/PublicBoard.vue"
 import Login from "../components/auth/Login.vue"
+import Register from "../components/auth/Register.vue"
 import ChangePassword from "../components/auth/ChangePassword.vue"
 import Tasks from "../components/tasks/Tasks.vue"
 import Orders from "../components/orders/Orders.vue"
@@ -13,6 +14,7 @@ import ProjectTasks from "../components/projects/ProjectTasks.vue"
 import Task from "../components/tasks/Task.vue"
 import Project from "../components/projects/Project.vue"
 import Menu from "../components/menu/Menu.vue"
+// import EmployeesMenu from "../components/users/EmployeesMenu.vue"
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -28,14 +30,19 @@ const router = createRouter({
       component: Login
     },
     {
+      path: '/register',
+      name: 'Register',
+      component: Register
+    },
+    {
       path: '/password',
       name: 'ChangePassword',
       component: ChangePassword
     },
     {
-      path: '/dashboard',
-      name: 'Dashboard',
-      component: Dashboard
+      path: '/publicboard',
+      name: 'PublicBoard',
+      component: PublicBoard
     },
     {
       path: '/menu',
@@ -48,6 +55,11 @@ const router = createRouter({
       name: 'Orders',
       component: Orders,
     },
+    // {
+    //   path: '/employeesMenu',
+    //   name: 'EmployeesMenu',
+    //   component: EmployeesMenu
+    // },
     // {
     //   path: '/notifications',
     //   name: 'Notifications',

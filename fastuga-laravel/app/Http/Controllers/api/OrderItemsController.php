@@ -3,19 +3,16 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\OrderItemsResource;
 use App\Models\OrderItems;
 use Illuminate\Http\Request;
 
 class OrderItemsController extends Controller
 {
-    public function getOrderItems(int $id) {
-        return OrderItems::find($id);
-    }
-
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Database\Eloquent\Collection
      */
     public function index()
     {
@@ -36,12 +33,12 @@ class OrderItemsController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param OrderItems $orderItems
+     * @return OrderItemsResource
      */
-    public function show($id)
+    public function show(OrderItems $orderItems)
     {
-        //
+        return new OrderItemsResource($orderItems);
     }
 
     /**

@@ -27,11 +27,11 @@ class OrderController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Database\Eloquent\Collection
      */
     public function index()
     {
-        return OrderResource::collection(Order::all());
+        return Order::all();
     }
 
     /**
@@ -49,11 +49,11 @@ class OrderController extends Controller
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return OrderResource
      */
-    public function show($id)
+    public function show(Order $order)
     {
-        return new OrderResource(Order::findOrFail($id));
+        return new OrderResource($order);
     }
 
     /**

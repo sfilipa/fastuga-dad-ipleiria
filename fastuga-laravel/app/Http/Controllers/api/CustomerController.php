@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\CustomerResource;
 use App\Models\Customer;
 use App\Models\Order;
+use Cassandra\Custom;
 use Illuminate\Http\Request;
 
 class CustomerController extends Controller
@@ -20,11 +21,6 @@ class CustomerController extends Controller
         return $customer->orders;
     }
 
-    public function getCustomer(int $id)
-    {
-        return Customer::find($id);
-    }
-
     public function getOrder(Customer $customer, Order $order)
     {
         return $customer->orders->find($order->id);
@@ -33,11 +29,11 @@ class CustomerController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Database\Eloquent\Collection
      */
     public function index()
     {
-        return CustomerResource::collection(Customer::all());
+        return Customer::all();
     }
 
     /**
@@ -55,11 +51,11 @@ class CustomerController extends Controller
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return CustomerResource
      */
-    public function show($id)
+    public function show(Customer $customer)
     {
-        //
+        return new CustomerResource($customer);
     }
 
     /**

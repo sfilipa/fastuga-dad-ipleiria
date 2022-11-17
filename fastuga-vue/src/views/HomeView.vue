@@ -3,6 +3,6 @@
 
 <template>
   <div class="about">
-    <h1>This is the home page</h1>
+    <h1>Welcome to Fastuga</h1>
   </div>
 </template>
