@@ -22,7 +22,8 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
-  filterByType: String
+  filterByType: String,
+  filterByPrice: Number
 })
 
 const emit = defineEmits(["edit", "deleted"])
@@ -95,7 +96,10 @@ const deleteClick = (product) => {
       </tr>
     </thead>
     <tbody>
-      <tr v-for="product in props.products.filter(product => props.filterByType==null||props.filterByType==='any' ? true : product.type===props.filterByType)" :key="product.id">
+      <tr v-for="product in props.products
+                            .filter(product => props.filterByType==='any' ? true : product.type===props.filterByType)
+                            .filter(product => props.filterByPrice==null ? true : product.price<=props.filterByPrice)" 
+        :key="product.id">
         <td>
             <img :src='"http://localhost:8081/storage/products/"+product.photo_url' />
         </td>

@@ -7,7 +7,8 @@
   const router = useRouter()
   const products = ref([])
   const productTypes = ref([])
-  const filterByType = ref(null)
+  const filterByType = ref('any')
+  const filterByPrice = ref(15)
 
   const LoadProducts = () => {
     axios.get(`/products`)
@@ -74,14 +75,7 @@
         for="selectPrice"
         class="form-label"
       >Filter by price:</label>
-      <select
-        class="form-select"
-        id="selectPrice"
-        v-model="filterByPrice"
-      >
-        <option value="-1">Any</option>
-        
-      </select>
+      <input v-model="filterByPrice" class="form-control" type="number" min="0" step="0.01"/>
     </div>
     <div class="mx-2 mt-2">
       <button
@@ -97,6 +91,7 @@
     @deleted="deletedProduct"
     @add="addProductToOrder"
     :filterByType="filterByType"
+    :filterByPrice="filterByPrice"
   ></product-table>
 </template>
 
@@ -117,4 +112,5 @@
   margin-top: 1.85rem;
   background-color: #821c1c;
 }
+
 </style>
