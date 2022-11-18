@@ -1,98 +1,68 @@
 <script setup>
 import { ref, computed, onMounted, inject } from 'vue'
 
+
 const props = defineProps({
-    orders: Array
+    orders: Array,
+    default: () => [],
+    filterByType: String,
+    ticketNumber: Number,
+    costumerId: Number
 })
-//const emit = defineEmits([])
+const emit = defineEmits(['show','edit','delete'])
 
+const showClick = (order) => {
+    emit('show', order)
+}
 
+const editClick = (order) => {
+  emit('edit', order)
+}
+
+const deleteClick = (order) => {
+  emit('delete', order)
+}
 </script>
 
 <template>
 <table class="table">
     <thead>
       <tr>
+        <th>Id</th>
         <th>Ticket Number</th>
         <th>Status</th>
         <th>Date</th>
         <th>Total Price</th>
-        <th v-if="showEditButton || showDeleteButton || showAddButton"></th>
+        <th></th>
       </tr>
     </thead>
     <tbody>
-      <tr v-for="order in props.orders" :key="order.id">
-        <td>
-            {{order.name}}
-        </td>
-        <td>
-          <span >{{ order.description }}</span>
-        </td>
-        <td>{{ order.type }}</td>
-        <td>{{ order.price }}€</td>
-        <td
-          class="text-end"
-          v-if="showEditButton || showDeleteButton || showAddButton"
-        >
+      <tr v-for="order in props.orders.filter(order => props.filterByType === 'A' ? true : order.status === props.filterByType)
+                                      .filter(order => !props.ticketNumber ? true : order.ticket_number === props.ticketNumber)
+                                      .filter(order => !props.costumerId ? true : order.costumer_id === props.costumerId)" :key="order.id">
+        <td> {{ order.id }} </td>
+        <td> {{order.ticket_number}} </td>
+
+        <td v-if="order.status == 'P'">Preparing</td> <!-- <p class="text-primary">Preparing</p> -->
+        <td v-else-if="order.status == 'R'">Ready</td> <!-- <p class="text-info">Ready</p> -->
+        <td v-else-if="order.status == 'D'">Delivered</td> <!-- <p class="text-success">Delivered</p> -->
+        <td v-else-if="order.status == 'C'">Cancelled</td> <!-- <p class="text-danger">Cancelled</p> -->
+
+        <td>{{ order.date }}</td>
+        <td>{{ order.total_price }}€</td>
+        <td class="text-end">
           <div class="d-flex justify-content-end">
             <button
               class="btn btn-xs btn-light"
-              @click="addClick(order)"
-              v-if="showAddButton"
-            >
-              <i class="bi bi-xs bi-cart-check"></i>
-            </button>
-
-            <button
-              class="btn btn-xs btn-light"
-              @click="editClick(order)"
-              v-if="showEditButton"
-            >
-              <i class="bi bi-xs bi-pencil"></i>
+              @click="showClick(order)"
+              >
+              <i class="bi bi-xs bi-search"></i>
             </button>
 
             <button
               class="btn btn-xs btn-light"
               @click="deleteClick(order)"
-              v-if="showDeleteButton"
-            >
-              <i class="bi bi-xs bi-x-square-fill"></i>
-            </button>
-          </div>
-        </td>
-      </tr>
-      <tr >
-        <td>#001</td>
-        <td>Delivered</td>
-        <td>16/11/2022</td>
-        <td>3€</td>
-        
-        <td
-          class="text-end"
-          v-if="showEditButton || showDeleteButton || showAddButton"
-        >
-          <div class="d-flex justify-content-end">
-            <button
-              class="btn btn-xs btn-light"
-              @click="addClick(product)"
-              v-if="showAddButton"
-            >
-              <i class="bi bi-xs bi-cart-check"></i>
-            </button>
-
-            <button
-              class="btn btn-xs btn-light"
-              @click="editClick(product)"
-              v-if="showEditButton"
-            >
-              <i class="bi bi-xs bi-pencil"></i>
-            </button>
-
-            <button
-              class="btn btn-xs btn-light"
-              @click="deleteClick(product)"
-              v-if="showDeleteButton"
-            >
+              >
               <i class="bi bi-xs bi-x-square-fill"></i>
             </button>
           </div>
