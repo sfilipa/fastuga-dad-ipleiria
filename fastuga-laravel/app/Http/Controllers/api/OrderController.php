@@ -13,6 +13,12 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
+
+    public function getOrdersStatus()
+    {
+        return Order::groupBy('status')->pluck('status');
+    }
+
     public function getOrderOfOrderItems(OrderItems $orderItems) {
         return new OrderResource($orderItems->order);
     }

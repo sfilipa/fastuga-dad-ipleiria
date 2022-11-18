@@ -7,11 +7,18 @@ use App\Http\Controllers\api\ProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\UserController;
+use App\Http\Controllers\api\AuthController;
 
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+/*Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();*/
+
+
+Route::post('login', [AuthController::class, 'login']);
+Route::middleware('auth:api')->group(function () {
+    Route::post('logout', [AuthController::class, 'logout']);
+    Route::get('users/me', [UserController::class, 'show_me']);
+    Route::get('users/employees', [UserController::class, 'getAllEmployees']);
 
 // User Routes
 Route::apiResource("users",UserController::class);
@@ -21,6 +28,7 @@ Route::apiResource("customers",CustomerController::class);
 Route::get('customers/{customer}/user', [UserController::class, 'getUserOfCustomer']);
 
 // Order Routes
+Route::get('orders/status', [OrderController::class, 'getOrdersStatus']);
 Route::apiResource("orders", OrderController::class);
 Route::get('orders/{order}/customer', [CustomerController::class, 'getCostumerOfOrder']);
 Route::get('orders/{order}/user', [UserController::class, 'getUserOfOrder']);
@@ -34,3 +42,5 @@ Route::get('order-items/{orderItems}/product',[ProductController::class, 'getPro
 // Product Routes
 Route::get('products/types', [ProductController::class, 'getProductsTypes']);
 Route::apiResource("products", ProductController::class);
+
+});

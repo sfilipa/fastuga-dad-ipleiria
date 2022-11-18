@@ -14,7 +14,7 @@ import ProjectTasks from "../components/projects/ProjectTasks.vue"
 import Task from "../components/tasks/Task.vue"
 import Project from "../components/projects/Project.vue"
 import Menu from "../components/menu/Menu.vue"
-// import EmployeesMenu from "../components/users/EmployeesMenu.vue"
+import Employees from "../components/employees/Employees.vue"
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -55,11 +55,11 @@ const router = createRouter({
       name: 'Orders',
       component: Orders,
     },
-    // {
-    //   path: '/employeesMenu',
-    //   name: 'EmployeesMenu',
-    //   component: EmployeesMenu
-    // },
+    {
+      path: '/employees',
+      name: 'Employees',
+      component: Employees,
+    },
     // {
     //   path: '/notifications',
     //   name: 'Notifications',
