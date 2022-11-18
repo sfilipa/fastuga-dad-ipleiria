@@ -4,8 +4,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 const PASSPORT_SERVER_URL = "http://localhost";
-const CLIENT_ID = 4;
-const CLIENT_SECRET = 'VYi8sNZIaAG4WZcvFVK3VI6ANuM03JRHuv4jxAvF';
+const CLIENT_ID = 2;
+const CLIENT_SECRET = 'Esyh6jlcK8yeVmkemvTq5cgb4vDp3loENoNt3dSQ';
 
 class AuthController extends Controller
 {
