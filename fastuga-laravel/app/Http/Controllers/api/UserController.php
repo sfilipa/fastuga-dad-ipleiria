@@ -59,4 +59,8 @@ class UserController extends Controller
     {
         return new UserResource($request->user());
     }
+
+    public function getAllEmployees() {
+        return User::whereIn('type', array('ec', 'ed', 'em'))->get();
+    }
 }

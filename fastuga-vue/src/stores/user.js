@@ -1,10 +1,13 @@
 import { ref, computed, inject } from 'vue'
 import { defineStore } from 'pinia'
+import avatarNoneUrl from '@/assets/avatar-none.png'
+
 export const useUserStore = defineStore('user', () => {
     const axios = inject('axios')
     const serverBaseUrl = inject('serverBaseUrl')
 
     const user = ref(null)
+
     const userPhotoUrl = computed(() => {
         if (!user.value?.photo_url) {
             return avatarNoneUrl

@@ -18,6 +18,7 @@ Route::post('login', [AuthController::class, 'login']);
 Route::middleware('auth:api')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('users/me', [UserController::class, 'show_me']);
+    Route::get('users/employees', [UserController::class, 'getAllEmployees']);
 
 // User Routes
 Route::apiResource("users",UserController::class);

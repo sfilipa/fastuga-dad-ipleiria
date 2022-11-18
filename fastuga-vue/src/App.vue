@@ -16,6 +16,7 @@ const logout = async () => {
   if (await userStore.logout()) {
     toast.success('User has logged out of the application.')
     router.push({ name: 'home' })
+    userStore.clearUser()
   } else {
     toast.error('There was a problem logging out of the application!')
   }
@@ -131,6 +132,13 @@ onMounted(() => {
             </li>
 
             <li class="nav-item">
+              <router-link class="nav-link" :class="{ active: $route.name === 'Employees' }" :to="{ name: 'Employees' }">
+                <i class="bi bi-people-fill"></i>
+                Employees
+              </router-link>
+            </li>
+
+            <li class="nav-item">
               <router-link class="nav-link" :class="{ active: $route.name === 'Tasks' }" :to="{ name: 'Tasks' }">
                 <i class="bi bi-bell"></i>
                 Notifications
@@ -211,7 +219,6 @@ onMounted(() => {
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink2" role="button"
                   data-bs-toggle="dropdown" aria-expanded="false">
                   <img :src="userStore.userPhotoUrl" class="rounded-circle z-depth-0 avatar-img" alt="avatar image"/>
-                    alt="avatar image" />
                   <span class="avatar-text">{{ userStore.user?.name ?? 'Anonymous' }}</span>
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink2">
