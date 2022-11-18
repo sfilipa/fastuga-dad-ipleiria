@@ -21,6 +21,7 @@ Route::apiResource("customers",CustomerController::class);
 Route::get('customers/{customer}/user', [UserController::class, 'getUserOfCustomer']);
 
 // Order Routes
+Route::get('orders/status', [OrderController::class, 'getOrdersStatus']);
 Route::apiResource("orders", OrderController::class);
 Route::get('orders/{order}/customer', [CustomerController::class, 'getCostumerOfOrder']);
 Route::get('orders/{order}/user', [UserController::class, 'getUserOfOrder']);
