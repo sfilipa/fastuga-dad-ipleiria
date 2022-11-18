@@ -1,18 +1,22 @@
 <script setup>
-import { RouterLink, RouterView } from "vue-router";
+import { useRouter, RouterLink, RouterView } from "vue-router"
 import { ref, onMounted, inject } from "vue";
 
+import { useUserStore } from './stores/user.js'
+
+const router = useRouter()
 const axios = inject("axios")
 const toast = inject("toast")
+
+const userStore = useUserStore()
 
 const workInProgressProjects = ref([]);
 
 const logout = async () => {
-  try {
-    await axios.post('logout')
+  if (await userStore.logout()) {
     toast.success('User has logged out of the application.')
-    delete axios.defaults.headers.common.Authorization
-  } catch (error) {
+    router.push({ name: 'home' })
+  } else {
     toast.error('There was a problem logging out of the application!')
   }
 }
@@ -58,8 +62,8 @@ onMounted(() => {
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
               data-bs-toggle="dropdown" aria-expanded="false">
-              <img src="@/assets/avatar-exemplo-1.jpg" class="rounded-circle z-depth-0 avatar-img" alt="avatar image" />
-              <span class="avatar-text">User Name</span>
+              <img :src="userStore.userPhotoUrl" class="rounded-circle z-depth-0 avatar-img" alt="avatar image"/>
+              <span class="avatar-text">{{ userStore.user?.name ?? 'Anonymous' }}</span>
             </a>
             <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
               <li>
@@ -206,9 +210,9 @@ onMounted(() => {
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink2" role="button"
                   data-bs-toggle="dropdown" aria-expanded="false">
-                  <img src="@/assets/avatar-exemplo-1.jpg" class="rounded-circle z-depth-0 avatar-img"
+                  <img :src="userStore.userPhotoUrl" class="rounded-circle z-depth-0 avatar-img" alt="avatar image"/>
                     alt="avatar image" />
-                  <span class="avatar-text">User Name</span>
+                  <span class="avatar-text">{{ userStore.user?.name ?? 'Anonymous' }}</span>
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink2">
                   <li>

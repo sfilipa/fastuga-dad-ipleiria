@@ -54,4 +54,9 @@ class UserController extends Controller
     {
         $user->softDeletes();
     }
+
+    public function show_me(Request $request)
+    {
+        return new UserResource($request->user());
+    }
 }

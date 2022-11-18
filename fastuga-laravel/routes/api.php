@@ -12,7 +12,13 @@ use App\Http\Controllers\api\AuthController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
-});
+
+
+Route::post('login', [AuthController::class, 'login']);
+Route::middleware('auth:api')->group(function () {
+    Route::post('logout', [AuthController::class, 'logout']);
+    Route::get('users/me', [UserController::class, 'show_me']);
+   });
 
 // User Routes
 Route::apiResource("users",UserController::class);
@@ -37,5 +43,4 @@ Route::get('order-items/{orderItems}/product',[ProductController::class, 'getPro
 Route::get('products/types', [ProductController::class, 'getProductsTypes']);
 Route::apiResource("products", ProductController::class);
 
-Route::post('login', [AuthController::class, 'login']);
-Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api');
+});
