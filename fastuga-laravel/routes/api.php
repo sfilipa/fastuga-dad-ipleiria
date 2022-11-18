@@ -7,6 +7,7 @@ use App\Http\Controllers\api\ProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\UserController;
+use App\Http\Controllers\api\AuthController;
 
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -35,3 +36,6 @@ Route::get('order-items/{orderItems}/product',[ProductController::class, 'getPro
 // Product Routes
 Route::get('products/types', [ProductController::class, 'getProductsTypes']);
 Route::apiResource("products", ProductController::class);
+
+Route::post('login', [AuthController::class, 'login']);
+Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api');

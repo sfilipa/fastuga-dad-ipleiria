@@ -1,73 +1,64 @@
 <script setup>
-  import { ref } from 'vue'
+import { ref, inject } from 'vue'
+import { useRouter } from 'vue-router'
 
-  const credentials = ref({
-        email: '',
-        password: ''
-    })
+const router = useRouter()
+const axios = inject('axios')
+const toast = inject('toast')
 
-  const emit = defineEmits(['login'])
+const credentials = ref({
+  username: '',
+  password: ''
+})
 
-  const login = () => {
-      // FALTA FAZER O LOGIN
-      if(credentials.email != "" && credentials.password != "") {
-      }else{
-        console.log("odeio isto")
-      }
-      //emit('login')
+const emit = defineEmits(['login'])
+
+const login = async () => {
+  try {
+    const response = await axios.post('login', credentials.value)
+    toast.success('User ' + credentials.value.username + ' has entered the application.')
+    axios.defaults.headers.common.Authorization = "Bearer " + response.data.access_token
+    emit('login')
+    router.back()
   }
+  catch (error) {
+    delete axios.defaults.headers.common.Authorization
+    credentials.value.password = ''
+    toast.error('User credentials are invalid!')
+  }
+}
 </script>
 
 <template>
-  <form
-    class="row g-3 needs-validation"
-    novalidate
-    @submit.prevent="login"
-  >
+  <form class="row g-3 needs-validation" novalidate @submit.prevent="login">
     <h3 class="mt-4">Login</h3>
     <hr>
     <div class="mb-2">
-      <div class="col-md-offset-5 col-md-4" id="center" >
-        <input
-          type="text"
-          class="form-control"
-          id="inputEmail" placeholder="Enter Email"
-          required
-          v-model="credentials.email"
-        >
-      </div> 
+      <div class="col-md-offset-5 col-md-4 center">
+        <input type="text" class="form-control" id="inputEmail" placeholder="Enter Email" required
+          v-model="credentials.username">
       </div>
+    </div>
     <div class="mb-2">
-      <div class="col-md-offset-5 col-md-4"  id="center">
-        <input
-          type="password"
-          class="form-control"
-          id="inputPassword"
-          placeholder="Enter Password"
-          required
-          v-model="credentials.password"
-        >
+      <div class="col-md-offset-5 col-md-4 center">
+        <input type="password" class="form-control" id="inputPassword" placeholder="Enter Password" required
+          v-model="credentials.password">
       </div>
     </div>
     <div class="mb-3 d-flex justify-content-center">
-      <p v-if="validated">Hey You got the error</p>
-      <button
-        type="button"
-        class="btn btn-success px-5"
-        @click="login"
-      >Login</button>
+      <button type="button" class="btn btn-success px-5" @click="login">Login</button>
     </div>
   </form>
-  
-      <div class="mb-3 d-flex justify-content-center">
-        <p>
-        <RouterLink to="/register"> Create a new account </RouterLink>
-      </p>
-    </div>
+
+  <div class="mb-3 d-flex justify-content-center">
+    <p>
+      <RouterLink to="/register"> Create a new account </RouterLink>
+    </p>
+  </div>
 </template>
 
 <style scoped>
-#center {
+.center {
   display: block;
   margin-right: auto;
   margin-left: auto;
