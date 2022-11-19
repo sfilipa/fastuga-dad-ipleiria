@@ -87,7 +87,7 @@ const deleteClick = (product) => {
   <table class="table">
     <thead>
       <tr>
-        <th>#</th>
+        <th></th>
         <th>Name</th>
         <th>Description</th>
         <th>Type</th>
