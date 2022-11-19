@@ -1,14 +1,36 @@
 <script setup>
-  import { ref, computed, onMounted, inject } from 'vue'
+  import { ref, computed, onMounted, inject, toDisplayString } from 'vue'
   import {useRouter} from 'vue-router'
   import ProductTable from "./ProductTable.vue"
 
   const axios = inject('axios')
   const router = useRouter()
+  const toast = inject("toast")
+
   const products = ref([])
   const productTypes = ref([])
   const filterByType = ref('any')
   const filterByPrice = ref(15)
+  const orderConfirmationDialog = ref(null)
+
+  const orderItems = ref([])
+
+  const addProduct = () => {
+    
+  }
+
+  const addProductToOrder = (product) => {
+    orderItems.value.push(product)
+  }
+
+  const makeOrder = () => {
+    orderConfirmationDialog.value.show()
+    console.log(orderItems.value) 
+  } 
+
+  const dialogConfirmOrder = () => {
+    toast.info(orderItems.value)
+  }
 
   const LoadProducts = () => {
     axios.get(`/products`)
@@ -45,11 +67,25 @@
 </script>
 
 <template>
+  <confirmation-dialog
+    ref="orderConfirmationDialog"
+    confirmationBtn="Delete product"
+    :msg="`Do you really want to delete the product ${orderItems.value}?`"
+    @confirmed="dialogConfirmOrder"
+  >
+  </confirmation-dialog>
+
   <div class="d-flex justify-content-between">
     <div class="mx-2">
       <h3 class="mt-4">{{ menuTitle }}</h3>
     </div>
+    <button
+        type="button"
+        class="btn btn-success hvr-grow"
+        @click="makeOrder"
+      ><i class="bi bi-xs bi-plus-circle"></i>&nbsp; Make Order</button>
   </div>
+
   <hr>
   <div
     class="mb-3 d-flex justify-content-between flex-wrap"
@@ -111,6 +147,23 @@
 .btn-addproduct:hover {
   margin-top: 1.85rem;
   background-color: #821c1c;
+}
+
+.hvr-grow {
+  margin-top: 1.85rem;
+  display: inline-block;
+  vertical-align: middle;
+  -webkit-transform: perspective(1px) translateZ(0);
+  transform: perspective(1px) translateZ(0);
+  box-shadow: 0 0 1px rgba(0, 0, 0, 0);
+  -webkit-transition-duration: 0.3s;
+  transition-duration: 0.3s;
+  -webkit-transition-property: transform;
+  transition-property: transform;
+}
+.hvr-grow:hover, .hvr-grow:focus, .hvr-grow:active {
+  -webkit-transform: scale(1.1);
+  transform: scale(1.1);
 }
 
 </style>

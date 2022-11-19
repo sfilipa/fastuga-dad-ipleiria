@@ -26,7 +26,7 @@ const props = defineProps({
   filterByPrice: Number
 })
 
-const emit = defineEmits(["edit", "deleted"])
+const emit = defineEmits(["add", "edit", "deleted"])
 
 const editingProducts = ref(props.products)
 const productToDelete = ref(null)
@@ -117,7 +117,7 @@ const deleteClick = (product) => {
         >
           <div class="d-flex justify-content-end">
             <button
-              class="btn btn-xs btn-light"
+              class="btn btn-xs btn-light hvr-grow"
               @click="addClick(product)"
               v-if="showAddButton"
             >
@@ -158,4 +158,22 @@ img, svg {
   vertical-align: middle;
   width: 55px;
 }
+
+.hvr-grow {
+  display: inline-block;
+  vertical-align: middle;
+  -webkit-transform: perspective(1px) translateZ(0);
+  transform: perspective(1px) translateZ(0);
+  box-shadow: 0 0 1px rgba(0, 0, 0, 0);
+  -webkit-transition-duration: 0.3s;
+  transition-duration: 0.3s;
+  -webkit-transition-property: transform;
+  transition-property: transform;
+}
+.hvr-grow:hover, .hvr-grow:focus, .hvr-grow:active {
+  -webkit-transform: scale(1.1);
+  transform: scale(1.1);
+}
+
+
 </style>
