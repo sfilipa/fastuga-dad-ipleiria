@@ -11,7 +11,8 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    public function getProductOfOrderItems(OrderItems $orderItems) {
+    public function getProductOfOrderItems(OrderItems $orderItems)
+    {
         return new ProductResource($orderItems->product);
     }
 
