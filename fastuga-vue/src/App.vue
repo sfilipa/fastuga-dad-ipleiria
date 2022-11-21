@@ -184,7 +184,7 @@ onMounted(() => {
 
           <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
             <span>My Orders</span>
-            <router-link class="link-secondary" :to="{ name: 'NewProject' }" aria-label="Add a new project">
+            <router-link class="link-secondary" :to="{ name: 'NewOrder' }" aria-label="Make a new order">
               <i class="bi bi-xs bi-plus-circle"></i>
             </router-link>
           </h6>
