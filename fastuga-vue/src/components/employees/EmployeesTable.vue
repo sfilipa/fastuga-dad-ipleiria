@@ -77,8 +77,8 @@ const unblockEmployeeClick = (employee) => {
 						<button
 							v-if="employee.blocked === 1"
 							class="btn btn-xs btn-warning"
-							@click="blockEmployeeClick(employee)">
-							<i class="bi bi-x-octagon-fill"></i> Block
+							@click="unblockEmployeeClick(employee)">
+							<i class="bi bi-x-octagon-fill"></i> Unblock
 						</button>
 						<button class="btn btn-xs btn-danger" @click="deleteClick(employee)">
 							<i class="bi bi-trash-fill"></i> Delete

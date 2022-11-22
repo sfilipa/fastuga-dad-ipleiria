@@ -38,22 +38,82 @@ const editEmployee = (employee) => {
 	console.log(employeeObj);
 };
 
-const blockEmployee = (employee) => {
+const blockEmployee = async (employee) => {
 	console.log("Blocked");
 	const employeeObj = Object.assign({}, employee);
 	console.log(employeeObj);
+    try {
+        const { data } = await axios({
+            method: 'put',
+            url: `/users/${employeeObj.id}`,
+            data: {
+                name: employeeObj.name,
+                email: employeeObj.email,
+                type: employeeObj.type,
+                photo_url: employeeObj.url,
+                blocked: 1,
+                custom: employeeObj.custom
+            }
+        });
+
+        console.log(data);
+    } catch (err) {
+        if (err.response.status === 404) {
+            console.log('Resource could not be found!');
+        } else {
+            console.log(err.message);
+        }
+    }
+    LoadEmployees();
+
 };
 
-const unblockEmployee = (employee) => {
+const unblockEmployee = async (employee) => {
 	console.log("Unblocked");
 	const employeeObj = Object.assign({}, employee);
 	console.log(employeeObj);
+    try {
+        const { data } = await axios({
+            method: 'put',
+            url: `/users/${employeeObj.id}`,
+            data: {
+                name: employeeObj.name,
+                email: employeeObj.email,
+                type: employeeObj.type,
+                photo_url: employeeObj.url,
+                blocked: 0,
+                custom: employeeObj.custom
+            }
+        });
+        console.log(data);
+    } catch (err) {
+        if (err.response.status === 404) {
+            console.log('Resource could not be found!');
+        } else {
+            console.log(err.message);
+        }
+    }
+    LoadEmployees();
 };
 
-const deleteEmployee = (employee) => {
+const deleteEmployee = async (employee) => {
 	console.log("Delete");
 	const employeeObj = Object.assign({}, employee);
 	console.log(employeeObj);
+    try {
+        const { data } = await axios({
+            method: 'delete',
+            url: `/users/${employeeObj.id}`
+        });
+        console.log(data);
+    } catch (err) {
+        if (err.response.status === 404) {
+            console.log('Resource could not be found!');
+        } else {
+            console.log(err.message);
+        }
+    }
+    LoadEmployees();
 };
 
 onMounted(() => {
