@@ -1,6 +1,6 @@
 <script setup>
-import { ref, watch, watchEffect, computed, inject } from "vue"
-
+import { ref, watch, watchEffect, computed, inject, onUpdated} from "vue"
+import ConfirmationDialog from "../global/ConfirmationDialog.vue";
 
 const axios = inject("axios")
 const toast = inject("toast")
@@ -32,6 +32,20 @@ const editingProducts = ref(props.products)
 const productToDelete = ref(null)
 const deleteConfirmationDialog = ref(null)
 
+const addDialog = ref(null)
+
+const showAddDialog = (bool)=>{
+  addDialog.value = bool
+}
+
+const addItemsToMenuDialog = ref(null)
+const productToAddOrder = ref(null)
+const quantityToAddOrder = ref(1)
+
+const productToAddOrderName = computed(() => {
+  return productToAddOrder.value ? productToAddOrder.value.name : ""
+})
+
 const productToDeleteDescription = computed(() => {
   return productToDelete.value
     ? `#${productToDelete.value.id} (${productToDelete.value.description})`
@@ -45,16 +59,21 @@ watch(
   }
 )
 
-// Alternative to previous watch
-// watchEffect(() => {
-//   editingTasks.value = props.tasks
-// })
 const editClick = (product) => {
   emit("edit", product)
 }
 
+const dialogConfirmAdd = () => {
+  emit("add", productToAddOrder.value, quantityToAddOrder.value)
+  quantityToAddOrder.value = 1
+  productToAddOrder.value = null
+}
+
 const addClick = (product) => {
-    emit("add", product)
+  productToAddOrder.value = product
+  if(addItemsToMenuDialog.value !== null && addDialog.value !== null){
+    addItemsToMenuDialog.value.show()
+  }
 }
 
 const dialogConfirmedDelete = () => {
@@ -70,19 +89,45 @@ const dialogConfirmedDelete = () => {
 }
 
 const deleteClick = (product) => {
-    productToDelete.value = product
-  deleteConfirmationDialog.value.show()
+  productToDelete.value = product
+  if(deleteConfirmationDialog.value !== null && addDialog.value !== null){
+    deleteConfirmationDialog.value.show()
+  }
 }
+
+onUpdated(()=>{
+  if(addDialog.value === false){
+   deleteConfirmationDialog.value.show()
+  }
+  if(addDialog.value === true){
+    addItemsToMenuDialog.value.show()
+  }
+})
+
 </script>
 
 <template>
-  <confirmation-dialog
-    ref="deleteConfirmationDialog"
-    confirmationBtn="Delete product"
-    :msg="`Do you really want to delete the product ${productToDeleteDescription}?`"
-    @confirmed="dialogConfirmedDelete"
-  >
-  </confirmation-dialog>
+  <div v-if="addDialog">
+    <ConfirmationDialog
+      ref="addItemsToMenuDialog"
+      confirmationBtn="Add Items"
+      :msg="`Product: ${productToAddOrderName}
+      `"
+      @confirmed="dialogConfirmAdd"
+    >
+    <input v-model="quantityToAddOrder" class="form-control" type="number" min="1"/>
+    </ConfirmationDialog>
+  </div>
+  
+  <div v-else>
+    <ConfirmationDialog
+      ref="deleteConfirmationDialog"
+      confirmationBtn="Delete product"
+      :msg="`Do you really want to delete the product ${productToDeleteDescription}?`"
+      @confirmed="dialogConfirmedDelete"
+    >
+    </ConfirmationDialog>
+  </div>
 
   <table class="table">
     <thead>
@@ -118,7 +163,7 @@ const deleteClick = (product) => {
           <div class="d-flex justify-content-end">
             <button
               class="btn btn-xs btn-light hvr-grow"
-              @click="addClick(product)"
+              @click="showAddDialog(true); addClick(product)"
               v-if="showAddButton"
             >
               <i class="bi bi-xs bi-cart-check"></i>
@@ -134,7 +179,7 @@ const deleteClick = (product) => {
 
             <button
               class="btn btn-xs btn-light"
-              @click="deleteClick(product)"
+              @click="showAddDialog(false);  deleteClick(product)"
               v-if="showDeleteButton"
             >
               <i class="bi bi-xs bi-x-square-fill"></i>

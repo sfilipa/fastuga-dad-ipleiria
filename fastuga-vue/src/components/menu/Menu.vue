@@ -2,35 +2,31 @@
   import { ref, computed, onMounted, inject, toDisplayString } from 'vue'
   import {useRouter} from 'vue-router'
   import ProductTable from "./ProductTable.vue"
+  import { useOrderItemsStore } from '@/stores/orderItems.js'
 
   const axios = inject('axios')
   const router = useRouter()
-  const toast = inject("toast")
 
   const products = ref([])
   const productTypes = ref([])
   const filterByType = ref('any')
   const filterByPrice = ref(15)
-  const orderConfirmationDialog = ref(null)
 
-  const orderItems = ref([])
+  const store = useOrderItemsStore()
 
   const addProduct = () => {
-    
+    //TODO
   }
 
-  const addProductToOrder = (product) => {
-    orderItems.value.push(product)
+  const addProductToOrder = (product, quantity) => {
+    for (let index = 0; index < quantity; index++) {
+      store.addItem(product)
+    } 
   }
 
   const makeOrder = () => {
-    orderConfirmationDialog.value.show()
-    console.log(orderItems.value) 
+    console.log(store.items)
   } 
-
-  const dialogConfirmOrder = () => {
-    toast.info(orderItems.value)
-  }
 
   const LoadProducts = () => {
     axios.get(`/products`)
@@ -67,23 +63,18 @@
 </script>
 
 <template>
-  <confirmation-dialog
-    ref="orderConfirmationDialog"
-    confirmationBtn="Delete product"
-    :msg="`Do you really want to delete the product ${orderItems.value}?`"
-    @confirmed="dialogConfirmOrder"
-  >
-  </confirmation-dialog>
-
   <div class="d-flex justify-content-between">
     <div class="mx-2">
       <h3 class="mt-4">{{ menuTitle }}</h3>
     </div>
-    <button
+    <!-- <button
         type="button"
         class="btn btn-success hvr-grow"
         @click="makeOrder"
-      ><i class="bi bi-xs bi-plus-circle"></i>&nbsp; Make Order</button>
+      ><i class="bi bi-xs bi-plus-circle"></i>&nbsp; Make Order</button> -->
+      <router-link class="link-secondary" :to="{ name: 'NewOrder' }" aria-label="Make a new order">
+              <i class="bi bi-xs bi-plus-circle">Make Order</i>
+      </router-link>
   </div>
 
   <hr>

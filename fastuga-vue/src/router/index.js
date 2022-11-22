@@ -7,6 +7,7 @@ import Register from "../components/auth/Register.vue"
 import ChangePassword from "../components/auth/ChangePassword.vue"
 import Tasks from "../components/tasks/Tasks.vue"
 import Orders from "../components/orders/Orders.vue"
+import NewOrder from "../components/orders/NewOrder.vue"
 import Projects from "../components/projects/Projects.vue"
 import Users from "../components/users/Users.vue"
 import User from "../components/users/User.vue"
@@ -93,6 +94,11 @@ const router = createRouter({
       name: 'Project',
       component: Project,
       props: route => ({ id: parseInt(route.params.id) })     
+    },
+    {
+      path: '/orders/new',
+      name: 'NewOrder',
+      component: NewOrder
     },
     {
       path: '/users',
