@@ -24,18 +24,18 @@ class StoreUpdateOrderRequest extends FormRequest
     public function rules()
     {
         return [
-            'ticket_number' => 'required|digits|between:0,99',
-            'status' => 'required|in:p,r,d,c',
-            'customer_id' => 'required|exists:customers,id',
+            'ticket_number' => 'required|numeric|between:0,99',
+            'status' => 'required|in:P,R,D,C',
+            'customer_id' => 'nullable|exists:customers,id',
             'total_price' => 'required|numeric|between:0,99.99',
             'total_paid' => 'required|numeric|between:0,99.99',
             'total_paid_with_points' => 'required|numeric|between:0,99.99',
-            'points_gained' => 'required|digits|min:0',
-            'points_used_to_pay' => 'required|digits',
-            'payment_type' => 'required|in:visa,paypal,mbway',
+            'points_gained' => 'required|numeric|min:0',
+            'points_used_to_pay' => 'required|numeric|min:0',
+            'payment_type' => 'required|in:VISA,PAYPAL,MBWAY',
             'payment_reference' => 'required',
-            'date' => 'required|date|after:today',
-            'delivered_by' => 'required|exists:users,id',
+            'date' => 'required|date',
+            'delivered_by' => 'nullable|exists:users,id',
             'custom' => 'nullable'
         ];
     }

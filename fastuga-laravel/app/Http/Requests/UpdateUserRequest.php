@@ -3,8 +3,9 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class StoreUpdateUserRequest extends FormRequest
+class UpdateUserRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,9 +26,8 @@ class StoreUpdateUserRequest extends FormRequest
     {
         return [
             'name' => 'required|min:3',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:8',
-            'type' => 'required|in:c,ec,ed,em',
+            'email' => ['required','email', Rule::unique('users')->ignore($this->user)],
+            'type' => 'required|in:C,EC,ED,EM',
             'blocked' => 'required|in:0,1',
             'photo_url' => 'nullable',
             'custom' => 'nullable'

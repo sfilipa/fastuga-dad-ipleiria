@@ -3,7 +3,8 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreUpdateUserRequest;
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\CustomerResource;
 use App\Http\Resources\UserResource;
 use App\Models\Customer;
@@ -38,13 +39,13 @@ class UserController extends Controller
         return new UserResource($user);
     }
 
-    public function store(StoreUpdateUserRequest $request)
+    public function store(StoreUserRequest $request)
     {
         $newUser = User::create($request->validated());
         return new UserResource($newUser);
     }
 
-    public function update(StoreUpdateUserRequest $request, User $user)
+    public function update(UpdateUserRequest $request, User $user)
     {
         $user->update($request->validated());
         return new UserResource($user);
@@ -52,7 +53,7 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
-        $user->softDeletes();
+        $user->delete();
     }
 
     public function show_me(Request $request)
