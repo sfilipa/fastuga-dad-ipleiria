@@ -37,7 +37,7 @@ onMounted(() => {
 <template>
   <nav class="navbar navbar-expand-md navbar-dark bg-dark sticky-top flex-md-nowrap p-0 shadow">
     <div class="container-fluid">
-      <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" href="#">
+      <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" :to="{ name: 'home' }">
         <img src="@/assets/logo.svg" alt="" width="30" height="24" class="d-inline-block align-text-top" />
         Fastuga
       </a>
@@ -60,16 +60,17 @@ onMounted(() => {
               Login
             </router-link>
           </li>
-          <li class="nav-item dropdown">
+          <li class="nav-item dropdown" v-show="userStore.user">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
               data-bs-toggle="dropdown" aria-expanded="false">
-              <img :src="userStore.userPhotoUrl" class="rounded-circle z-depth-0 avatar-img" alt="avatar image"/>
+              <img :src="userStore.userPhotoUrl" class="rounded-circle z-depth-0 avatar-img" alt="avatar image" />
               <span class="avatar-text">{{ userStore.user?.name ?? 'Anonymous' }}</span>
             </a>
             <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
               <li>
                 <router-link class="dropdown-item" :class="{ active: $route.name == 'User' && $route.params.id == 1 }"
-                  :to="{ name: 'User', params: { id: 1 } }"> <!--Onde tem id = 1 $route.params.id == 1 e tem de se trocar para userStore.userId-->
+                  :to="{ name: 'User', params: { id: 1 } }">
+                  <!--Onde tem id = 1 $route.params.id == 1 e tem de se trocar para userStore.userId-->
                   <i class="bi bi-person-square"></i>Profile
                 </router-link>
               </li>
@@ -132,7 +133,8 @@ onMounted(() => {
             </li>
 
             <li class="nav-item">
-              <router-link class="nav-link" :class="{ active: $route.name === 'Employees' }" :to="{ name: 'Employees' }">
+              <router-link class="nav-link" :class="{ active: $route.name === 'Employees' }"
+                :to="{ name: 'Employees' }">
                 <i class="bi bi-people-fill"></i>
                 Employees
               </router-link>
@@ -204,28 +206,29 @@ onMounted(() => {
               <span>User</span>
             </h6>
             <ul class="nav flex-column mb-2">
-              <li class="nav-item">
+              <li class="nav-item" v-show="!userStore.user">
                 <a class="nav-link" href="#"><i class="bi bi-person-check-fill"></i>
                   Register
                 </a>
               </li>
-              <li class="nav-item">
+              <li class="nav-item" v-show="!userStore.user">
                 <router-link class="nav-link" :class="{ active: $route.name === 'Login' }" :to="{ name: 'Login' }">
                   <i class="bi bi-box-arrow-in-right"></i>
                   Login
                 </router-link>
               </li>
-              <li class="nav-item dropdown">
+              <li class="nav-item dropdown" v-show="userStore.user">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink2" role="button"
                   data-bs-toggle="dropdown" aria-expanded="false">
-                  <img :src="userStore.userPhotoUrl" class="rounded-circle z-depth-0 avatar-img" alt="avatar image"/>
+                  <img :src="userStore.userPhotoUrl" class="rounded-circle z-depth-0 avatar-img" alt="avatar image" />
                   <span class="avatar-text">{{ userStore.user?.name ?? 'Anonymous' }}</span>
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink2">
                   <li>
                     <router-link class="dropdown-item"
                       :class="{ active: $route.name == 'User' && $route.params.id == 1 }"
-                      :to="{ name: 'User', params: { id: 1 } }"><!--Onde tem id = 1 $route.params.id == 1 e tem de se trocar para userStore.userId-->
+                      :to="{ name: 'User', params: { id: 1 } }">
+                      <!--Onde tem id = 1 $route.params.id == 1 e tem de se trocar para userStore.userId-->
                       <i class="bi bi-person-square"></i>Profile
                     </router-link>
                   </li>

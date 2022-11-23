@@ -17,6 +17,8 @@ import Project from "../components/projects/Project.vue"
 import Menu from "../components/menu/Menu.vue"
 import Employees from "../components/employees/Employees.vue"
 
+import { useUserStore } from "../stores/user.js"
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -93,7 +95,7 @@ const router = createRouter({
       path: '/projects/:id',
       name: 'Project',
       component: Project,
-      props: route => ({ id: parseInt(route.params.id) })     
+      props: route => ({ id: parseInt(route.params.id) })
     },
     {
       path: '/orders/new',
@@ -112,7 +114,7 @@ const router = createRouter({
       //props: true
       // Replaced with the following line to ensure that id is a number
       props: route => ({ id: parseInt(route.params.id) })
-    }, 
+    },
     {
       path: '/projects/:id/tasks',
       name: 'ProjectTasks',
@@ -123,7 +125,7 @@ const router = createRouter({
       path: '/projects/:id/tasks/new',
       name: 'NewTaskOfProject',
       component: Task,
-      props: route => ({ id:-1, fixedProject:  parseInt(route.params.id) })
+      props: route => ({ id: -1, fixedProject: parseInt(route.params.id) })
     },
     {
       path: '/tasks/new',
@@ -135,7 +137,7 @@ const router = createRouter({
       path: '/tasks/:id',
       name: 'Task',
       component: Task,
-      props: route => ({ id: parseInt(route.params.id) })    
+      props: route => ({ id: parseInt(route.params.id) })
     },
     {
       path: '/about',
@@ -147,5 +149,34 @@ const router = createRouter({
     }
   ]
 })
+/*
+//esta função serve para definir que tabs do menu cada user pode ver ficha 7 ponto 8 exemplo reports so os managers podem ver
+//2 ifs iniciais servem para ver se o user esta loggado ou nao, se nao tiver, so pode ver o login e a home page
+router.beforeEach((to, from, next) => {
+  const userStore = useUserStore()
+  if ((to.name == 'Login') || (to.name == 'Home')) {
+    next()
+    return
+  }
+  if (!userStore.user) {
+    next({ name: 'Login' })
+    return
+  }
+  /*if (to.name == 'Reports') {
+    if (userStore.user.type != 'EM') {
+      next({ name: 'home' })
+      return
+    }
+  }
+ if (to.name == 'User') {
+    if ((userStore.user.type == 'EM') || (userStore.user.id == to.params.id)) {//ver detalhes do user so o Manager e o proprio user podem ver 
+      next()
+      return
+    }
+    next({ name: 'home' })
+    return
+  }*/
+ /* next()
+})*/
 
 export default router
