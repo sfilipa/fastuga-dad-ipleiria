@@ -12,14 +12,23 @@ const userStore = useUserStore()
 
 const workInProgressProjects = ref([]);
 
+const buttonSidebarExpand = ref(null)
+
 const logout = async () => {
   if (await userStore.logout()) {
     toast.success('User has logged out of the application.')
+    clickMenuOption()
     router.push({ name: 'home' })
     userStore.clearUser()
   } else {
     toast.error('There was a problem logging out of the application!')
   }
+}
+
+const clickMenuOption = () => {
+ if (window.getComputedStyle(buttonSidebarExpand.value).display !== "none") {
+ buttonSidebarExpand.value.click()
+ }
 }
 
 onMounted(() => {
@@ -41,7 +50,7 @@ onMounted(() => {
         <img src="@/assets/logo.svg" alt="" width="30" height="24" class="d-inline-block align-text-top" />
         Fastuga
       </a>
-      <button id="buttonSidebarExpandId" class="navbar-toggler" type="button" data-bs-toggle="collapse"
+      <button id="buttonSidebarExpandId" ref="buttonSidebarExpand" class="navbar-toggler" type="button" data-bs-toggle="collapse"
         data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -49,13 +58,13 @@ onMounted(() => {
       <div class="collapse navbar-collapse justify-content-end">
         <ul class="navbar-nav">
           <li class="nav-item">
-            <router-link class="nav-link" :class="{ active: $route.name === 'Register' }" :to="{ name: 'Register' }">
+            <router-link class="nav-link" :class="{ active: $route.name === 'Register' }" :to="{ name: 'Register' }" @click="clickMenuOption">
               <i class="bi bi-box-arrow-in-right"></i>
               Register
             </router-link>
           </li>
           <li class="nav-item">
-            <router-link class="nav-link" :class="{ active: $route.name === 'Login' }" :to="{ name: 'Login' }">
+            <router-link class="nav-link" :class="{ active: $route.name === 'Login' }" :to="{ name: 'Login' }" @click="clickMenuOption">
               <i class="bi bi-box-arrow-in-right"></i>
               Login
             </router-link>
@@ -69,14 +78,14 @@ onMounted(() => {
             <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
               <li>
                 <router-link class="dropdown-item" :class="{ active: $route.name == 'User' && $route.params.id == 1 }"
-                  :to="{ name: 'User', params: { id: 1 } }">
+                  :to="{ name: 'User', params: { id: 1 } }" @click="clickMenuOption">
                   <!--Onde tem id = 1 $route.params.id == 1 e tem de se trocar para userStore.userId-->
                   <i class="bi bi-person-square"></i>Profile
                 </router-link>
               </li>
               <li>
                 <router-link class="dropdown-item" :class="{ active: $route.name === 'ChangePassword' }"
-                  :to="{ name: 'ChangePassword' }">
+                  :to="{ name: 'ChangePassword' }" @click="clickMenuOption">
                   <i class="bi bi-key-fill"></i>
                   Change password
                 </router-link>
@@ -103,7 +112,7 @@ onMounted(() => {
           <ul class="nav flex-column">
             <li class="nav-item">
               <router-link class="nav-link" :class="{ active: $route.name === 'PublicBoard' }"
-                :to="{ name: 'PublicBoard' }">
+                :to="{ name: 'PublicBoard' }" @click="clickMenuOption">
                 <i class="bi bi-house"></i>
                 Public Board
               </router-link>
@@ -119,14 +128,14 @@ onMounted(() => {
               </router-link>
             </li> -->
             <li class="nav-item">
-              <router-link class="nav-link" :class="{ active: $route.name === 'Menu' }" :to="{ name: 'Menu' }">
+              <router-link class="nav-link" :class="{ active: $route.name === 'Menu' }" :to="{ name: 'Menu' }" @click="clickMenuOption">
                 <i class="bi bi-cup-straw"></i>
                 Menu
               </router-link>
             </li>
 
             <li class="nav-item">
-              <router-link class="nav-link" :class="{ active: $route.name === 'Orders' }" :to="{ name: 'Orders' }">
+              <router-link class="nav-link" :class="{ active: $route.name === 'Orders' }" :to="{ name: 'Orders' }" @click="clickMenuOption">
                 <i class="bi bi-list-stars"></i>
                 Orders
               </router-link>
@@ -134,14 +143,14 @@ onMounted(() => {
 
             <li class="nav-item">
               <router-link class="nav-link" :class="{ active: $route.name === 'Employees' }"
-                :to="{ name: 'Employees' }">
+                :to="{ name: 'Employees' }" @click="clickMenuOption">
                 <i class="bi bi-people-fill"></i>
                 Employees
               </router-link>
             </li>
 
             <li class="nav-item">
-              <router-link class="nav-link" :class="{ active: $route.name === 'Tasks' }" :to="{ name: 'Tasks' }">
+              <router-link class="nav-link" :class="{ active: $route.name === 'Tasks' }" :to="{ name: 'Tasks' }" @click="clickMenuOption">
                 <i class="bi bi-bell"></i>
                 Notifications
               </router-link>
@@ -186,7 +195,7 @@ onMounted(() => {
 
           <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
             <span>My Orders</span>
-            <router-link class="link-secondary" :to="{ name: 'NewOrder' }" aria-label="Make a new order">
+            <router-link class="link-secondary" :to="{ name: 'NewOrder' }" aria-label="Make a new order" @click="clickMenuOption">
               <i class="bi bi-xs bi-plus-circle"></i>
             </router-link>
           </h6>
@@ -194,7 +203,7 @@ onMounted(() => {
             <li class="nav-item" v-for="prj in workInProgressProjects" :key="prj.id">
               <router-link class="nav-link w-100 me-3"
                 :class="{ active: $route.name == 'ProjectTasks' && $route.params.id == prj.id }"
-                :to="{ name: 'ProjectTasks', params: { id: prj.id } }">
+                :to="{ name: 'ProjectTasks', params: { id: prj.id } }" @click="clickMenuOption">
                 <i class="bi bi-file-ruled"></i>
                 {{ prj.name }}
               </router-link>
@@ -212,7 +221,7 @@ onMounted(() => {
                 </a>
               </li>
               <li class="nav-item" v-show="!userStore.user">
-                <router-link class="nav-link" :class="{ active: $route.name === 'Login' }" :to="{ name: 'Login' }">
+                <router-link class="nav-link" :class="{ active: $route.name === 'Login' }" :to="{ name: 'Login' }" @click="clickMenuOption">
                   <i class="bi bi-box-arrow-in-right"></i>
                   Login
                 </router-link>
@@ -227,14 +236,14 @@ onMounted(() => {
                   <li>
                     <router-link class="dropdown-item"
                       :class="{ active: $route.name == 'User' && $route.params.id == 1 }"
-                      :to="{ name: 'User', params: { id: 1 } }">
+                      :to="{ name: 'User', params: { id: 1 } }" @click="clickMenuOption">
                       <!--Onde tem id = 1 $route.params.id == 1 e tem de se trocar para userStore.userId-->
                       <i class="bi bi-person-square"></i>Profile
                     </router-link>
                   </li>
                   <li>
                     <router-link class="dropdown-item" :class="{ active: $route.name === 'ChangePassword' }"
-                      :to="{ name: 'ChangePassword' }">
+                      :to="{ name: 'ChangePassword' }" @click="clickMenuOption">
                       <i class="bi bi-key-fill"></i>
                       Change password
                     </router-link>
