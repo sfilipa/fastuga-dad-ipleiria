@@ -14,12 +14,12 @@ use App\Http\Controllers\api\AuthController;
 
 
 Route::post('login', [AuthController::class, 'login']);
-// Route::middleware('auth:api')->group(function () {
+Route::middleware('auth:api')->group(function () {
 
 Route::post('logout', [AuthController::class, 'logout']);
 Route::get('users/me', [UserController::class, 'show_me']);
-Route::get('users/employees', [UserController::class, 'getAllEmployees']);
-
+Route::get('users/employees', [UserController::class, 'getAllEmployees'])->middleware('can:view, App\Models\User');
+});
 // User Routes
 Route::apiResource("users", UserController::class);
 
@@ -39,7 +39,7 @@ Route::apiResource("order-items", OrderItemsController::class);
 Route::get('order-items/{orderItems}/user', [UserController::class, 'getUserOfOrderItems']);
 Route::get('order-items/{orderItems}/order', [OrderController::class, 'getOrderOfOrderItems']);
 Route::get('order-items/{orderItems}/product', [ProductController::class, 'getProductOfOrderItems']);
-// });
+
 
 // Product Routes
 Route::get('products/types', [ProductController::class, 'getProductsTypes']);

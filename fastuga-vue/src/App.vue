@@ -69,7 +69,7 @@ onMounted(() => {
             <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
               <li>
                 <router-link class="dropdown-item" :class="{ active: $route.name == 'User' && $route.params.id == 1 }"
-                  :to="{ name: 'User', params: { id: 1 } }">
+                  :to="{ name: 'User', params: { id: 1 } }"> <!--Onde tem id = 1 $route.params.id == 1 e tem de se trocar para userStore.userId-->
                   <i class="bi bi-person-square"></i>Profile
                 </router-link>
               </li>
@@ -225,7 +225,7 @@ onMounted(() => {
                   <li>
                     <router-link class="dropdown-item"
                       :class="{ active: $route.name == 'User' && $route.params.id == 1 }"
-                      :to="{ name: 'User', params: { id: 1 } }">
+                      :to="{ name: 'User', params: { id: 1 } }"><!--Onde tem id = 1 $route.params.id == 1 e tem de se trocar para userStore.userId-->
                       <i class="bi bi-person-square"></i>Profile
                     </router-link>
                   </li>

@@ -8,6 +8,10 @@ export const useUserStore = defineStore('user', () => {
 
     const user = ref(null)
 
+    const userId = computed(() => {
+        return user.value?.id ?? -1
+        })
+
     const userPhotoUrl = computed(() => {
         if (!user.value?.photo_url) {
             return avatarNoneUrl
@@ -52,5 +56,5 @@ export const useUserStore = defineStore('user', () => {
         }
     }
 
-    return { user, userPhotoUrl, loadUser, clearUser, login, logout }
+    return { user, userId, userPhotoUrl, loadUser, clearUser, login, logout }
 })
