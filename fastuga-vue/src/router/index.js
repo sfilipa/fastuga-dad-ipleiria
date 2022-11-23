@@ -19,6 +19,8 @@ import Employees from "../components/employees/Employees.vue"
 
 import { useUserStore } from "../stores/user.js"
 
+import RouteRedirector from "../components/global/RouteRedirector.vue"
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -26,6 +28,12 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView
+    },
+    {
+      path: '/redirect/:redirectTo',
+      name: 'Redirect',
+      component: RouteRedirector,
+      props: route => ({ redirectTo: route.params.redirectTo })
     },
     {
       path: '/login',
@@ -149,19 +157,28 @@ const router = createRouter({
     }
   ]
 })
-/*
+let handlingFirstRoute = true
+
 //esta função serve para definir que tabs do menu cada user pode ver ficha 7 ponto 8 exemplo reports so os managers podem ver
 //2 ifs iniciais servem para ver se o user esta loggado ou nao, se nao tiver, so pode ver o login e a home page
 router.beforeEach((to, from, next) => {
+  if (handlingFirstRoute) {
+    handlingFirstRoute = false
+    next({ name: 'Redirect', params: { redirectTo: to.fullPath } })
+    return
+  } else if (to.name == 'Redirect') {
+    next()
+    return
+  }
   const userStore = useUserStore()
-  if ((to.name == 'Login') || (to.name == 'Home')) {
+  /*if ((to.name == 'Login') || (to.name == 'Home')) {
     next()
     return
   }
   if (!userStore.user) {
     next({ name: 'Login' })
     return
-  }
+  }*/
   /*if (to.name == 'Reports') {
     if (userStore.user.type != 'EM') {
       next({ name: 'home' })
@@ -176,7 +193,7 @@ router.beforeEach((to, from, next) => {
     next({ name: 'home' })
     return
   }*/
- /* next()
-})*/
+  next()
+})
 
 export default router
