@@ -50,7 +50,11 @@ class OrderController extends Controller
 
     public function update(StoreUpdateOrderRequest $request, Order $order)
     {
-        $order->update($request->validated());
+        
+        $order->fill($request->validated());
+        $order->custom = json_encode($request["custom"]);
+        dd($order);
+        $order->save();
         return new OrderResource($order);
     }
 
