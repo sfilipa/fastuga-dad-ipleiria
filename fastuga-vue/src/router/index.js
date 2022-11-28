@@ -16,6 +16,7 @@ import Task from "../components/tasks/Task.vue"
 import Project from "../components/projects/Project.vue"
 import Menu from "../components/menu/Menu.vue"
 import Employees from "../components/employees/Employees.vue"
+import AddProduct from "../components/menu/AddProduct.vue"
 
 import { useUserStore } from "../stores/user.js"
 
@@ -60,6 +61,11 @@ const router = createRouter({
       name: 'Menu',
       component: Menu,
       props: { menuTitle: 'Menu' }
+    },
+    {
+      path: '/menu/add',
+      name: 'AddProduct',
+      component: AddProduct,
     },
     {
       path: '/orders',

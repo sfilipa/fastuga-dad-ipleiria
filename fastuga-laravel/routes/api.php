@@ -15,32 +15,35 @@ use App\Http\Controllers\api\AuthController;
 
 Route::post('login', [AuthController::class, 'login']);
 Route::middleware('auth:api')->group(function () {
-
-Route::post('logout', [AuthController::class, 'logout']);
-Route::get('users/me', [UserController::class, 'show_me']);
+    Route::post('logout', [AuthController::class, 'logout']);
+    Route::get('users/me', [UserController::class, 'show_me']);
 });
-Route::get('users/employees', [UserController::class, 'getAllEmployees']);//->middleware('can:view, App\Models\User'); - so o manager consegue ver os employees assim
 
 // User Routes
+Route::get('users/employees', [UserController::class, 'getAllEmployees']);//->middleware('can:view, App\Models\User'); - so o manager consegue ver os employees assim
 Route::apiResource("users", UserController::class);
 
 // Customer Routes
-Route::apiResource("customers", CustomerController::class);
 Route::get('customers/{customer}/user', [UserController::class, 'getUserOfCustomer']);
+Route::apiResource("customers", CustomerController::class);
 
 // Order Routes
-Route::get('orders/status', [OrderController::class, 'getOrdersStatus']);
-Route::get('orders/status/{status}', [OrderController::class, 'getOrderByStatus']);
+
+Route::prefix('orders')->group(function () {
+    Route::get('/status', [OrderController::class, 'getOrdersStatus']);
+    Route::get('/status/{status}', [OrderController::class, 'getOrderByStatus']);
+    Route::get('/{order}/customer', [CustomerController::class, 'getCostumerOfOrder']);
+    Route::get('/{order}/user', [UserController::class, 'getUserOfOrder']);
+});
 Route::apiResource("orders", OrderController::class);
-Route::get('orders/{order}/customer', [CustomerController::class, 'getCostumerOfOrder']);
-Route::get('orders/{order}/user', [UserController::class, 'getUserOfOrder']);
 
 // OrderItems Routes
+Route::prefix('order-items')->group(function () {
+    Route::get('/{orderItems}/user', [UserController::class, 'getUserOfOrderItems']);
+    Route::get('/{orderItems}/order', [OrderController::class, 'getOrderOfOrderItems']);
+    Route::get('/{orderItems}/product', [ProductController::class, 'getProductOfOrderItems']);
+});
 Route::apiResource("order-items", OrderItemsController::class);
-Route::get('order-items/{orderItems}/user', [UserController::class, 'getUserOfOrderItems']);
-Route::get('order-items/{orderItems}/order', [OrderController::class, 'getOrderOfOrderItems']);
-Route::get('order-items/{orderItems}/product', [ProductController::class, 'getProductOfOrderItems']);
-
 
 // Product Routes
 Route::get('products/types', [ProductController::class, 'getProductsTypes']);
