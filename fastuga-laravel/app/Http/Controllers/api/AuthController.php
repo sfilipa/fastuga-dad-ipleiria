@@ -5,6 +5,12 @@ namespace App\Http\Controllers\api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Models\User;
+use App\Models\Customer;
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\StoreUpdateCustomerRequest;
+use App\Http\Resources\CustomerResource;
+use App\Http\Resources\UserResource;
 
 const PASSPORT_SERVER_URL = "http://localhost";
 const CLIENT_ID = 2;
@@ -38,6 +44,24 @@ class AuthController extends Controller
             return response()->json($auth_server_response, $errorCode);
         } catch (\Exception $e) {
             return response()->json('Authentication has failed!', 401);
+        }
+    }
+
+    public function register(Request $request)
+    {
+        
+        $userRequest = new StoreUserRequest($request->all());
+        $customerRequest = new StoreUpdateCustomerRequest($request->all());
+        try {
+            $newUser = User::create($userRequest->validate($userRequest->rules()));
+            $responseUser = new UserResource($newUser);
+
+            $customerRequest->query->add(['user_id' => $newUser->id]);  
+            $newCustomer = Customer::create($customerRequest->validate($customerRequest->rules()));
+            $responseCustomer = new CustomerResource($newCustomer);
+            return response()->json("Good", 200);
+        } catch (\Exception $e) {
+            return response()->json("Erros a definir", 401);
         }
     }
 

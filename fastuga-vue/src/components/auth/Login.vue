@@ -65,4 +65,25 @@ const login = async () => {
   margin-right: auto;
   margin-left: auto;
 }
+
+
+.btn:hover {
+  background-color: #0b450f;
+}
+
+input[type=text] {
+  width: 100%;
+  margin-bottom: 0px;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+input[type=password] {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
 </style>
