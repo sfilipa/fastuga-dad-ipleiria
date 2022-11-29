@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, watchEffect, computed, inject, onUpdated} from "vue"
+import { ref, watch, computed, inject, onUpdated} from "vue"
 import ConfirmationDialog from "../global/ConfirmationDialog.vue";
 
 const axios = inject("axios")
@@ -78,10 +78,12 @@ const addClick = (product) => {
 
 const dialogConfirmedDelete = () => {
   axios
-    .delete("product/" + productToDelete.value.id)
+    .delete("products/" + productToDelete.value.id)
     .then((response) => {
+      addDialog.value = null;
       emit("deleted", response.data.data)
       toast.info("Product " + productToDeleteDescription.value + " was deleted")
+
     })
     .catch((error) => {
       console.log(error)
@@ -111,11 +113,12 @@ onUpdated(()=>{
     <ConfirmationDialog
       ref="addItemsToMenuDialog"
       confirmationBtn="Add Items"
-      :msg="`Product: ${productToAddOrderName}
-      `"
+      :msg="``"
       @confirmed="dialogConfirmAdd"
     >
-    <input v-model="quantityToAddOrder" class="form-control" type="number" min="1"/>
+    <div>
+      <span>Product: {{productToAddOrderName}}</span><input v-model="quantityToAddOrder" class="form-control" type="number" min="1"/>
+    </div>
     </ConfirmationDialog>
   </div>
   

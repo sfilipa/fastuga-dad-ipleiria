@@ -8,6 +8,9 @@ const router = useRouter()
 const axios = inject('axios')
 const toast = inject('toast')
 
+// WS
+const socket = inject("socket")
+
 const userStore = useUserStore()
 
 const credentials = ref({
@@ -20,6 +23,7 @@ const emit = defineEmits(['login'])
 const login = async () => {
   if (await userStore.login(credentials.value)) {
     toast.success('User ' + userStore.user.name + ' has entered the application.')
+    socket.emit('userLoggedIn', userStore.user)
     await userStore.loadUser() 
     emit('login')
     router.back()

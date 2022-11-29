@@ -18,7 +18,7 @@ use Illuminate\Http\Request;
 class UserController extends Controller
 {
     public function getUserOfOrderItems(OrderItems $orderItems) {
-        return UserResource::collection($orderItems->user->sortByDesc('id'));
+        return new UserResource($orderItems->user);
     }
 
     public function getUserOfCustomer(Customer $customer) {
