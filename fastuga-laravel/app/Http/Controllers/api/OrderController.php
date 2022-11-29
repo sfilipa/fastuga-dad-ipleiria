@@ -53,7 +53,6 @@ class OrderController extends Controller
         
         $order->fill($request->validated());
         $order->custom = json_encode($request["custom"]);
-        dd($order);
         $order->save();
         return new OrderResource($order);
     }
