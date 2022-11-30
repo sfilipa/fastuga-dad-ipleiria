@@ -17,6 +17,7 @@ import Project from "../components/projects/Project.vue"
 import Menu from "../components/menu/Menu.vue"
 import Employees from "../components/employees/Employees.vue"
 import AddProduct from "../components/menu/AddProduct.vue"
+import AddEmployee from "../components/employees/AddEmployee.vue"
 
 import { useUserStore } from "../stores/user.js"
 
@@ -66,6 +67,11 @@ const router = createRouter({
       path: '/menu/add',
       name: 'AddProduct',
       component: AddProduct,
+    }, 
+    {
+      path: '/employees/add',
+      name: 'AddEmployee',
+      component: AddEmployee,
     },
     {
       path: '/orders',

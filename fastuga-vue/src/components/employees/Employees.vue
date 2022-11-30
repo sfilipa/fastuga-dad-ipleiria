@@ -28,10 +28,6 @@ const showEmployee = (employee) => {
 	console.log(employeeObj);
 };
 
-const addEmployee = () => {
-	router.push({ name: "NewEmployee" });
-};
-
 const editEmployee = (employee) => {
 	console.log("Edit");
 	const employeeObj = Object.assign({}, employee);
@@ -115,6 +111,10 @@ const deleteEmployee = async (employee) => {
     }
     LoadEmployees();
 };
+
+const addEmployee = async () => {
+      router.push({ name: "AddEmployee" })
+}
 
 onMounted(() => {
 	LoadEmployees();
