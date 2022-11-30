@@ -6,10 +6,9 @@
 
     const PAYMENT_URL = 'https://dad-202223-payments-api.vercel.app' 
     const store = useOrderItemsStore()
+    const toast = inject("toast")
     const paymentType = ref("visa")
     const paymentReference = ref("")
-    //   const axios = inject("axios")
-    //   const inputDiv = null
     const referenceFocus = ref(null)
     const errors = ref(null)
 
@@ -23,6 +22,7 @@
     const refocus = () => {
         paymentReference.value = ""
         referenceFocus.value.focus()
+        errors.value = null
     }
 
     const confirmPayment = () => {
@@ -33,28 +33,30 @@
             }
             return 
         }
+
+        if(store.totalPrice <= 0){
+            errors.value = {
+                default: ["Price Must Be Higher Than Zero!"]
+            }
+            return
+        }
+
         if(paymentType.value == 'visa'){
-            if(paymentReference.value.match('[1-9][0-9]{15}')){
-                console.log("matches") 
-            }else{
+            if(!paymentReference.value.match('[1-9][0-9]{15}')){
                 errors.value = {
                 visa: ["Invalid Visa Reference"]
                 }
                 return
             }
         }else if(paymentType.value == 'mbway'){
-            if(paymentReference.value.match('[1-9][0-9]{8}')){
-                console.log("matches") 
-            }else{
+            if(!paymentReference.value.match('[1-9][0-9]{8}')){
                 errors.value = {
                 mbway: ["Invalid Phone Number"]
                 }
                 return
             }
         }else if(paymentType.value == 'paypal'){
-            if(paymentReference.value.match('[a-zA-Z0-9.+_]+@[a-zA-Z0-9.+_]+.[a-zA-Z]')){
-                console.log("matches") 
-            }else{
+            if(!paymentReference.value.match('[a-zA-Z0-9.+_]+@[a-zA-Z0-9.+_]+.[a-zA-Z]')){
                 errors.value = {
                 paypal: ["Invalid Email Format"]
                 }
@@ -63,13 +65,6 @@
         }else{
             errors.value = {
                 default: ["Payment Type Not Supported"]
-            }
-            return
-        }
-
-        if(store.totalPrice <= 0){
-            errors.value = {
-                default: ["Price Must Be Higher Than Zero!"]
             }
             return
         }
@@ -88,10 +83,8 @@
             .catch((error) => {
                 if (error.response.status == 422) {
                 toast.error('Order was not created due to validation errors!')
-                errors.value = error.response.data.errors
                 } else {
                 toast.error('Order was not created due to unknown server error!')
-                errors.value = error.response.data.errors
                 }
             })
     }
