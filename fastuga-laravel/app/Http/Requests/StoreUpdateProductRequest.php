@@ -27,7 +27,7 @@ class StoreUpdateProductRequest extends FormRequest
             'name' => 'required',
             'type' => 'required|in:hot dish,cold dish,drink,dessert',
             'description' => 'required',
-            'photo_url' => 'required',
+            'photo_url' => 'sometimes',
             'price' => 'required|numeric|between:0,99.99',
             'custom' => 'nullable'
         ];

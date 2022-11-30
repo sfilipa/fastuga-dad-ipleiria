@@ -6,8 +6,8 @@
       <h1 class="h2">Public Board</h1>
     </div>
     <div>
-      <h4>Orders available but not ready</h4>
-      <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequuntur, minus. Voluptatum cum iusto, commodi sunt molestias beatae adipisci architecto aspernatur, molestiae dicta placeat earum fugiat consequatur. Cum reiciendis ex amet!</p>
+      <h4>Orders ready</h4>
+      
     </div>
     <div>
       <h4>Icons</h4>

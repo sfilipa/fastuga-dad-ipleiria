@@ -57,13 +57,13 @@ onMounted(() => {
 
       <div class="collapse navbar-collapse justify-content-end">
         <ul class="navbar-nav">
-          <li class="nav-item">
+          <li class="nav-item" v-show="!userStore.user">
             <router-link class="nav-link" :class="{ active: $route.name === 'Register' }" :to="{ name: 'Register' }" @click="clickMenuOption">
               <i class="bi bi-box-arrow-in-right"></i>
               Register
             </router-link>
           </li>
-          <li class="nav-item">
+          <li class="nav-item" v-show="!userStore.user">
             <router-link class="nav-link" :class="{ active: $route.name === 'Login' }" :to="{ name: 'Login' }" @click="clickMenuOption">
               <i class="bi bi-box-arrow-in-right"></i>
               Login
@@ -215,17 +215,6 @@ onMounted(() => {
               <span>User</span>
             </h6>
             <ul class="nav flex-column mb-2">
-              <li class="nav-item" v-show="!userStore.user">
-                <a class="nav-link" href="#"><i class="bi bi-person-check-fill"></i>
-                  Register
-                </a>
-              </li>
-              <li class="nav-item" v-show="!userStore.user">
-                <router-link class="nav-link" :class="{ active: $route.name === 'Login' }" :to="{ name: 'Login' }" @click="clickMenuOption">
-                  <i class="bi bi-box-arrow-in-right"></i>
-                  Login
-                </router-link>
-              </li>
               <li class="nav-item dropdown" v-show="userStore.user">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink2" role="button"
                   data-bs-toggle="dropdown" aria-expanded="false">

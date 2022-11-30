@@ -1,5 +1,8 @@
 <script setup>
 import { ref, computed, onMounted, inject } from "vue";
+import ConfirmationDialog from "../global/ConfirmationDialog.vue";
+
+const toast = inject("toast")
 
 const props = defineProps({
 	employees: Array,
@@ -17,20 +20,40 @@ const editClick = (employee) => {
 	emit("edit", employee);
 };
 
+// Delete
+const deleteConfirmationDialog = ref(null)
+const employeeToDelete = ref(null);
+const employeeToDeleteDescription = computed(() => {
+	return employeeToDelete.value ? `${employeeToDelete.value.name}` : ""
+}) 
 const deleteClick = (employee) => {
-	emit("delete", employee);
+	employeeToDelete.value = employee;
+	if (deleteConfirmationDialog.value !== null) {
+		deleteConfirmationDialog.value.show();
+	}
 };
+const dialogConfirmDelete = () => {
+	emit("delete", employeeToDelete.value);
+	toast.info("Employee " + employeeToDeleteDescription.value.name + " was deleted")
+}
 
+// Block and Unblock
 const blockEmployeeClick = (employee) => {
 	emit("block", employee);
 };
-
 const unblockEmployeeClick = (employee) => {
 	emit("unblock", employee);
 };
+
 </script>
 
 <template>
+	<ConfirmationDialog
+		ref="deleteConfirmationDialog"
+		confirmationBtn="Delete Employee"
+		:msg="`Do you really want to delete: ${employeeToDeleteDescription}`"
+		@confirmed="dialogConfirmDelete"
+		></ConfirmationDialog>
 	<table class="table">
 		<thead>
 			<tr>
@@ -45,8 +68,8 @@ const unblockEmployeeClick = (employee) => {
 		<tbody>
 			<tr
 				v-for="employee in props.employees
-					.filter((employee) => (props.filterByType === 'A' ? true : employee.type === props.filterByType))
-					.filter((employee) => (!props.name ? true : employee.name === props.name))"
+				.filter((employee) => (props.filterByType === 'A' ? true : employee.type === props.filterByType))
+				.filter((employee) => (!props.name ? true : employee.name === props.name))"
 				:key="employee.id">
 				<td>
 					<img
