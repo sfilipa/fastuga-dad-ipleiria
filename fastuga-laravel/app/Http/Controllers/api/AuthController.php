@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\api;
 
+
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -11,6 +13,8 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\StoreUpdateCustomerRequest;
 use App\Http\Resources\CustomerResource;
 use App\Http\Resources\UserResource;
+
+use Illuminate\Support\Facades\Hash;
 
 const PASSPORT_SERVER_URL = "http://localhost";
 const CLIENT_ID = 2;
@@ -48,24 +52,31 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        
         $userRequest = new StoreUserRequest($request->all());
         $customerRequest = new StoreUpdateCustomerRequest($request->all());
+
+        DB::beginTransaction();
+
         try {
-            $validationUser = $userRequest->validate($userRequest->rules());
-            $customerRequest->query->add(['user_id' => 1]);  //TODO: Change this 
-            $validationCustomer = $customerRequest->validate($customerRequest->rules());
+
+            $userRequest->validate($userRequest->rules());//validate password without hash
             
-            $newUser = User::create($validationUser);
+            $userRequest->query->add(['password' => Hash::make($userRequest->password)]); 
+
+            $newUser = User::create($userRequest->validate($userRequest->rules()));
+            
             $responseUser = new UserResource($newUser);
-            
+
             $customerRequest->query->add(['user_id' => $newUser->id]); 
 
-            $newCustomer = Customer::create($validationCustomer);
+            $newCustomer = Customer::create($customerRequest->validate($customerRequest->rules()));
             $responseCustomer = new CustomerResource($newCustomer);
+
+            DB::commit();
             return response()->json("Good", 200);
         } catch (\Exception $e) {
-            return response()->json($e->getMessage(), $e->status);
+            DB::rollback();
+            return response()->json($e->getMessage(), 400);
         }
     }
 
