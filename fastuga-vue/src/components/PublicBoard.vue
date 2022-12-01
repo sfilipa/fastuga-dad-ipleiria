@@ -80,6 +80,11 @@ onMounted(()=>{
               Total Paid: <span style="float: right">{{order.total_paid}}€</span>
             </div>
           </li>
+          <li>
+            <div>
+              Points Gained: <span style="float: right">{{order.points_gained}} pts</span>
+            </div>
+          </li>
         </ul>
       </div>
     </div>

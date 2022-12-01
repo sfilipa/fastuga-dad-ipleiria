@@ -4,6 +4,7 @@ import ConfirmationDialog from "../global/ConfirmationDialog.vue";
 
 const axios = inject("axios")
 const toast = inject("toast")
+const serverBaseUrl = inject("serverBaseUrl")
 
 const props = defineProps({
   products: {
@@ -157,8 +158,8 @@ onUpdated(()=>{
                               .filter(product => props.filterByType==='any' ? true : product.type===props.filterByType)
                               .filter(product => props.filterByPrice==null ? true : product.price<=props.filterByPrice)" 
           :key="product.id">
-          <td>
-              <img :src='"http://localhost:8081/storage/products/"+product.photo_url' />
+          <td style="text-align: center;">
+              <img :src='`${serverBaseUrl}/storage/products/${product.photo_url}`'/>
           </td>
           <td>
               {{product.name}}
@@ -212,7 +213,8 @@ button {
 
 img, svg {
   vertical-align: middle;
-  width: 55px;
+  height: 55px;
+  width: auto;
 }
 
 .hvr-grow {
