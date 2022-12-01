@@ -14,7 +14,7 @@ use App\Http\Resources\UserResource;
 
 const PASSPORT_SERVER_URL = "http://localhost";
 const CLIENT_ID = 2;
-const CLIENT_SECRET = 'NnwPusaTbdGZmiVbt8FV2VtjCITzYR7Abe4CqSEn'; 
+//const CLIENT_SECRET = 'NnwPusaTbdGZmiVbt8FV2VtjCITzYR7Abe4CqSEn'; 
 
 const CLIENT_SECRET = 'vabnHSSpaYqEAQwyMNKQlFNMbW6bEv0S1dgTICN4';
 class AuthController extends Controller
@@ -52,15 +52,20 @@ class AuthController extends Controller
         $userRequest = new StoreUserRequest($request->all());
         $customerRequest = new StoreUpdateCustomerRequest($request->all());
         try {
-            $newUser = User::create($userRequest->validate($userRequest->rules()));
+            $validationUser = $userRequest->validate($userRequest->rules());
+            $customerRequest->query->add(['user_id' => 1]);  //TODO: Change this 
+            $validationCustomer = $customerRequest->validate($customerRequest->rules());
+            
+            $newUser = User::create($validationUser);
             $responseUser = new UserResource($newUser);
+            
+            $customerRequest->query->add(['user_id' => $newUser->id]); 
 
-            $customerRequest->query->add(['user_id' => $newUser->id]);  
-            $newCustomer = Customer::create($customerRequest->validate($customerRequest->rules()));
+            $newCustomer = Customer::create($validationCustomer);
             $responseCustomer = new CustomerResource($newCustomer);
             return response()->json("Good", 200);
         } catch (\Exception $e) {
-            return response()->json("Erros a definir", 401);
+            return response()->json($e->getMessage(), $e->status);
         }
     }
 
