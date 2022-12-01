@@ -25,7 +25,7 @@ class StoreUpdateOrderRequest extends FormRequest
     {
         return [
             'ticket_number' => 'required|numeric|between:0,99',
-            'status' => 'required|in:P,R,D,C',
+            'status' => 'required|in:p,r,d,c',
             'customer_id' => 'nullable|exists:customers,id',
             'total_price' => 'required|numeric|between:0,99.99',
             'total_paid' => 'required|numeric|between:0,99.99',

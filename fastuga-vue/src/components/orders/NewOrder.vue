@@ -79,7 +79,7 @@
             'order_items': store.items
         }
 
-        console.log("0")
+        console.log(paymentBody)
 
         if(finalPrice.value == 0){
             axiosLaravel.post('/orders', paymentBody)
@@ -126,7 +126,7 @@
                 'value': finalPrice.value
         }
         console.log(requestBody)
-        
+
         axios.post(`${PAYMENT_URL}/api/payments`, requestBody)
             .then((response) => {
                 console.log("Payment Body:")
@@ -191,13 +191,12 @@
 
 
     const checkOrderStatus = () => {
-        store.items.forEach(product => {
-            if(product.type = 'hot dish'){
-                return 'P'
-                
+        for(const elem of store.items){
+            if(elem.type == 'hot dish'){
+                return 'p'
             }
-        });
-        return 'R'
+        }
+        return 'r'
     }
 
     const getTimestamp = () => {
