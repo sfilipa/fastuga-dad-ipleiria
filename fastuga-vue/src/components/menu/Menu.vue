@@ -7,17 +7,12 @@
   const axios = inject('axios')
   const router = useRouter()
 
-  const products = ref([])
+  const products = ref(null)
   const productTypes = ref([])
   const filterByType = ref('any')
   const filterByPrice = ref(15)
 
   const store = useOrderItemsStore()
-
-  const addProduct = () => {
-    //TODO
-    // LoadProducts();
-  }
 
   const addProductToOrder = (product, quantity) => {
     for (let index = 0; index < quantity; index++) {
@@ -110,24 +105,21 @@
       <input v-model="filterByPrice" class="form-control" type="number" min="0" max="99" step="0.1"/>
     </div>
     <div class="mx-2 mt-2">
-      <!-- <button
-        type="button"
-        class="btn btn-success px-4 btn-addproduct"
-        @click="addProduct"
-      ><i class="bi bi-xs bi-plus-circle"></i>&nbsp; Add Product</button> -->
-      <router-link class="link-secondary" :to="{ name: 'AddProduct'}" aria-label="Add Product" @addProduct="addProduct">
+      <router-link class="link-secondary" :to="{ name: 'AddProduct'}" aria-label="Add Product">
               <i class="bi bi-xs bi-plus-circle">Add Product</i>
       </router-link>
     </div>
   </div> 
-  <product-table
-    :products="products"
-    @edit="editProduct"
-    @deleted="deletedProduct"
-    @add="addProductToOrder"
-    :filterByType="filterByType"
-    :filterByPrice="filterByPrice"
-  ></product-table>
+  <div>
+    <product-table
+      :products="products"
+      @edit="editProduct"
+      @deleted="deletedProduct"
+      @add="addProductToOrder"
+      :filterByType="filterByType"
+      :filterByPrice="filterByPrice"
+    ></product-table>
+  </div>
 </template>
 
 
