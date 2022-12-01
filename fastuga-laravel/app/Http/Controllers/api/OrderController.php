@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreUpdateOrderItemsRequest;
 use App\Http\Requests\StoreUpdateOrderRequest;
 use App\Http\Resources\OrderItemsResource;
 use App\Http\Resources\OrderResource;
@@ -10,6 +11,8 @@ use App\Models\Order;
 use App\Models\OrderItems;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Models\Customer;
 
 class OrderController extends Controller
 {
@@ -37,10 +40,52 @@ class OrderController extends Controller
         return Order::all();
     }
 
-    public function store(StoreUpdateOrderRequest $request)
+    public function store(Request $request)
     {
-        $newOrder = Order::create($request->validated());
-        return new OrderResource($newOrder);
+        DB::beginTransaction();
+        try{
+            $orderRequest = new StoreUpdateOrderRequest($request->all());
+            $validatedOrder = $orderRequest->validate($orderRequest->rules());
+            $newOrder = Order::create($validatedOrder);
+            $newOrder->save();
+
+            $orderItemsArray = $request->order_items;
+            $local_number = 0;
+            foreach($orderItemsArray as $item){
+                $this->store_each_order_item($item, $newOrder['id'], $local_number);
+                $local_number++;
+            }
+            
+            if($newOrder['customer_id'] != null){
+                $customer = Customer::find($newOrder['customer_id']);
+                $previousPoints = $customer->points;
+                $customer->points = $previousPoints - $newOrder['points_used_to_pay'] + $newOrder['points_gained'];
+                $customer->save();
+            }
+
+            DB::commit();
+            return new OrderResource($newOrder);
+        }catch(\Exception $e){
+            DB::rollBack();
+            return response($e->getMessage());
+        }
+    }
+
+    function store_each_order_item($item, $order_id, $local_number){
+        $status = $item['type'] == 'hot dish' ? 'w' : 'r';
+        $itemRequest = new StoreUpdateOrderItemsRequest([
+            'order_id' => $order_id,
+            'order_local_number' => $local_number,
+            'product_id' => $item['id'],
+            'status' => $status,
+            'price' => $item['price'],
+            'preparation_by' => null,
+            'notes' => null,
+            'custom' => null
+        ]);
+        $validateItem = $itemRequest->validate($itemRequest->rules());
+        $newItem = OrderItems::create($validateItem);
+        $newItem->save();
     }
 
     public function show(Order $order)
