@@ -26,7 +26,15 @@ class OrderController extends Controller
     {
         $status = strtoupper($status);
         if ($status == 'P' or  $status == 'R' or $status == 'D' or $status == 'C') {
-            return OrderResource::collection(Order::where('status', $status)->get());
+            return Order::where('status', $status)->with("orderItems", "orderItems.product")->get();
+        }
+    }
+
+    public function getOrderByStatusTAES(String $status)
+    {
+        $status = strtoupper($status);
+        if ($status == 'P' or  $status == 'R' or $status == 'D' or $status == 'C') {
+            return OrderResource::collection(Order::where('status', $status)->get()); 
         }
     }
 
@@ -95,7 +103,6 @@ class OrderController extends Controller
 
     public function update(StoreUpdateOrderRequest $request, Order $order)
     {
-        
         $order->fill($request->validated());
         $order->custom = json_encode($request["custom"]);
         $order->save();

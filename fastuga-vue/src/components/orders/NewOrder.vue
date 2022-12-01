@@ -280,7 +280,7 @@
 <template>
     <div v-if="store.items.length == 0">
         <h2>No items to order</h2>
-        <p>Please add some items from the menu first.</p>
+        <p>Please add some items from the <router-link :to="{ name: 'Menu' }">menu</router-link> first.</p>
     </div>
     <div v-else>
         <h2>Create a new order</h2>

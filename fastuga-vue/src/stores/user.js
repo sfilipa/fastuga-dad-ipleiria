@@ -58,14 +58,14 @@ export const useUserStore = defineStore('user', () => {
         }
     }
 
-    async function register(credentials) {
+  /*  async function register(credentials) {
         try {
             await axios.post('register', credentials)
             return true
         } catch (error) {
-            return false
+            return response
         }
-    }
+    }*/
 
     async function restoreToken () {
         let storedToken = sessionStorage.getItem('token')
@@ -78,5 +78,5 @@ export const useUserStore = defineStore('user', () => {
         return false
        }
 
-    return { user, userId, userPhotoUrl, loadUser, clearUser, login, logout, register,restoreToken  }
+    return { user, userId, userPhotoUrl, loadUser, clearUser, login, logout, restoreToken  }
 })

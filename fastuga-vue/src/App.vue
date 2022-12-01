@@ -144,7 +144,7 @@ onMounted(() => {
             <li class="nav-item">
               <router-link class="nav-link" :class="{ active: $route.name === 'Employees' }"
                 :to="{ name: 'Employees' }" @click="clickMenuOption">
-                <i class="bi bi-people-fill"></i>
+                <i class="bi bi-people"></i>
                 Employees
               </router-link>
             </li>

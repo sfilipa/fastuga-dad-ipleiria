@@ -28,17 +28,20 @@ const credentials = ref({
 const emit = defineEmits(['register'])
 
 const register = async () => {
- // if (credentials.value.password == credentials.value.confirmationPassword) {
-    if (await userStore.register(credentials.value)) {
-      toast.success('Register Successful.')
-      emit('register')
-      router.push({ name: "Login" })
-    } else {
-      toast.error('Register Failed!')
-    }
-  /*}else{
+  if (credentials.value.password == credentials.value.confirmationPassword) {
+    await axios.post(`http://localhost:8081/api/register`, credentials.value)
+      .then((response) => {
+        toast.success('Register Successful.')
+        emit('register')
+        router.push({ name: "Login" })
+      })
+      .catch((error) => {
+        const errorSplit = error.response.data.split('.')
+        toast.error("Register Failed - " + errorSplit[0] + ".")
+      });
+  } else {
     toast.error('Password and Confirmation Password should match!')
-    }*/
+  }
 }
 
 </script>
@@ -49,36 +52,43 @@ const register = async () => {
     <hr>
     <div class="row">
       <div class="col-50">
+        <label>Name:</label>
         <input type="text" class="form-control" id="inputName" placeholder="Enter Name" required
           v-model="credentials.name">
       </div>
       <div class="col-50">
+        <label>Email:</label>
         <input type="text" class="form-control" id="inputEmail" placeholder="Enter Email" required
           v-model="credentials.email">
       </div>
     </div>
     <div class="row">
       <div class="col-50">
+        <label>NIF:</label>
         <input type="text" class="form-control" id="inputNif" placeholder="Enter NIF" required
           v-model="credentials.nif">
       </div>
       <div class="col-50">
+        <label>Phone Number:</label>
         <input type="text" class="form-control" id="inputPhoneNumber" placeholder="Enter Phone Number" required
           v-model="credentials.phone">
       </div>
     </div>
     <div class="row">
       <div class="col-50">
+        <label>Password:</label>
         <input type="password" class="form-control" id="inputPassword" placeholder="Enter Password" required
           v-model="credentials.password">
       </div>
       <div class="col-50">
+        <label>Confirmation Password:</label>
         <input type="password" class="form-control" id="inputPasswordConfirmation"
           placeholder="Enter Confirmation Password" required v-model="credentials.confirmationPassword">
       </div>
     </div>
     <div class="row">
       <div class="col-50">
+        <label>Default Payment Type:</label>
         <select class="form-select" id="selectType" v-model="credentials.default_payment_type">
           <option value="visa">Visa</option>
           <option value="mbway">MBWay</option>
@@ -86,6 +96,7 @@ const register = async () => {
         </select>
       </div>
       <div class="col-50">
+        <label>Default Payment Reference:</label>
         <div v-if="credentials.default_payment_type == 'visa'">
           <input type="text" class="form-control" id="inputVisaReference"
             placeholder="Enter Visa Card ID Payment Reference" required v-model="credentials.default_payment_reference">
