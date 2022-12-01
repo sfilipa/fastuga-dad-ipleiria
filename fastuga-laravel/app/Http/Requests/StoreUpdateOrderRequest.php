@@ -25,15 +25,15 @@ class StoreUpdateOrderRequest extends FormRequest
     {
         return [
             'ticket_number' => 'required|numeric|between:0,99',
-            'status' => 'required|in:P,R,D,C',
+            'status' => 'required|in:p,r,d,c',
             'customer_id' => 'nullable|exists:customers,id',
             'total_price' => 'required|numeric|between:0,99.99',
             'total_paid' => 'required|numeric|between:0,99.99',
             'total_paid_with_points' => 'required|numeric|between:0,99.99',
             'points_gained' => 'required|numeric|min:0',
             'points_used_to_pay' => 'required|numeric|min:0',
-            'payment_type' => 'required|in:VISA,PAYPAL,MBWAY',
-            'payment_reference' => 'required',
+            'payment_type' => 'nullable|in:VISA,PAYPAL,MBWAY',
+            'payment_reference' => 'required_if:payment_type:exists,null',
             'date' => 'required|date',
             'delivered_by' => 'nullable|exists:users,id',
             'custom' => 'nullable'

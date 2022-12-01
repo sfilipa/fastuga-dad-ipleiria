@@ -4,6 +4,7 @@ import ConfirmationDialog from "../global/ConfirmationDialog.vue";
 
 const axios = inject("axios")
 const toast = inject("toast")
+const serverBaseUrl = inject("serverBaseUrl")
 
 const props = defineProps({
   products: {
@@ -109,90 +110,98 @@ onUpdated(()=>{
 </script>
 
 <template>
-  <div v-if="addDialog">
-    <ConfirmationDialog
-      ref="addItemsToMenuDialog"
-      confirmationBtn="Add Items"
-      :msg="``"
-      @confirmed="dialogConfirmAdd"
-    >
-    <div>
-      <span>Product: {{productToAddOrderName}}</span><input v-model="quantityToAddOrder" class="form-control" type="number" min="1"/>
+    <div v-if="addDialog">
+      <ConfirmationDialog
+        ref="addItemsToMenuDialog"
+        confirmationBtn="Add Items"
+        :msg="``"
+        @confirmed="dialogConfirmAdd"
+      >
+      <div>
+        <span>Product: {{productToAddOrderName}}</span><input v-model="quantityToAddOrder" class="form-control" type="number" min="1"/>
+      </div>
+      </ConfirmationDialog>
     </div>
-    </ConfirmationDialog>
-  </div>
-  
-  <div v-else>
-    <ConfirmationDialog
-      ref="deleteConfirmationDialog"
-      confirmationBtn="Delete product"
-      :msg="`Do you really want to delete the product ${productToDeleteDescription}?`"
-      @confirmed="dialogConfirmedDelete"
-    >
-    </ConfirmationDialog>
-  </div>
+    
+    <div v-else>
+      <ConfirmationDialog
+        ref="deleteConfirmationDialog"
+        confirmationBtn="Delete product"
+        :msg="`Do you really want to delete the product ${productToDeleteDescription}?`"
+        @confirmed="dialogConfirmedDelete"
+      >
+      </ConfirmationDialog>
+    </div>
 
-  <table class="table">
-    <thead>
-      <tr>
-        <th></th>
-        <th>Name</th>
-        <th>Description</th>
-        <th>Type</th>
-        <th>Price</th>
-        <th v-if="showEditButton || showDeleteButton || showAddButton"></th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="product in props.products
-                            .filter(product => props.filterByType==='any' ? true : product.type===props.filterByType)
-                            .filter(product => props.filterByPrice==null ? true : product.price<=props.filterByPrice)" 
-        :key="product.id">
-        <td>
-            <img :src='"http://localhost:8081/storage/products/"+product.photo_url' />
-        </td>
-        <td>
-            {{product.name}}
-        </td>
-        <td>
-          <span >{{ product.description }}</span>
-        </td>
-        <td>{{ product.type }}</td>
-        <td>{{ product.price }}€</td>
-        <td
-          class="text-end"
-          v-if="showEditButton || showDeleteButton || showAddButton"
-        >
-          <div class="d-flex justify-content-end">
-            <button
-              class="btn btn-xs btn-light hvr-grow"
-              @click="showAddDialog(true); addClick(product)"
-              v-if="showAddButton"
-            >
-              <i class="bi bi-xs bi-cart-check"></i>
-            </button>
-
-            <button
-              class="btn btn-xs btn-light"
-              @click="editClick(product)"
-              v-if="showEditButton"
-            >
-              <i class="bi bi-xs bi-pencil"></i>
-            </button>
-
-            <button
-              class="btn btn-xs btn-light"
-              @click="showAddDialog(false);  deleteClick(product)"
-              v-if="showDeleteButton"
-            >
-              <i class="bi bi-xs bi-x-square-fill"></i>
-            </button>
+    <table class="table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Type</th>
+          <th>Price</th>
+          <th v-if="showEditButton || showDeleteButton || showAddButton"></th>
+        </tr>
+      </thead>    
+      <tbody >
+        <tr v-if="(props.products==null)">
+          <td colspan="6">
+            <div class="d-flex justify-content-center">
+              <div class="spinner-border" role="status" style="margin: 2%;">
+                <span class="sr-only"></span>
+              </div>
           </div>
-        </td>
-      </tr>
-      
-    </tbody>
-  </table>
+          </td>
+        </tr>
+        <tr v-else v-for="product in props.products
+                              .filter(product => props.filterByType==='any' ? true : product.type===props.filterByType)
+                              .filter(product => props.filterByPrice==null ? true : product.price<=props.filterByPrice)" 
+          :key="product.id">
+          <td style="text-align: center;">
+              <img :src='`${serverBaseUrl}/storage/products/${product.photo_url}`'/>
+          </td>
+          <td>
+              {{product.name}}
+          </td>
+          <td>
+            <span >{{ product.description }}</span>
+          </td>
+          <td>{{ product.type }}</td>
+          <td>{{ product.price }}€</td>
+          <td
+            class="text-end"
+            v-if="showEditButton || showDeleteButton || showAddButton"
+          >
+            <div class="d-flex justify-content-end">
+              <button
+                class="btn btn-xs btn-light hvr-grow"
+                @click="showAddDialog(true); addClick(product)"
+                v-if="showAddButton"
+              >
+                <i class="bi bi-xs bi-cart-check"></i>
+              </button>
+
+              <button
+                class="btn btn-xs btn-light"
+                @click="editClick(product)"
+                v-if="showEditButton"
+              >
+                <i class="bi bi-xs bi-pencil"></i>
+              </button>
+
+              <button
+                class="btn btn-xs btn-light"
+                @click="showAddDialog(false);  deleteClick(product)"
+                v-if="showDeleteButton"
+              >
+                <i class="bi bi-xs bi-x-square-fill"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
 </template>
 
 <style scoped>
@@ -204,7 +213,8 @@ button {
 
 img, svg {
   vertical-align: middle;
-  width: 55px;
+  height: 55px;
+  width: auto;
 }
 
 .hvr-grow {

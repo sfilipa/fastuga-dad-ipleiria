@@ -5,11 +5,9 @@
 
   const axios = inject('axios')
   const toast = inject('toast')
+  const serverBaseUrl = inject('serverBaseUrl')
 
   const router = useRouter()
-  const newProduct = ref('')
-
-  const emit = defineEmits(["addProduct"])
 
   const nameInput = ref(null)
   const typeInput = ref(null)
@@ -46,11 +44,10 @@
     formData.append('price', priceInput.value);
     formData.append('photo_url', photoInput.value);
 
-    await axiosImported.post(`http://localhost:8081/api/products`, formData)
+    await axiosImported.post(`${serverBaseUrl}/api/products`, formData)
         .then((response)=>{
-            toast.info("Product '" + response.data.data.name + "' was created")
-            emit('addProduct')
             router.push('/menu')
+            toast.info("Product '" + response.data.data.name + "' was created")
         })
         .catch((error)=>{
             console.log(error)

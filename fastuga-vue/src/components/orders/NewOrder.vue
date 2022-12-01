@@ -1,13 +1,21 @@
 <script setup>
-    import { ref, computed, onMounted, inject, watch } from 'vue'
+    import { ref, computed, onMounted, inject, watch, reactive } from 'vue'
     import { useRouter } from 'vue-router'
     import { useOrderItemsStore } from '@/stores/orderItems.js'
+    import { useUserStore } from '@/stores/user.js'
     import axios from 'axios'
 
+    const axiosLaravel = inject('axios')
     const PAYMENT_URL = 'https://dad-202223-payments-api.vercel.app' 
     const store = useOrderItemsStore()
+
+
+    const user = useUserStore()
+    const pointsToUse = ref(0)
+    const pointsAvailableToUse = ref([])
+    const customer = ref(null)
     const toast = inject("toast")
-    const paymentType = ref("visa")
+    const paymentType = ref("VISA")
     const paymentReference = ref("")
     const referenceFocus = ref(null)
     const errors = ref(null)
@@ -20,73 +28,250 @@
     }
 
     const refocus = () => {
-        paymentReference.value = ""
         referenceFocus.value.focus()
         errors.value = null
+        paymentReference.value = ""
+        if(customer){
+            if(paymentType.value == customer.value.default_payment_type){
+                paymentReference.value = customer.value.default_payment_reference
+            }
+        }
     }
 
+    // const paymentBody = ref({
+    //     ticket_number: 0,
+    //     status: '',
+    //     customer_id: 0,
+    //     total_price: 0,
+    //     total_paid: 0,
+    //     total_paid_with_points: 0,
+    //     points_gained: 0,
+    //     points_used_to_pay: 0,
+    //     payment_type: '',
+    //     date: null,
+    //     delivered_by: null,
+    //     order_items: null,
+    // })
+    // paymentBody.value.ticket_number = 1
+            // paymentBody.value.status = checkOrderStatus()
+            // paymentBody.value.customer_id = customer ? customer.value.id : null
+            // paymentBody.value.total_price = store.totalPrice
+            // paymentBody.value.total_paid = finalPrice.value
+            // paymentBody.value.total_paid_with_points
+            // paymentBody.value.
+            // paymentBody.value.
+            // paymentBody.value.
+
     const confirmPayment = () => {
+        const paymentBody = {
+            'ticket_number': 1,
+            'status': checkOrderStatus(),
+            'customer_id': customer ? customer.value.id : null,
+            'total_price': store.totalPrice,
+            'total_paid': finalPrice.value,
+            'total_paid_with_points': store.totalPrice - finalPrice.value,
+            'points_gained': customer ? calculatePointsGained() : 0,
+            'points_used_to_pay': pointsToUse.value,
+            'payment_type': null,
+            'payment_reference': null,
+            'date': getTimestamp(),
+            'delivered_by':null,
+            'order_items': store.items
+        }
+
+        console.log(paymentBody)
+
+        if(finalPrice.value == 0){
+            axiosLaravel.post('/orders', paymentBody)
+                .then((response)=>{
+                    console.log(response.data)
+                    store.resetOrderItems()
+                })
+                .catch((error)=>{
+                    console.log(error)
+                })
+            return
+        }
+        console.log("1")
 
         if(paymentReference.value.length == 0){
             errors.value = {
             default: ["Empty Reference Value"]
             }
+            toast.error('Order was not created due to validation errors!')
             return 
         }
 
-        if(store.totalPrice <= 0){
+        console.log("2")
+
+        if(store.totalPrice < 0){
             errors.value = {
                 default: ["Price Must Be Higher Than Zero!"]
             }
+            toast.error('Order was not created due to validation errors!')
             return
         }
 
-        if(paymentType.value == 'visa'){
+        console.log("3")
+
+        if(paymentReferenceValidations() == -1){
+            return
+        }
+
+        console.log("4")
+
+        const requestBody = {
+                'type': paymentType.value.toLowerCase(),
+                'reference': paymentReference.value,
+                'value': finalPrice.value
+        }
+        console.log(requestBody)
+
+        axios.post(`${PAYMENT_URL}/api/payments`, requestBody)
+            .then((response) => {
+                console.log("Payment Body:")
+                console.log(paymentBody)
+
+                paymentBody.payment_type = paymentType.value.toLowerCase()
+                paymentBody.payment_reference = paymentReference.value
+
+                axiosLaravel.post('/orders', paymentBody)
+                .then((response)=>{
+                    console.log(response.data)
+                })
+                .catch((error)=>{
+                    console.log(error)
+                })
+            
+                //confirmation-dialog
+                console.log("E BEM!")
+            })
+            .catch((error) => {
+                if (error.response.status == 422) {
+                toast.error('Order was not created due to validation errors - ' + error.response.data.message)
+                } else {
+                toast.error('Order was not created due to unknown server error!')
+                }
+            })
+    }
+
+    const paymentReferenceValidations = () => {
+        if(paymentType.value == 'VISA'){
             if(!paymentReference.value.match('[1-9][0-9]{15}')){
                 errors.value = {
                 visa: ["Invalid Visa Reference"]
                 }
-                return
+                toast.error('Order was not created due to validation errors!')
+                return -1
             }
-        }else if(paymentType.value == 'mbway'){
+        }else if(paymentType.value == 'MBWAY'){
             if(!paymentReference.value.match('[1-9][0-9]{8}')){
                 errors.value = {
                 mbway: ["Invalid Phone Number"]
                 }
-                return
+                toast.error('Order was not created due to validation errors!')
+                return -1
             }
-        }else if(paymentType.value == 'paypal'){
+        }else if(paymentType.value == 'PAYPAL'){
             if(!paymentReference.value.match('[a-zA-Z0-9.+_]+@[a-zA-Z0-9.+_]+.[a-zA-Z]')){
                 errors.value = {
                 paypal: ["Invalid Email Format"]
                 }
-                return
+                toast.error('Order was not created due to validation errors!')
+                return -1
             }
         }else{
             errors.value = {
                 default: ["Payment Type Not Supported"]
             }
-            return
+            toast.error('Order was not created due to validation errors!')
+            return -1
         }
+    }
 
-        const requestBody = {
-                'type': paymentType.value,
-                'reference': paymentReference.value,
-                'value': store.totalPrice
+
+    const checkOrderStatus = () => {
+        for(const elem of store.items){
+            if(elem.type == 'hot dish'){
+                return 'p'
+            }
         }
-        
-        axios.post(`${PAYMENT_URL}/api/payments`, requestBody)
+        return 'r'
+    }
+
+    const getTimestamp = () => {
+        var date = new Date()
+        return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
+    }
+
+    const LoadCustomerInfo = () => {
+        axiosLaravel.get(`/customers/${user.userId}`)
             .then((response) => {
-                //if successful, create order in DB with correct status (check if has a hot dish or not)
-                console.log(response)
+                customer.value = response.data.data
+                paymentReference.value = customer.value.default_payment_reference
+                paymentType.value = customer.value.default_payment_type
+                calculateAvailablePointsOptions()
             })
-            .catch((error) => {
-                if (error.response.status == 422) {
-                toast.error('Order was not created due to validation errors!')
-                } else {
-                toast.error('Order was not created due to unknown server error!')
+            .catch((error)=> {
+                console.log(error)
+            })
+    }
+
+    const calculateAvailablePointsOptions = () => {
+        var total = customer.value.points
+        //Desired transformation - Example 1: 23 -> 20, Example 2: 46 -> 40
+        while(total % 10 != 0){
+            total--
+        }
+        var arrayElement = 10
+        while(arrayElement <= total){ 
+            pointsAvailableToUse.value.push(arrayElement)
+            arrayElement += 10
+        }
+    }
+
+    const calculatePointsGained = () => {
+        var total = finalPrice.value
+        while(total % 10 != 0){
+            total--
+        }
+        if(total == 0){
+            return 0
+        }
+        return total / 10
+    }
+
+    onMounted(()=>{
+        pointsAvailableToUse.value = [0]
+        if(store.items.length != 0 && user.userId != -1){
+            LoadCustomerInfo()
+        }
+    })
+
+    const finalPrice = computed(()=> {
+        if(customer){
+            // if(pointsToUse.value > customer.value.points){
+            //     console.log("DEBUG")
+            //     errors.value = {
+            //         pointsToUse: ["Can't use more points than what you have"]
+            //     }
+            //     return store.totalPrice
+            // }
+            // else{
+                // var validDeductions = Math.trunc(pointsToUse.value / 10)
+                // var total = store.totalPrice - validDeductions * 5   
+                var total = store.totalPrice - transformatePointsToEuros(pointsToUse.value) 
+                if(total < 0){
+                    return 0
                 }
-            })
+                return Math.round(total * 100)/100
+            // }
+        }
+        return store.totalPrice
+    })
+
+    const transformatePointsToEuros = (points) => {
+        return Math.trunc(points / 10) * 5
     }
 
 </script>
@@ -94,7 +279,7 @@
 <template>
     <div v-if="store.items.length == 0">
         <h2>No items to order</h2>
-        <p>Please add some items from the menu first.</p>
+        <p>Please add some items from the <router-link :to="{ name: 'Menu' }">menu</router-link> first.</p>
     </div>
     <div v-else>
         <h2>Create a new order</h2>
@@ -137,32 +322,34 @@
         </div>
         <br>
         <hr/>
+
+
         <h2 class="text-center">Select Payment Type:</h2>
         <div class="paymentChoice">
             <ul>
-                <li><input @change="refocus" type="radio" name="payment" v-model="paymentType" value="visa" id="visa">Visa</li>
-                <li><input @change="refocus" type="radio" name="payment" v-model="paymentType" value="mbway" id="mbway">MbWay</li>
-                <li><input @change="refocus" type="radio" name="payment" v-model="paymentType" value="paypal" id="paypal">PayPal</li>
+                <li><input @change="refocus" type="radio" name="payment" v-model="paymentType" value="VISA" id="visa">Visa</li>
+                <li><input @change="refocus" type="radio" name="payment" v-model="paymentType" value="MBWAY" id="mbway">MbWay</li>
+                <li><input @change="refocus" type="radio" name="payment" v-model="paymentType" value="PAYPAL" id="paypal">PayPal</li>
             </ul>
         </div>
-        <div v-if="paymentType=='visa'">
+        <div v-if="paymentType=='VISA'">
             <div>
                 <label>Visa Card ID:</label>
-                <input ref="referenceFocus" class="form-control" type="text" v-model="paymentReference"/>
+                <input ref="referenceFocus" type="text" v-model="paymentReference"/>
                 <field-error-message :errors="errors" fieldName="visa"></field-error-message>
             </div>
         </div>
-        <div v-else-if="paymentType=='mbway'">
+        <div v-else-if="paymentType=='MBWAY'">
             <div>
                 <label>Phone Number:</label>
-                <input ref="referenceFocus" class="form-control" type="text" v-model="paymentReference"/>
+                <input ref="referenceFocus" type="text" v-model="paymentReference"/>
                 <field-error-message :errors="errors" fieldName="mbway"></field-error-message>
             </div>
         </div>
         <div v-else>
             <div>
                 <label>Email:</label>
-                <input ref="referenceFocus" class="form-control" type="text" v-model="paymentReference"/>
+                <input ref="referenceFocus" type="text" v-model="paymentReference"/>
                 <field-error-message :errors="errors" fieldName="paypal"></field-error-message>
             </div>
         </div>
@@ -202,6 +389,34 @@
             
         </div> -->
         <br>
+        <div>
+            <div v-if="customer">
+                <b>Available Points:</b> {{ customer.points }}
+            </div>
+            <div v-else>
+                <b>Available Points:</b> Not Available - Must Login First
+            </div>
+            <div>
+                <label for="points"><b>Points To Use:</b> </label>
+                <select
+                class="form-select"
+                id="selectType"
+                v-model="pointsToUse"
+                    >
+                <option v-for="points in pointsAvailableToUse" :value="points" :disabled="(transformatePointsToEuros(points) - store.totalPrice > 5)">
+                    {{ points }}
+                </option>
+            </select>
+                <field-error-message :errors="errors" fieldName="pointsToUse"></field-error-message>
+            </div>
+            <div>
+                <b>Total Discount:</b> {{ store.totalPrice == finalPrice ? 0 : Math.round((store.totalPrice - finalPrice) * 100) / 100 }} €
+            </div>
+            <div>
+                <b>Total Price To Pay:</b> {{ finalPrice }} €
+            </div>
+        </div>
+
         <button
             type="button"
             class="btn btn-success hvr-grow"

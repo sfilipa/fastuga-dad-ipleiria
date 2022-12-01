@@ -6,8 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
-    public $timestamps = false;
-
     protected $fillable = [
         'ticket_number',
         'status',
@@ -26,13 +24,13 @@ class Order extends Model
     public function getStatus()
     {
         switch ($this->status) {
-            case 'P':
+            case 'p':
                 return 'Preparing';
-            case 'R':
+            case 'r':
                 return 'Ready';
-            case 'D':
+            case 'd':
                 return 'Delivered';
-            case 'C':
+            case 'c':
                 return 'Cancelled';
         }
     }
