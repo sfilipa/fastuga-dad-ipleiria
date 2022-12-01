@@ -24,7 +24,7 @@ const login = async () => {
   if (await userStore.login(credentials.value)) {
     toast.success('User ' + userStore.user.name + ' has entered the application.')
     socket.emit('userLoggedIn', userStore.user)
-    await userStore.loadUser() 
+    await userStore.loadUser()
     emit('login')
     router.back()
   } else {
@@ -41,12 +41,14 @@ const login = async () => {
     <hr>
     <div class="mb-2">
       <div class="col-md-offset-5 col-md-4 center">
+        <label>Email:</label>
         <input type="text" class="form-control" id="inputEmail" placeholder="Enter Email" required
           v-model="credentials.username">
       </div>
     </div>
     <div class="mb-2">
       <div class="col-md-offset-5 col-md-4 center">
+        <label>Password:</label>
         <input type="password" class="form-control" id="inputPassword" placeholder="Enter Password" required
           v-model="credentials.password">
       </div>
@@ -68,5 +70,26 @@ const login = async () => {
   display: block;
   margin-right: auto;
   margin-left: auto;
+}
+
+
+.btn:hover {
+  background-color: #0b450f;
+}
+
+input[type=text] {
+  width: 100%;
+  margin-bottom: 0px;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+input[type=password] {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
 }
 </style>
