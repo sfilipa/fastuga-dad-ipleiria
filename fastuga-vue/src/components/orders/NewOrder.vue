@@ -4,11 +4,13 @@
     import { useOrderItemsStore } from '@/stores/orderItems.js'
     import { useUserStore } from '@/stores/user.js'
     import axios from 'axios'
+    import ConfirmationDialog from "../global/ConfirmationDialog.vue"
 
     const axiosLaravel = inject('axios')
     const PAYMENT_URL = 'https://dad-202223-payments-api.vercel.app' 
     const store = useOrderItemsStore()
 
+    //IMPORTANTE - SÓ DEIXAR FAZER COMPRAS A QUEM SEJA CUSTOMER/UTILIZADOR ANONIMO! (fazer middleware)
 
     const user = useUserStore()
     const pointsToUse = ref(0)
@@ -19,6 +21,8 @@
     const paymentReference = ref("")
     const referenceFocus = ref(null)
     const errors = ref(null)
+    const orderCompletedDialog = ref(false)
+    const ticketNumber = ref(0)
 
     const deleteClick = (product) => {
         const idx = store.items.findIndex((element) => element === product)
@@ -31,78 +35,49 @@
         referenceFocus.value.focus()
         errors.value = null
         paymentReference.value = ""
-        if(customer){
+        if(customer.value != null){
             if(paymentType.value == customer.value.default_payment_type){
                 paymentReference.value = customer.value.default_payment_reference
             }
         }
     }
 
-    // const paymentBody = ref({
-    //     ticket_number: 0,
-    //     status: '',
-    //     customer_id: 0,
-    //     total_price: 0,
-    //     total_paid: 0,
-    //     total_paid_with_points: 0,
-    //     points_gained: 0,
-    //     points_used_to_pay: 0,
-    //     payment_type: '',
-    //     date: null,
-    //     delivered_by: null,
-    //     order_items: null,
-    // })
-    // paymentBody.value.ticket_number = 1
-            // paymentBody.value.status = checkOrderStatus()
-            // paymentBody.value.customer_id = customer ? customer.value.id : null
-            // paymentBody.value.total_price = store.totalPrice
-            // paymentBody.value.total_paid = finalPrice.value
-            // paymentBody.value.total_paid_with_points
-            // paymentBody.value.
-            // paymentBody.value.
-            // paymentBody.value.
-
     const confirmPayment = () => {
         const paymentBody = {
             'ticket_number': 1,
             'status': checkOrderStatus(),
-            'customer_id': customer ? customer.value.id : null,
+            'customer_id': customer.value != null ? customer.value.id : null,
             'total_price': store.totalPrice,
             'total_paid': finalPrice.value,
             'total_paid_with_points': store.totalPrice - finalPrice.value,
-            'points_gained': customer ? calculatePointsGained() : 0,
+            'points_gained': user.userId != -1 ? calculatePointsGained() : 0,
             'points_used_to_pay': pointsToUse.value,
-            'payment_type': null,
-            'payment_reference': null,
+            'payment_type': finalPrice.value == 0 ? null : paymentType.value,
+            'payment_reference': finalPrice.value == 0 ? null : paymentReference.value,
             'date': getTimestamp(),
             'delivered_by':null,
             'order_items': store.items
         }
 
-        console.log(paymentBody)
-
         if(finalPrice.value == 0){
             axiosLaravel.post('/orders', paymentBody)
                 .then((response)=>{
-                    console.log(response.data)
-                    store.resetOrderItems()
+                    // console.log(response.data.data)
+                    orderCompletedDialog.value.show()
                 })
                 .catch((error)=>{
-                    console.log(error)
+                    toast.error('Order was not created due to ' + error.response.data.message)
                 })
             return
         }
-        console.log("1")
 
         if(paymentReference.value.length == 0){
             errors.value = {
-            default: ["Empty Reference Value"]
+                default: ["Empty Reference Value"]
             }
             toast.error('Order was not created due to validation errors!')
             return 
         }
-
-        console.log("2")
 
         if(store.totalPrice < 0){
             errors.value = {
@@ -112,39 +87,29 @@
             return
         }
 
-        console.log("3")
-
         if(paymentReferenceValidations() == -1){
             return
         }
-
-        console.log("4")
 
         const requestBody = {
                 'type': paymentType.value.toLowerCase(),
                 'reference': paymentReference.value,
                 'value': finalPrice.value
         }
-        console.log(requestBody)
 
         axios.post(`${PAYMENT_URL}/api/payments`, requestBody)
-            .then((response) => {
-                console.log("Payment Body:")
-                console.log(paymentBody)
-
-                paymentBody.payment_type = paymentType.value.toLowerCase()
+            .then(() => {
+                paymentBody.payment_type = paymentType.value
                 paymentBody.payment_reference = paymentReference.value
-
                 axiosLaravel.post('/orders', paymentBody)
                 .then((response)=>{
-                    console.log(response.data)
+                    // console.log(response.data.data)
+                    ticketNumber.value = response.data.data.ticket_number
+                    orderCompletedDialog.value.show()
                 })
                 .catch((error)=>{
-                    console.log(error)
+                    toast.error('Order was not created due to ' + error.response.data.message)
                 })
-            
-                //confirmation-dialog
-                console.log("E BEM!")
             })
             .catch((error) => {
                 if (error.response.status == 422) {
@@ -189,14 +154,13 @@
         }
     }
 
-
     const checkOrderStatus = () => {
-        for(const elem of store.items){
-            if(elem.type == 'hot dish'){
-                return 'p'
+        for(let elem of store.items){
+            if(elem.type.toLowerCase() == 'hot dish'){
+                return 'P'
             }
         }
-        return 'r'
+        return 'R'
     }
 
     const getTimestamp = () => {
@@ -214,11 +178,12 @@
             })
             .catch((error)=> {
                 console.log(error)
+                // toast.error("Couldn't load customer")
             })
     }
 
     const calculateAvailablePointsOptions = () => {
-        var total = customer.value.points
+        var total = Math.trunc(customer.value.points)
         //Desired transformation - Example 1: 23 -> 20, Example 2: 46 -> 40
         while(total % 10 != 0){
             total--
@@ -231,7 +196,7 @@
     }
 
     const calculatePointsGained = () => {
-        var total = finalPrice.value
+        var total = Math.trunc(finalPrice.value)
         while(total % 10 != 0){
             total--
         }
@@ -250,22 +215,11 @@
 
     const finalPrice = computed(()=> {
         if(customer){
-            // if(pointsToUse.value > customer.value.points){
-            //     console.log("DEBUG")
-            //     errors.value = {
-            //         pointsToUse: ["Can't use more points than what you have"]
-            //     }
-            //     return store.totalPrice
-            // }
-            // else{
-                // var validDeductions = Math.trunc(pointsToUse.value / 10)
-                // var total = store.totalPrice - validDeductions * 5   
-                var total = store.totalPrice - transformatePointsToEuros(pointsToUse.value) 
-                if(total < 0){
-                    return 0
-                }
-                return Math.round(total * 100)/100
-            // }
+            var total = store.totalPrice - transformatePointsToEuros(pointsToUse.value) 
+            if(total < 0){
+                return 0
+            }
+            return Math.round(total * 100)/100
         }
         return store.totalPrice
     })
@@ -274,9 +228,22 @@
         return Math.trunc(points / 10) * 5
     }
 
+    const dialogConfirm = () => {
+        store.resetOrderItems()
+        //redirect to somewhere
+
+    }
+
 </script>
 
 <template>
+    <ConfirmationDialog
+    ref="orderCompletedDialog"
+    confirmationBtn="Confirm"
+    :msg="`You order has been successfully placed with the ticket number: ${ticketNumber}`"
+    @confirmed="dialogConfirm"
+    >
+    </ConfirmationDialog>
     <div v-if="store.items.length == 0">
         <h2>No items to order</h2>
         <p>Please add some items from the <router-link :to="{ name: 'Menu' }">menu</router-link> first.</p>
@@ -322,8 +289,6 @@
         </div>
         <br>
         <hr/>
-
-
         <h2 class="text-center">Select Payment Type:</h2>
         <div class="paymentChoice">
             <ul>
@@ -335,21 +300,21 @@
         <div v-if="paymentType=='VISA'">
             <div>
                 <label>Visa Card ID:</label>
-                <input ref="referenceFocus" type="text" v-model="paymentReference"/>
+                <input @keydown="(errors = null)" ref="referenceFocus" type="text" v-model="paymentReference"/>
                 <field-error-message :errors="errors" fieldName="visa"></field-error-message>
             </div>
         </div>
         <div v-else-if="paymentType=='MBWAY'">
             <div>
                 <label>Phone Number:</label>
-                <input ref="referenceFocus" type="text" v-model="paymentReference"/>
+                <input @keydown="(errors = null)" ref="referenceFocus" type="text" v-model="paymentReference"/>
                 <field-error-message :errors="errors" fieldName="mbway"></field-error-message>
             </div>
         </div>
-        <div v-else>
+        <div v-else-if="paymentType=='PAYPAL'">
             <div>
                 <label>Email:</label>
-                <input ref="referenceFocus" type="text" v-model="paymentReference"/>
+                <input @keydown="(errors = null)" ref="referenceFocus" type="text" v-model="paymentReference"/>
                 <field-error-message :errors="errors" fieldName="paypal"></field-error-message>
             </div>
         </div>
@@ -392,23 +357,20 @@
         <div>
             <div v-if="customer">
                 <b>Available Points:</b> {{ customer.points }}
+                <div>
+                    <label for="points"><b>Points To Use:</b> </label>
+                    <select class="form-select" id="selectType" v-model="pointsToUse">
+                        <option v-for="points in pointsAvailableToUse" :value="points" :disabled="(transformatePointsToEuros(points) - store.totalPrice > 5)">
+                            {{ points }}
+                        </option>
+                    </select>
+                    <field-error-message :errors="errors" fieldName="pointsToUse"></field-error-message>
+                </div>
             </div>
             <div v-else>
                 <b>Available Points:</b> Not Available - Must Login First
             </div>
-            <div>
-                <label for="points"><b>Points To Use:</b> </label>
-                <select
-                class="form-select"
-                id="selectType"
-                v-model="pointsToUse"
-                    >
-                <option v-for="points in pointsAvailableToUse" :value="points" :disabled="(transformatePointsToEuros(points) - store.totalPrice > 5)">
-                    {{ points }}
-                </option>
-            </select>
-                <field-error-message :errors="errors" fieldName="pointsToUse"></field-error-message>
-            </div>
+            
             <div>
                 <b>Total Discount:</b> {{ store.totalPrice == finalPrice ? 0 : Math.round((store.totalPrice - finalPrice) * 100) / 100 }} €
             </div>
@@ -420,7 +382,6 @@
         <button
             type="button"
             class="btn btn-success hvr-grow"
-            style="float: right;"
             @click="confirmPayment"> Confirm Payment</button>
     </div>
 </template>
