@@ -29,7 +29,7 @@ class StoreUserRequest extends FormRequest
             'password' => 'required|min:8',
             'type' => 'required|in:C,EC,ED,EM',
             'blocked' => 'required|in:0,1',
-            'photo_url' => 'nullable',
+            'photo_url' => 'sometimes',
             'custom' => 'nullable'
         ];
     }
