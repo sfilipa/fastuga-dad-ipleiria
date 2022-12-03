@@ -2,6 +2,13 @@
 
 namespace App\Http\Controllers\api;
 
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\File;
+
+use Illuminate\Support\Facades\App;
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
@@ -13,7 +20,8 @@ use App\Models\OrderItems;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Http\Request;
+
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -41,7 +49,19 @@ class UserController extends Controller
 
     public function store(StoreUserRequest $request)
     {
-        $newUser = User::create($request->validated());
+       $request->validated();//validate password without hash
+            
+       $request->query->add(['password' => Hash::make($request->password)]); 
+
+       $newUser = User::create($request->validated());
+
+        if($request->hasFile('photo_url')){
+            $path = Storage::putFile('public/fotos',  $request->file('photo_url'));
+            $name = basename($path);
+            $newUser["photo_url"] = $name;
+            $newUser->save();
+        }
+
         return new UserResource($newUser);
     }
 

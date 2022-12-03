@@ -9,24 +9,41 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 const toast = inject('toast')
 
-const credentials = ref({
-    email: '',
-    password: '',
-    name: '',
-    type: ref("EC"),
-    blocked: 0,
-    photo_url: ''
-})
-
 const cancel = () => {
     router.push({ name: "Employees" })
 }
 
 const emit = defineEmits(['addEmployee'])
 
+const nameInput = ref(null)
+const typeInput = ref("EC")
+const emailInput = ref(null)
+const passwordInput = ref()
+const blockedInput = ref(0)
+const photoInput = ref(null)
+
+const updatePhoto = (e) => {
+    if (!e.target.files.length) {
+        return;
+    }
+
+    photoInput.value = e.target.files[0];
+}
+
+
 const addEmployee = async () => {
-    await axios.post(`http://localhost:8081/api/users`, credentials.value)
+    let formData = new FormData();
+
+    formData.append('name', nameInput.value);
+    formData.append('type', typeInput.value);
+    formData.append('email', emailInput.value);
+    formData.append('password', passwordInput.value);
+    formData.append('blocked', blockedInput.value);
+    formData.append('photo_url', photoInput.value);
+    
+    await axios.post(`http://localhost:8081/api/users`, formData)
         .then((response) => {
+            console.log(response)
             toast.info("Employee '" + response.data.data.name + "' was created")
             emit('addEmployee')
             router.push({ name: "Employees" })
@@ -44,19 +61,9 @@ const addEmployee = async () => {
                         toast.error('Add Employee Failed!')
                     }
                 }
-                console.log(error.response.data)
-                console.log(credentials.photo_url)
             }
         });
 }
-
-const updatePhoto = (e)=>{
-    if (!e.target.files.length){ 
-        return;
-    }
-
-    credentials.photo_url = e.target.files[0].name;
-  }
 
 </script>
 
@@ -68,23 +75,23 @@ const updatePhoto = (e)=>{
             <div class="col-50">
                 <label>Name:</label>
                 <input type="text" class="form-control" id="inputName" placeholder="Enter Name" required
-                    v-model="credentials.name">
+                    v-model="nameInput">
             </div>
             <div class="col-50">
                 <label>Email:</label>
                 <input type="text" class="form-control" id="inputEmail" placeholder="Enter Email" required
-                    v-model="credentials.email">
+                    v-model="emailInput">
             </div>
         </div>
         <div class="row">
             <div class="col-50">
                 <label>Password:</label>
                 <input type="password" class="form-control" id="inputPassword" placeholder="Enter Password" required
-                    v-model="credentials.password">
+                    v-model="passwordInput">
             </div>
             <div class="col-50">
                 <label>Employee Type:</label>
-                <select class="form-select" id="selectType" v-model="credentials.type">
+                <select class="form-select" id="selectType" v-model="typeInput">
                     <option value="EC">Chef</option>
                     <option value="ED">Delivery</option>
                     <option value="EM">Manager</option>

@@ -32,8 +32,8 @@ class StoreUpdateOrderRequest extends FormRequest
             'total_paid_with_points' => 'required|numeric|between:0,99.99',
             'points_gained' => 'required|numeric|min:0',
             'points_used_to_pay' => 'required|numeric|min:0',
-            'payment_type' => 'required|in:VISA,PAYPAL,MBWAY',
-            'payment_reference' => 'required',
+            'payment_type' => 'nullable|in:VISA,PAYPAL,MBWAY',
+            'payment_reference' => 'required_if:payment_type:exists,null',
             'date' => 'required|date',
             'delivered_by' => 'nullable|exists:users,id',
             'custom' => 'nullable'

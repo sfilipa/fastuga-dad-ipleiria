@@ -31,10 +31,12 @@ Route::apiResource("customers", CustomerController::class);
 
 Route::prefix('orders')->group(function () {
     Route::get('/status', [OrderController::class, 'getOrdersStatus']);
+    Route::get('/statusTAES/{status}', [OrderController::class, 'getOrderByStatusTAES']);
     Route::get('/status/{status}', [OrderController::class, 'getOrderByStatus']);
     Route::get('/{order}/customer', [CustomerController::class, 'getCostumerOfOrder']);
     Route::get('/{order}/user', [UserController::class, 'getUserOfOrder']);
 });
+Route::post('/ordersTAES',[OrderController::class, 'storeTAES']);
 Route::apiResource("orders", OrderController::class);
 
 // OrderItems Routes

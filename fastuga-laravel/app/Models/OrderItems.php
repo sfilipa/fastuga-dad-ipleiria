@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class OrderItems extends Model
 {
+    public $timestamps = false;
+
     protected $fillable = [
         'order_id',
         'order_local_number',
@@ -20,11 +22,11 @@ class OrderItems extends Model
     public function getStatus()
     {
         switch ($this->status) {
-            case 'W':
+            case 'w':
                 return 'Waiting';
-            case 'P':
+            case 'p':
                 return 'Preparing';
-            case 'R':
+            case 'r':
                 return 'Ready';
         }
     }
