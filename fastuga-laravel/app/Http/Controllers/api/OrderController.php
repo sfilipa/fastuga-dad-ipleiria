@@ -79,6 +79,11 @@ class OrderController extends Controller
         }
     }
 
+    public function storeTAES(StoreUpdateOrderRequest $request) {
+        $newOrder = Order::create($request->validated());
+        return new OrderResource($newOrder);
+    }
+
     function store_each_order_item($item, $order_id, $local_number){
         $status = $item['type'] == 'hot dish' ? 'W' : 'R';
         $itemRequest = new StoreUpdateOrderItemsRequest([
