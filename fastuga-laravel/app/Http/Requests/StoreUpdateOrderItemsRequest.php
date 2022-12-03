@@ -27,7 +27,7 @@ class StoreUpdateOrderItemsRequest extends FormRequest
             'order_id' => 'required|exists:orders,id',
             'order_local_number' => 'required|integer|min:0, max:99',
             'product_id' => 'required|exists:products,id',
-            'status' => 'required|in:w,p,r',
+            'status' => 'required|in:W,P,R',
             'price' => 'required|numeric|between:0,99.99',
             'preparation_by' => 'nullable|exists:users,id',
             'notes' => 'nullable',

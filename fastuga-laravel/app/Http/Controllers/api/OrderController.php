@@ -81,7 +81,7 @@ class OrderController extends Controller
     }
 
     function store_each_order_item($item, $order_id, $local_number){
-        $status = $item['type'] == 'hot dish' ? 'w' : 'r';
+        $status = $item['type'] == 'hot dish' ? 'W' : 'R';
         $itemRequest = new StoreUpdateOrderItemsRequest([
             'order_id' => $order_id,
             'order_local_number' => $local_number,
