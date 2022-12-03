@@ -18,6 +18,7 @@ import Menu from "../components/menu/Menu.vue"
 import Employees from "../components/employees/Employees.vue"
 import AddProduct from "../components/menu/AddProduct.vue"
 import AddEmployee from "../components/employees/AddEmployee.vue"
+import Statistics from "../components/statistics/Statistics.vue"
 
 import { useUserStore } from "../stores/user.js"
 
@@ -160,6 +161,11 @@ const router = createRouter({
       props: route => ({ id: parseInt(route.params.id) })
     },
     {
+      path: '/statistics',
+      name: 'Statistics',
+      component: Statistics
+    },
+    {
       path: '/about',
       name: 'about',
       // route level code-splitting
@@ -183,14 +189,14 @@ router.beforeEach((to, from, next) => {
     return
   }
   const userStore = useUserStore()
-  /*if ((to.name == 'Login') || (to.name == 'Home')) {
+ /* if ((to.name == 'Login') || (to.name == 'Home')) {
     next()
     return
   }
   if (!userStore.user) {
     next({ name: 'Login' })
     return
-  }*/
+  }
   /*if (to.name == 'Reports') {
     if (userStore.user.type != 'EM') {
       next({ name: 'home' })

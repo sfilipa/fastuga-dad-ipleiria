@@ -65,4 +65,17 @@ class ProductController extends Controller
     {
         $product->delete();
     }
+
+    public function getBestProducts()
+    {
+        $items = OrderItems::orderBy('sum', 'DESC')->groupBy('product_id')
+        ->selectRaw('sum(product_id) as sum, product_id')
+        ->pluck('sum','product_id')->take(5);
+
+        foreach($items as $key =>$item){
+            $final []= Product::where('id', $key)->get();   
+        }
+
+        return $final;
+    }
 }

@@ -10,6 +10,7 @@ use App\Http\Resources\OrderResource;
 use App\Models\Order;
 use App\Models\OrderItems;
 use App\Models\User;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Customer;
@@ -112,5 +113,22 @@ class OrderController extends Controller
     public function destroy(Order $order)
     {
         $order->delete();
+    }
+
+    public function getAllCustomerOrders(int $user_id)
+    {
+       $id = Customer::where('user_id', $user_id)->get('id');
+
+        return Order::where('customer_id', $id[0]->id)->get();
+    }
+    public function getAllOrderProducts(int $order_id)
+    {  
+        $allProducts = null;
+        $products_id = OrderItems::where('order_id', $order_id)->get('product_id');
+
+        foreach($products_id as $item){
+            $allProducts[] = Product::where('id', $item->product_id)->get();
+        }
+        return $allProducts;
     }
 }

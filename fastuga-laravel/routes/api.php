@@ -35,6 +35,8 @@ Route::prefix('orders')->group(function () {
     Route::get('/status/{status}', [OrderController::class, 'getOrderByStatus']);
     Route::get('/{order}/customer', [CustomerController::class, 'getCostumerOfOrder']);
     Route::get('/{order}/user', [UserController::class, 'getUserOfOrder']);
+    Route::get('/customer/{user_id}', [OrderController::class, 'getAllCustomerOrders']);
+    Route::get('/order/orderItems/{order_id}', [OrderController::class, 'getAllOrderProducts']);
 });
 Route::apiResource("orders", OrderController::class);
 
@@ -48,4 +50,6 @@ Route::apiResource("order-items", OrderItemsController::class);
 
 // Product Routes
 Route::get('products/types', [ProductController::class, 'getProductsTypes']);
+
+Route::get('/products/top', [ProductController::class, 'getBestProducts']);
 Route::apiResource("products", ProductController::class);
