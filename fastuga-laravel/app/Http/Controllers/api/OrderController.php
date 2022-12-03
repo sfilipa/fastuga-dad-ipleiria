@@ -80,8 +80,10 @@ class OrderController extends Controller
     }
 
     public function storeTAES(StoreUpdateOrderRequest $request) {
-        $newOrder = Order::create($request->validated());
-        return new OrderResource($newOrder);
+        $order = new Order($request->validated());
+        $order->custom = json_encode($request["custom"]);
+        $order->save();
+        return new OrderResource($order);
     }
 
     function store_each_order_item($item, $order_id, $local_number){
