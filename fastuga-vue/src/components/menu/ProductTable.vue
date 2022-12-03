@@ -11,6 +11,10 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  productTypes: {
+    type: Array,
+    default: () => [],
+  },
   showEditButton: {
     type: Boolean,
     default: true,
@@ -34,6 +38,23 @@ const productToDelete = ref(null)
 const deleteConfirmationDialog = ref(null)
 
 const addDialog = ref(null)
+const editRow = ref(false)
+const currentImage = ref(null)
+
+const editingProduct = ref(null)
+
+const newProduct = () => {
+      return {
+        id: null,
+        name: '',  
+        description: '',
+        price: '',
+        type: '',
+        photo_url: '',
+      }
+  }
+
+let oldProduct = newProduct();
 
 const showAddDialog = (bool)=>{
   addDialog.value = bool
@@ -53,15 +74,73 @@ const productToDeleteDescription = computed(() => {
     : ""
 })
 
+const updatePhoto = (e)=>{
+    if (!e.target.files.length){ 
+        return;
+    }
+
+    editingProduct.value.photo_url = e.target.files[0];
+    currentImage.value = URL.createObjectURL(e.target.files[0]);
+    console.log(currentImage.value)
+  }
+
 watch(
   () => props.products,
+  () => props.productsTypes,
   (newProducts) => {
     editingProducts.value = newProducts
   }
 )
 
+const setRowActive = (product) => {
+  editingProduct.value = product;
+  editRow.value = true;
+}
+
+const disableRowActive = () => {
+  editRow.value = false;
+  editingProduct.value = null;
+  currentImage.value = null;
+}
+
+const restoreProduct = () => {
+  editingProduct.value.description = oldProduct.description;
+  editingProduct.value.type = oldProduct.type;
+  editingProduct.value.name = oldProduct.name;
+  editingProduct.value.price = oldProduct.price;
+  editingProduct.value.photo_url = oldProduct.photo_url;
+}
+
+const saveOldProduct = (product) => {
+  oldProduct.id = product.id;
+  oldProduct.name = product.name;
+  oldProduct.description = product.description;
+  oldProduct.type = product.type;
+  oldProduct.price = product.price;
+  oldProduct.photo_url = product.photo_url;
+}
+
 const editClick = (product) => {
-  emit("edit", product)
+  saveOldProduct(product)
+  setRowActive(product)
+  console.log("Old Product: ")
+  console.log(oldProduct)
+  console.log("Editing Product: ")
+  console.log(editingProduct.value)
+}
+
+const doneClick = () => {
+  emit("edit", editingProduct.value)
+  disableRowActive()
+}
+
+const cancelClick = () => {
+  console.log("Cancel old: ")
+  console.log(oldProduct)
+  console.log("Cancel editing: ")
+  console.log(editingProduct.value)
+  restoreProduct()
+  disableRowActive()
 }
 
 const dialogConfirmAdd = () => {
@@ -100,17 +179,18 @@ const deleteClick = (product) => {
 
 onUpdated(()=>{
   if(addDialog.value === false){
-   deleteConfirmationDialog.value.show()
+   deleteConfirmationDialog.value != null ? deleteConfirmationDialog.value.show() : addDialog.value = null
   }
   if(addDialog.value === true){
-    addItemsToMenuDialog.value.show()
+    addItemsToMenuDialog.value != null ? addItemsToMenuDialog.value.show() : addDialog.value = null
   }
 })
 
 </script>
 
 <template>
-    <div v-if="addDialog">
+    <!-- Add Product to Order Dialog Confirmation -->
+    <div v-if="(addDialog && !editRow)">
       <ConfirmationDialog
         ref="addItemsToMenuDialog"
         confirmationBtn="Add Items"
@@ -123,7 +203,8 @@ onUpdated(()=>{
       </ConfirmationDialog>
     </div>
     
-    <div v-else>
+    <!-- Delete Product Dialog Confirmation -->
+    <div v-if="(!addDialog && !editRow)">
       <ConfirmationDialog
         ref="deleteConfirmationDialog"
         confirmationBtn="Delete product"
@@ -145,6 +226,7 @@ onUpdated(()=>{
         </tr>
       </thead>    
       <tbody >
+        <!-- Spinner While Waiting for Products -->
         <tr v-if="(props.products==null)">
           <td colspan="6">
             <div class="d-flex justify-content-center">
@@ -154,49 +236,172 @@ onUpdated(()=>{
           </div>
           </td>
         </tr>
+        
         <tr v-else v-for="product in props.products
-                              .filter(product => props.filterByType==='any' ? true : product.type===props.filterByType)
-                              .filter(product => props.filterByPrice==null ? true : product.price<=props.filterByPrice)" 
-          :key="product.id">
-          <td style="text-align: center;">
-              <img :src='`${serverBaseUrl}/storage/products/${product.photo_url}`'/>
+                              .filter(product => props.filterByType==='any' || (editRow  && product==editingProduct) ? true : product.type===props.filterByType)
+                              .filter(product => props.filterByPrice==null || (editRow  && product==editingProduct) ? true : product.price<=props.filterByPrice)" 
+          :key="product.id" >
+
+          <td class="align-middle-td">
+            <!-- Editiing Row Photo -->
+            <div v-if="(editRow && product==editingProduct)" class="mb-2">
+
+              <!-- Uploaded Photo -->
+              <div v-if="(currentImage!=null)" >
+                <img  :src='`${currentImage}`' width="65px"/>
+              </div>
+              <!-- Original Photo -->
+              <div v-else >
+                <img :src='`${serverBaseUrl}/storage/products/${product.photo_url}`' width="65px"/>
+              </div>
+
+              <input 
+                type="file" 
+                id="inputPhoto" 
+                accept="image/png, image/jpeg, image/jpg"
+                @change="updatePhoto"
+                class="input-photo"
+                />
+              <!-- <field-error-message :errors="errors" fieldName="photo"></field-error-message> -->
+            </div>
+
+            <!-- Product Photo -->
+            <div v-else>
+              <img :src='`${serverBaseUrl}/storage/products/${product.photo_url}`' width="65px"/>
+            </div>
           </td>
+          
           <td>
+            <!-- Editiing Row Name -->
+            <div v-if="(editRow && product==editingProduct)" class="mb-2">
+              <input
+                type="text"
+                id="inputName"
+                required
+                v-model="editingProduct.name"
+              />
+              <!-- <field-error-message :errors="errors" fieldName="name"></field-error-message> -->
+            </div>
+
+            <!-- Product Name -->
+            <div v-else>
               {{product.name}}
+            </div>
           </td>
+
           <td>
-            <span >{{ product.description }}</span>
+            <!-- Editiing Row Description -->
+            <div v-if="(editRow && product==editingProduct)" class="mb-3">
+              <textarea
+                id="inputDescription"
+                rows="2"
+                style="width: -moz-available;"
+                v-model="editingProduct.description"
+              ></textarea>
+              <!-- <field-error-message :errors="errors" fieldName="description"></field-error-message> -->
+            </div>
+
+            <!-- Product Description -->
+            <div v-else>
+              {{product.description}}
+            </div>
           </td>
-          <td>{{ product.type }}</td>
-          <td>{{ product.price }}€</td>
+
+          <td >
+            <!-- Editiing Row Type -->
+            <div v-if="(editRow && product==editingProduct)" class="mb-3">
+              <select
+                class="form-select"
+                id="inputType"
+                v-model="editingProduct.type"
+              >
+                <option v-for="prdtype in props.productTypes" :value="prdtype" :selected="(product.type==prdtype)" >
+                  {{prdtype}}
+                </option>
+              </select>
+            </div>
+
+            <!-- Product Type -->
+            <div v-else>
+              {{product.type}}
+            </div>
+          </td>
+
+          <td >
+            <!-- Editiing Row Price -->
+            <div v-if="(editRow && product==editingProduct)" class="mb-3">
+              <div class="col-sm-10">
+                <input
+                  type="number"
+                  class="form-control"
+                  id="inputPrice"
+                  min="0" max="99" step="0.1"
+                  v-model="editingProduct.price"
+                />
+                <!-- <field-error-message
+                  :errors="errors"
+                  fieldName="price"
+                ></field-error-message> -->
+              </div>
+            </div>
+
+            <!-- Product Price -->
+            <div v-else>
+              {{ product.price }}€
+            </div>
+          </td>
+
           <td
             class="text-end"
             v-if="showEditButton || showDeleteButton || showAddButton"
           >
             <div class="d-flex justify-content-end">
-              <button
-                class="btn btn-xs btn-light hvr-grow"
-                @click="showAddDialog(true); addClick(product)"
-                v-if="showAddButton"
-              >
-                <i class="bi bi-xs bi-cart-check"></i>
-              </button>
+              <!-- Add to Order, Edit and Delete Buttons -->
+              <div v-if="(product!=editingProduct)" class="buttons-product">
+                <button
+                  class="btn btn-xs btn-light hvr-grow"
+                  @click="showAddDialog(true); addClick(product)"
+                  v-if="showAddButton"
+                  :disabled="editRow"
+                >
+                  <i class="bi bi-xs bi-cart-check"></i>
+                </button>
 
-              <button
-                class="btn btn-xs btn-light"
-                @click="editClick(product)"
-                v-if="showEditButton"
-              >
-                <i class="bi bi-xs bi-pencil"></i>
-              </button>
+                <button
+                  class="btn btn-xs btn-light"
+                  @click="editClick(product)"
+                  v-if="showEditButton"
+                  :disabled="editRow"
+                >
+                  <i class="bi bi-xs bi-pencil"></i>
+                </button>
 
-              <button
-                class="btn btn-xs btn-light"
-                @click="showAddDialog(false);  deleteClick(product)"
-                v-if="showDeleteButton"
-              >
-                <i class="bi bi-xs bi-x-square-fill"></i>
-              </button>
+                <button
+                  class="btn btn-xs btn-light"
+                  @click="showAddDialog(false);  deleteClick(product)"
+                  v-if="showDeleteButton"
+                  :disabled="editRow"
+                >
+                  <i class="bi bi-xs bi-x-square-fill"></i>
+                </button>
+              </div>
+
+              <!-- Editiing Row Buttons -->
+              <div v-else-if="editRow" class=" buttons-product">
+                <button
+                  class="btn btn-xs btn-light"
+                  @click="doneClick(product)"
+                >
+                  <i class="bi bi-xs bi-check-lg"></i>
+                </button>
+
+                <button
+                  class="btn btn-xs btn-light"
+                  @click="cancelClick"
+                >
+                  <i class="bi bi-xs bi-x-lg"></i>
+                </button>
+              </div>
             </div>
           </td>
         </tr>
@@ -206,6 +411,35 @@ onUpdated(()=>{
 
 <style scoped>
 
+.input-photo{
+  width: 74px;
+}
+
+.buttons-product{
+  flex-direction: row;
+  display: inline-flex;
+}
+
+td{
+  vertical-align: middle;
+}
+
+.align-middle-td{ 
+  text-align: center;
+}
+
+select{
+  width: auto;
+}
+
+input[type=text]{
+  width: 160px;
+}
+
+input[type=number]{
+  width: 80px;
+}
+
 button {
   margin-left: 3px;
   margin-right: 3px;
@@ -213,7 +447,7 @@ button {
 
 img, svg {
   vertical-align: middle;
-  height: 55px;
+  height: 68px;
   width: auto;
 }
 

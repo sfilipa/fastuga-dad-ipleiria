@@ -65,10 +65,13 @@
     <h2>Create a new product</h2>
     <div>
         <form action="#" class="form-inline row d-flex" enctype="multipart/form-data">
+            <!-- Product Name -->
             <div class="flex-grow-2 d-flex">
                 <label>Name: </label>
                 <input type="text" name="name" v-model="nameInput">
             </div>
+
+            <!-- Product Type -->
             <div class="flex-grow-2 d-flex">
                 <label>Type: </label>
                 <select name="type" id="type" v-model="typeInput">
@@ -76,18 +79,24 @@
                 </select>
             </div>
             
+            <!-- Product Description -->
             <div class="flex-grow-1 d-flex-direction-col">
                 <p><label>Description: </label></p>
                 <textarea id="description" name="description" rows="4" cols="50" v-model="descriptionInput"></textarea><br>
             </div>
+
+            <!-- Product Price -->
             <div class="flex-grow-1 d-flex">
                 <label>Price: </label>
                 <input type="number" name="price" min="0" max="99" step="0.1" v-model="priceInput">
             </div>
+
+            <!-- Product Photo -->
             <div class="flex-grow-1 d-flex">
                 <label>Photo: </label>
                 <input type="file" id="photo_url" name="photo_url" accept="image/png, image/jpeg, image/jpg" @change="updatePhoto">
             </div>
+
              <div>
                 <button type="submit" class="btn btn-info" @click.prevent="addProduct">
                     <span class="glyphicon glyphicon-plus" aria-hidden="true">
