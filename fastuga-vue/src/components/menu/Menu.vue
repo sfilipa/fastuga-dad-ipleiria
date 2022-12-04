@@ -3,9 +3,12 @@
   import {useRouter} from 'vue-router'
   import ProductTable from "./ProductTable.vue"
   import { useOrderItemsStore } from '@/stores/orderItems.js'
+  import axiosImported from 'axios'
 
   const axios = inject('axios')
   const router = useRouter()
+  const toast = inject('toast')
+  const serverBaseUrl = inject("serverBaseUrl")
 
   const products = ref(null)
   const productTypes = ref([])
@@ -13,6 +16,27 @@
   const filterByPrice = ref(15)
 
   const store = useOrderItemsStore()
+
+  const editProduct = async (product) => {
+    let formData = new FormData();
+  
+    formData.append('name', product.name);
+    formData.append('type', product.type);
+    formData.append('description', product.description);
+    formData.append('price', product.price);
+    formData.append('photo_url', product.photo_url);
+    formData.append('_method', 'PUT');
+
+    await axiosImported.post(`${serverBaseUrl}/api/products/${product.id}`, 
+          formData)
+            .then((response)=>{
+              LoadProducts()
+              toast.info("Product '" + response.data.data.name + "' was updated")
+            }) 
+            .catch((error) => {
+              console.log(error)
+            })
+  }
 
   const addProductToOrder = (product, quantity) => {
     for (let index = 0; index < quantity; index++) {
@@ -38,7 +62,6 @@
     axios.get(`/products/types`)
       .then((response) => {
         productTypes.value = response.data;
-        console.log(productTypes);
       })
       .catch((error) => {
         console.log(error)
@@ -113,6 +136,7 @@
   <div>
     <product-table
       :products="products"
+      :productTypes="productTypes"
       @edit="editProduct"
       @deleted="deletedProduct"
       @add="addProductToOrder"

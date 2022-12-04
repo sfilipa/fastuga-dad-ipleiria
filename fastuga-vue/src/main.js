@@ -17,7 +17,7 @@ import "bootstrap"
 const app = createApp(App)
 
 // Listening WS
-app.provide('socket', io("http://localhost:8080"))
+//app.provide('socket', io("http://localhost:8080"))
 
 const serverBaseUrl = 'http://localhost:8081'
 app.provide('axios', axios.create({

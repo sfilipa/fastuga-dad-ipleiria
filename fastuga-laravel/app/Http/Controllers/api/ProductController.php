@@ -57,7 +57,24 @@ class ProductController extends Controller
 
     public function update(StoreUpdateProductRequest $request, Product $product)
     {
-        $product->update($request->validated());
+        $validatedData = $request->validated();
+
+        // Check if New Photo Uploaded
+        if($request->hasFile('photo_url')){
+            // Delete Existing Photo
+            if(Storage::disk('public')->exists('products/'.$product->photo_url)) {
+                Storage::disk('public')->delete('products/'.$product->photo_url);
+            }
+
+            // Save New Photo
+            $path = Storage::putFile('public/products',  $request->file('photo_url'));
+            $name = basename($path);
+            $validatedData["photo_url"] = $name;
+        }
+        
+        $product->fill($validatedData);
+        $product->save();
+
         return new ProductResource($product);
     }
 
