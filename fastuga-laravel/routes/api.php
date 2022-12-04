@@ -36,7 +36,8 @@ Route::prefix('orders')->group(function () {
     Route::get('/{order}/customer', [CustomerController::class, 'getCostumerOfOrder']);
     Route::get('/{order}/user', [UserController::class, 'getUserOfOrder']);
 });
-Route::post('/ordersTAES',[OrderController::class, 'storeTAES']);
+Route::post('ordersTAES',[OrderController::class, 'storeTAES']);
+Route::get('unassignedOrders', [OrderController::class, 'getUnassignedOrders']);
 Route::apiResource("orders", OrderController::class);
 
 // OrderItems Routes
