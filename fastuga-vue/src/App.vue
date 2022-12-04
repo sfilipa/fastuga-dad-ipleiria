@@ -26,9 +26,9 @@ const logout = async () => {
 }
 
 const clickMenuOption = () => {
- if (window.getComputedStyle(buttonSidebarExpand.value).display !== "none") {
- buttonSidebarExpand.value.click()
- }
+  if (window.getComputedStyle(buttonSidebarExpand.value).display !== "none") {
+    buttonSidebarExpand.value.click()
+  }
 }
 
 onMounted(() => {
@@ -50,21 +50,24 @@ onMounted(() => {
         <img src="@/assets/logo.svg" alt="" width="30" height="24" class="d-inline-block align-text-top" />
         Fastuga
       </a>
-      <button id="buttonSidebarExpandId" ref="buttonSidebarExpand" class="navbar-toggler" type="button" data-bs-toggle="collapse"
-        data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+      <button id="buttonSidebarExpandId" ref="buttonSidebarExpand" class="navbar-toggler" type="button"
+        data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false"
+        aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
 
       <div class="collapse navbar-collapse justify-content-end">
         <ul class="navbar-nav">
           <li class="nav-item" v-show="!userStore.user">
-            <router-link class="nav-link" :class="{ active: $route.name === 'Register' }" :to="{ name: 'Register' }" @click="clickMenuOption">
+            <router-link class="nav-link" :class="{ active: $route.name === 'Register' }" :to="{ name: 'Register' }"
+              @click="clickMenuOption">
               <i class="bi bi-box-arrow-in-right"></i>
               Register
             </router-link>
           </li>
           <li class="nav-item" v-show="!userStore.user">
-            <router-link class="nav-link" :class="{ active: $route.name === 'Login' }" :to="{ name: 'Login' }" @click="clickMenuOption">
+            <router-link class="nav-link" :class="{ active: $route.name === 'Login' }" :to="{ name: 'Login' }"
+              @click="clickMenuOption">
               <i class="bi bi-box-arrow-in-right"></i>
               Login
             </router-link>
@@ -128,29 +131,32 @@ onMounted(() => {
               </router-link>
             </li> -->
             <li class="nav-item">
-              <router-link class="nav-link" :class="{ active: $route.name === 'Menu' }" :to="{ name: 'Menu' }" @click="clickMenuOption">
+              <router-link class="nav-link" :class="{ active: $route.name === 'Menu' }" :to="{ name: 'Menu' }"
+                @click="clickMenuOption">
                 <i class="bi bi-cup-straw"></i>
                 Menu
               </router-link>
             </li>
 
             <li class="nav-item">
-              <router-link class="nav-link" :class="{ active: $route.name === 'Orders' }" :to="{ name: 'Orders' }" @click="clickMenuOption">
+              <router-link class="nav-link" :class="{ active: $route.name === 'Orders' }" :to="{ name: 'Orders' }"
+                @click="clickMenuOption">
                 <i class="bi bi-list-stars"></i>
                 Orders
               </router-link>
             </li>
 
             <li class="nav-item">
-              <router-link class="nav-link" :class="{ active: $route.name === 'Employees' }"
-                :to="{ name: 'Employees' }" @click="clickMenuOption">
+              <router-link class="nav-link" :class="{ active: $route.name === 'Employees' }" :to="{ name: 'Employees' }"
+                @click="clickMenuOption">
                 <i class="bi bi-people"></i>
                 Employees
               </router-link>
             </li>
 
             <li class="nav-item">
-              <router-link class="nav-link" :class="{ active: $route.name === 'Tasks' }" :to="{ name: 'Tasks' }" @click="clickMenuOption">
+              <router-link class="nav-link" :class="{ active: $route.name === 'Tasks' }" :to="{ name: 'Tasks' }"
+                @click="clickMenuOption">
                 <i class="bi bi-bell"></i>
                 Notifications
               </router-link>
@@ -185,17 +191,19 @@ onMounted(() => {
                 Team Members
               </router-link>
             </li> -->
-            <li class="nav-item">
-              <a class="nav-link" href="#">
-                <i class="bi bi-bar-chart-line"></i>
-                Statistics
-              </a>
+            <li class="nav-item" v-show="userStore.user">
+                <router-link class="nav-link" :class="{ active: $route.name === 'Statistics' }" :to="{ name: 'Statistics' }"
+                  @click="clickMenuOption">
+                  <i class="bi bi-graph-up"></i>
+                  Statistics
+                </router-link>
             </li>
           </ul>
 
           <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
             <span>My Orders</span>
-            <router-link class="link-secondary" :to="{ name: 'NewOrder' }" aria-label="Make a new order" @click="clickMenuOption">
+            <router-link class="link-secondary" :to="{ name: 'NewOrder' }" aria-label="Make a new order"
+              @click="clickMenuOption">
               <i class="bi bi-xs bi-plus-circle"></i>
             </router-link>
           </h6>
