@@ -76,6 +76,12 @@ class UserController extends Controller
         $user->delete();
     }
 
+    public function destroyWithEmail(string $email)
+    {
+        $user = User::where('email', $email)->get();
+        $user->each->delete();
+    }
+
     public function show_me(Request $request)
     {
         return new UserResource($request->user());
