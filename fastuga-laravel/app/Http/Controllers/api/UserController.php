@@ -90,4 +90,8 @@ class UserController extends Controller
     public function getAllEmployees() {
         return User::whereIn('type', array('ec', 'ed', 'em'))->get();
     }
+
+    public function getUserByEmail(string $email) {
+        return UserResource::collection(User::onlyTrashed()->where('email', $email)->get());
+    }
 }
