@@ -39,6 +39,23 @@ class OrderController extends Controller
         }
     }
 
+    public function getUnassignedOrders(){
+        $orders = Order::whereNotNull('custom')->get();
+        // return $orders;
+        $subset = $orders->filter(function ($order){
+            return json_decode($order->custom)->assigned==null;
+        });
+        // $subset = $orders->map(function ($order) {
+        //     // return 
+        //     return collect($order)
+        //             ->whereNotNull(json_decode($order->custom)->address)
+        //             ->all();
+        // });
+        return OrderResource::collection($subset);
+        // dd($order);
+        // return json_decode($order->custom)->address;
+    }
+
     public function getOrderOfOrderItems(OrderItems $orderItems)
     {
         return new OrderResource($orderItems->order);

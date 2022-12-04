@@ -40,7 +40,8 @@ Route::prefix('orders')->group(function () {
     Route::get('/customer/{user_id}', [OrderController::class, 'getAllCustomerOrders']);
     Route::get('/order/orderItems/{order_id}', [OrderController::class, 'getAllOrderProducts']);
 });
-Route::post('/ordersTAES',[OrderController::class, 'storeTAES']);
+Route::post('ordersTAES',[OrderController::class, 'storeTAES']);
+Route::get('unassignedOrders', [OrderController::class, 'getUnassignedOrders']);
 Route::apiResource("orders", OrderController::class);
 
 // OrderItems Routes
