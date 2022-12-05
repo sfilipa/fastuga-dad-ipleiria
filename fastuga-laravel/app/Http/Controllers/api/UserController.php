@@ -79,6 +79,11 @@ class UserController extends Controller
     public function destroyWithEmail(string $email)
     {
         $user = User::where('email', $email)->get();
+
+        if($user[0]->type == 'C'){
+            $customer = Customer::where('user_id', $user[0]->id)->get();
+            $customer->each->delete();
+        }
         $user->each->delete();
     }
 
