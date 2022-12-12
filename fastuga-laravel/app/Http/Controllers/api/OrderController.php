@@ -31,12 +31,9 @@ class OrderController extends Controller
         }
     }
 
-    public function getOrderByStatusTAES(String $status)
+    public function getOrderByStatusTAES()
     {
-        $status = strtoupper($status);
-        if ($status == 'P' or  $status == 'R' or $status == 'D' or $status == 'C') {
-            return OrderResource::collection(Order::where('status', $status)->get()); 
-        }
+        return OrderResource::collection(Order::where('status', 'R')->orWhere('status', 'P')->get()); 
     }
 
     public function getUnassignedOrders(){
