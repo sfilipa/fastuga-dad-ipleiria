@@ -30,7 +30,8 @@ class OrderResource extends JsonResource
             'payment_reference' => $this->payment_reference,
             'date' => $this->date,
             'delivered_by' => new UserResource(User::find($this->delivered_by)),
-            'custom' => $this->custom,
+            'custom' => $this->custom, 
+            'updated_at' => $this->updated_at
         ];
     }
 }

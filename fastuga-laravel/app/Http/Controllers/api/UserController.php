@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
+use App\Http\Requests\UpdateUserPasswordRequest;
+use App\Http\Requests\UpdateUserNameTAESRequest;
 use App\Http\Resources\CustomerResource;
 use App\Http\Resources\UserResource;
 use App\Models\Customer;
@@ -71,6 +73,41 @@ class UserController extends Controller
         return new UserResource($user);
     }
 
+    public function updateTAESPassword(UpdateUserPasswordRequest $request, string $email)
+    {
+            try {
+            
+            $user = User::where('email', $email)->firstOrFail();
+
+            $userpassword = $request->validated();
+            
+            User::whereId($user->id)->update([
+                'password' => Hash::make($request->password)
+            ]); 
+
+            return new UserResource($user);
+        } catch (\Exception $e) {
+        return response()->json($e->getMessage(), 400);
+    }
+    }
+    public function updateTAESName(UpdateUserNameTAESRequest $request, string $email)
+    {
+        try {
+            
+            $user = User::where('email', $email)->firstOrFail();
+
+            $userName = $request->validated();
+            
+            User::whereId($user->id)->update([
+                'name' => $request->name
+            ]);
+
+            return new UserResource($user);
+        }catch (\Exception $e) {
+            return response()->json($e->getMessage(), 400);
+        }
+    }
+
     public function destroy(User $user)
     {
         $user->delete();
@@ -79,6 +116,11 @@ class UserController extends Controller
     public function destroyWithEmail(string $email)
     {
         $user = User::where('email', $email)->get();
+
+        if($user[0]->type == 'C'){
+            $customer = Customer::where('user_id', $user[0]->id)->get();
+            $customer->each->delete();
+        }
         $user->each->delete();
     }
 
@@ -89,5 +131,9 @@ class UserController extends Controller
 
     public function getAllEmployees() {
         return User::whereIn('type', array('ec', 'ed', 'em'))->get();
+    }
+
+    public function getUserByEmail(string $email) {
+        return UserResource::collection(User::onlyTrashed()->where('email', $email)->get());
     }
 }
