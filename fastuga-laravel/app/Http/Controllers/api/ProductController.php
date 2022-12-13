@@ -48,6 +48,8 @@ class ProductController extends Controller
             $path = Storage::putFile('public/products',  $request->file('photo_url'));
             $name = basename($path);
             $newProduct["photo_url"] = $name;
+            $capitalizedName = ucfirst($newProduct["name"]);
+            $newProduct["name"] = $capitalizedName;
             $newProduct->save();
 
             return new ProductResource($newProduct);

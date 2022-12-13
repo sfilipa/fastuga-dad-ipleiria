@@ -60,7 +60,7 @@
   const LoadProducts = () => {
     axios.get(`/products`)
       .then((response) => {
-        products.value = response.data
+        products.value = response.data.data
       })
       .catch((error) => {
         console.log(error)
