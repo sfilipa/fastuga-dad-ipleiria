@@ -28,7 +28,6 @@ const showClick = (order) => {
 				<th>Payment Type</th>
 				<th>Payment Reference</th>
 				<th>Total Paid</th>
-				<th>Details</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -39,9 +38,8 @@ const showClick = (order) => {
 				<td>{{ order.payment_type }}</td>
 				<td>{{ order.payment_reference }}</td>
 				<td>{{ order.total_paid }} €</td>
-				<td class="text-end">
-					<button class="btn btn-xs btn-info" @click="showClick(order)">
-						<i class="bi bi-info-square-fill"></i> About
+				<td class="text-end"><button class="btn btn-xs btn-light" @click="showClick(order)">
+						<i class="bi bi-xs bi-search"></i>
 					</button>
 				</td>
 			</tr>

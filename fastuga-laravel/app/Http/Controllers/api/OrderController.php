@@ -14,6 +14,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Customer;
+use Carbon\Carbon;
 
 class OrderController extends Controller
 {
@@ -136,6 +137,7 @@ class OrderController extends Controller
         $order->delete();
     }
 
+    //Statistics - Customer
     public function getAllCustomerOrders(int $user_id)
     {
        $id = Customer::where('user_id', $user_id)->get('id');
@@ -151,5 +153,45 @@ class OrderController extends Controller
             $allProducts[] = Product::where('id', $item->product_id)->get();
         }
         return $allProducts;
+    }
+
+    //Statistics - Manager - Orders
+    public function getTotalOrdersByMonth()
+    { 
+        $items = Order::orderBy('month', 'ASC')->groupBy('month')
+        ->selectRaw('MONTH(date) as month, sum(id) as sum')
+        ->pluck('month','sum');
+
+        $i=0;
+        foreach($items as $key =>$item){
+            $total[$i] = $key;
+            $i++;
+        }
+
+        return $total;
+    }
+
+    public function getTotalOrdersMonths()
+    { 
+        $items = Order::orderBy('month', 'ASC')->groupBy('month')
+        ->selectRaw('MONTH(date) as month, sum(id) as sum')
+        ->pluck('month','sum');
+
+        $i=0;
+        foreach($items as $key =>$item){
+            $months[$i] = $item;
+            if($months[$i] == 9){
+                $months[$i] = 'Setembro';
+            }else if($months[$i] == 10){
+                $months[$i] = 'Outubro';
+            }else if($months[$i] == 11){
+                $months[$i] = 'Novembro';
+            }else if($months[$i] == 12){
+                $months[$i] = 'Dezembro';
+            }
+            $i++;
+        }
+
+        return $months;
     }
 }

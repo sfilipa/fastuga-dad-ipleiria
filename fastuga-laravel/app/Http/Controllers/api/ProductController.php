@@ -83,16 +83,65 @@ class ProductController extends Controller
         $product->delete();
     }
 
+
+    //Manager Statistics - maybe change later
     public function getBestProducts()
     {
         $items = OrderItems::orderBy('sum', 'DESC')->groupBy('product_id')
         ->selectRaw('sum(product_id) as sum, product_id')
         ->pluck('sum','product_id')->take(5);
-
+        
+        $i=0;
         foreach($items as $key =>$item){
-            $final []= Product::where('id', $key)->get();   
+            $final[$i]= Product::where('id', $key)->value('name');  
+            $i++;
         }
-
         return $final;
+    }
+
+    public function getTotalOrdersOfTopProducts()
+    {
+        $items = OrderItems::orderBy('sum', 'DESC')->groupBy('product_id')
+        ->selectRaw('sum(product_id) as sum, product_id')
+        ->pluck('sum','product_id')->take(5);
+        
+        $i=0;
+        foreach($items as $key =>$item){
+            $total[$i] = $item;
+            $i++;
+        }
+        return $total;
+    }
+
+    public function getWorstProducts()
+    {
+        $items = OrderItems::orderBy('sum', 'ASC')->groupBy('product_id')
+        ->selectRaw('sum(product_id) as sum, product_id')
+        ->pluck('sum','product_id')->take(5);
+
+        
+        $i=0;
+        foreach($items as $key =>$item){
+            $final[$i]= Product::where('id', $key)->value('name');  
+            if($final[$i] == null){
+                $final[$i] = 'Undefined';
+            }
+            $i++;
+        }
+        return $final;
+    }
+
+    public function getTotalOrdersOfWorstProducts()
+    {
+        $items = OrderItems::orderBy('sum', 'ASC')->groupBy('product_id')
+        ->selectRaw('sum(product_id) as sum, product_id')
+        ->pluck('sum','product_id')->take(5);
+        
+        $i=0;
+        foreach($items as $key =>$item){
+            $total[$i] = $item;
+            $i++;
+        }
+        return $total;
     }
 }

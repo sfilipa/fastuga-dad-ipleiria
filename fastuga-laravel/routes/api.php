@@ -32,15 +32,16 @@ Route::get('customers/{customer}/user', [UserController::class, 'getUserOfCustom
 Route::apiResource("customers", CustomerController::class);
 
 // Order Routes
-
+Route::get('/orders/bymonth', [OrderController::class, 'getTotalOrdersMonths']);//statistics - managers
+Route::get('/orders/bymonth/total', [OrderController::class, 'getTotalOrdersByMonth']);//statistics - managers
 Route::prefix('orders')->group(function () {
     Route::get('/status', [OrderController::class, 'getOrdersStatus']);
     Route::get('/statusTAES', [OrderController::class, 'getOrderByStatusTAES']);
     Route::get('/status/{status}', [OrderController::class, 'getOrderByStatus']);
     Route::get('/{order}/customer', [CustomerController::class, 'getCostumerOfOrder']);
     Route::get('/{order}/user', [UserController::class, 'getUserOfOrder']);
-    Route::get('/customer/{user_id}', [OrderController::class, 'getAllCustomerOrders']);
-    Route::get('/order/orderItems/{order_id}', [OrderController::class, 'getAllOrderProducts']);
+    Route::get('/customer/{user_id}', [OrderController::class, 'getAllCustomerOrders']);//statistics - customers
+    Route::get('/order/orderItems/{order_id}', [OrderController::class, 'getAllOrderProducts']);//statistics - customers
 });
 Route::post('ordersTAES',[OrderController::class, 'storeTAES']);
 Route::get('unassignedOrders', [OrderController::class, 'getUnassignedOrders']);
@@ -57,5 +58,10 @@ Route::apiResource("order-items", OrderItemsController::class);
 // Product Routes
 Route::get('products/types', [ProductController::class, 'getProductsTypes']);
 
+//Statistics 
 Route::get('/products/top', [ProductController::class, 'getBestProducts']);
+Route::get('/products/top/total', [ProductController::class, 'getTotalOrdersOfTopProducts']);
+Route::get('/products/worst', [ProductController::class, 'getWorstProducts']);
+Route::get('/products/worst/total', [ProductController::class, 'getTotalOrdersOfWorstProducts']);
+
 Route::apiResource("products", ProductController::class);

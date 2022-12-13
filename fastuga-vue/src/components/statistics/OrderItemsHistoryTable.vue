@@ -16,10 +16,10 @@ const props = defineProps({
 	<table class="table">
 		<thead>
 			<tr>
+				<th>Photo Url</th>
 				<th>Name</th>
 				<th>Type</th>
 				<th>Description</th>
-				<th>Photo Url</th>
 			</tr>
 		</thead>
 		<tbody>
