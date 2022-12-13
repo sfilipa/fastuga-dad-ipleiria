@@ -7,21 +7,14 @@ const io = require("socket.io")(httpServer, {
     credentials: true,
   },
 });
-
 httpServer.listen(8080, () => {
   console.log("listening on *:8080");
 });
-
 io.on("connection", (socket) => {
   console.log(`client ${socket.id} has connected`);
-});
 
-io.on("connection", (socket) => {
-  // Connection to WS Successful
-  console.log(`client ${socket.id} has connected`);
-
-  // User LoggedIn
-  socket.on("userLoggedIn", (user) => {
-    socket.broadcast.emit("userLoggedIn", user);
+  // new product created
+  socket.on("newProduct", (product) => {
+    socket.broadcast.emit("newProduct", product);
   });
 });

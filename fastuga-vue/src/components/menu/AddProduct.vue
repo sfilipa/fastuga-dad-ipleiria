@@ -16,6 +16,9 @@
   const photoInput = ref(null)
 
   const productTypes = ref([])
+
+  // Web Sockets
+  const socket = inject("socket")
   
   const LoadProductTypes = () => {
     axios.get(`/products/types`)
@@ -47,6 +50,10 @@
     await axiosImported.post(`${serverBaseUrl}/api/products`, formData)
         .then((response)=>{
             router.push('/menu')
+
+            // Send message to web socket
+            socket.emit('newProduct', response.data.data)
+
             toast.info("Product '" + response.data.data.name + "' was created")
         })
         .catch((error)=>{

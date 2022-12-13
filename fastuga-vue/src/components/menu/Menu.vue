@@ -17,6 +17,9 @@
 
   const store = useOrderItemsStore()
 
+  // Web Socket
+  const socket = inject('socket')
+
   const editProduct = async (product) => {
     let formData = new FormData();
   
@@ -43,6 +46,12 @@
       store.addItem(product)
     } 
   }
+
+  // waits for the new product message
+  socket.on("newProduct", (product) => {
+    toast.success(`${product.name} was created and the price is ${product.price} €`)
+    LoadProducts();
+  })
 
   const makeOrder = () => {
     console.log(store.items)
