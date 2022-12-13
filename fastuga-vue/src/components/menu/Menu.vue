@@ -34,6 +34,10 @@
           formData)
             .then((response)=>{
               LoadProducts()
+
+              // Send message to web socket
+              socket.emit('updateProduct', response.data.data)
+
               toast.info("Product '" + response.data.data.name + "' was updated")
             }) 
             .catch((error) => {
@@ -46,12 +50,6 @@
       store.addItem(product)
     } 
   }
-
-  // waits for the new product message
-  socket.on("newProduct", (product) => {
-    toast.success(`${product.name} was created and the price is ${product.price} €`)
-    LoadProducts();
-  })
 
   const makeOrder = () => {
     console.log(store.items)
@@ -92,6 +90,32 @@
     LoadProducts()
     LoadProductTypes()
   })
+
+
+//==================================================
+// Web Sockets
+//==================================================
+
+// Listen for the 'message' event from the server and log the data
+// received from the server to the users.
+
+// waits for the created product message 
+socket.on("newProduct", (product) => {
+  toast.success(`New Product: ${product.name} was created with the price ${product.price} €`)
+  LoadProducts();
+})
+// waits for the updated product message
+socket.on("updateProduct", (product) => {
+  toast.success(`Product: ${product.name} was updated`)
+  LoadProducts();
+})
+// TODO: Emit for the delete
+// waits for the deleted product message
+socket.on("deleteProduct", (product) => {
+  toast.success(`Product: ${product.name} was deleted`)
+  LoadProducts();
+})
+
 </script>
 
 <template>
