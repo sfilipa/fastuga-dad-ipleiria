@@ -43,6 +43,9 @@ const currentImage = ref(null);
 
 const editingProduct = ref(null);
 
+// Web Sockets
+const socket = inject("socket")
+
 const newProduct = () => {
   return {
     id: null,
@@ -162,6 +165,10 @@ const dialogConfirmedDelete = () => {
     .then((response) => {
       addDialog.value = null;
       emit("deleted", response.data.data);
+
+      // Send message to web socket
+      socket.emit('deleteProduct', productToDelete.value)
+
       toast.info(
         "Product " + productToDeleteDescription.value + " was deleted"
       );
