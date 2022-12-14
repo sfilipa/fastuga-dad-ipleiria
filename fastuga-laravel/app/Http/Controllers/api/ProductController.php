@@ -14,8 +14,7 @@ use App\Http\Requests\StoreUpdateProductRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\OrderItems;
 use App\Models\Product;
-
-
+use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
@@ -31,8 +30,14 @@ class ProductController extends Controller
 
     public function index()
     {
-        App::setlocale("pt");
-        return  ProductResource::collection(Product::all())->sortBy('name', SORT_LOCALE_STRING)->sort()->values();
+        // Get the collection and sort it
+        $collection = Product::all();
+        $sortedCollection = $collection->sortBy(function ($item) {
+            return Str::ascii($item->name);
+        });
+
+        // Return the sorted collection as a resource
+        return ProductResource::collection($sortedCollection);
     }
 
     public function store(StoreUpdateProductRequest $request)
@@ -43,6 +48,8 @@ class ProductController extends Controller
             $path = Storage::putFile('public/products',  $request->file('photo_url'));
             $name = basename($path);
             $newProduct["photo_url"] = $name;
+            $capitalizedName = ucfirst($newProduct["name"]);
+            $newProduct["name"] = $capitalizedName;
             $newProduct->save();
 
             return new ProductResource($newProduct);

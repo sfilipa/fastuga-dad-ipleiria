@@ -8,20 +8,24 @@ const io = require("socket.io")(httpServer, {
   },
 });
 
+// Listens messages from this port
 httpServer.listen(8080, () => {
   console.log("listening on *:8080");
 });
 
+// Starts the connection
 io.on("connection", (socket) => {
   console.log(`client ${socket.id} has connected`);
+
+  // For Products
+  sendBroadcastMessage(socket, "newProduct");
+  sendBroadcastMessage(socket, "updateProduct");
+  sendBroadcastMessage(socket, "deleteProduct");
 });
 
-io.on("connection", (socket) => {
-  // Connection to WS Successful
-  console.log(`client ${socket.id} has connected`);
-
-  // User LoggedIn
-  socket.on("userLoggedIn", (user) => {
-    socket.broadcast.emit("userLoggedIn", user);
+function sendBroadcastMessage(socket, message) {
+  // Send the 'message' event to all clients except for the one that emitted the event.
+  socket.on(message, (data) => {
+    socket.broadcast.emit(message, data);
   });
-});
+}
