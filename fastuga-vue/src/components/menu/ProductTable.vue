@@ -325,7 +325,7 @@ onUpdated(() => {
       </div>
       <div class="product-body product-font">
         <!-- Editiing Row Description -->
-        <div v-if="editRow && product == editingProduct" class="mb-3">
+        <div v-if="editRow && product == editingProduct" style="width: -moz-available;">
           <textarea
             id="inputDescription"
             rows="2"
@@ -540,8 +540,8 @@ select {
 }
 
 textarea {
-  width: 150%;
-  height: 125%;
+  width: 100%;
+  height: 100%;
 }
 
 input[type="text"] {
