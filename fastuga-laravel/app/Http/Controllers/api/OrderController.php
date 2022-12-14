@@ -60,7 +60,7 @@ class OrderController extends Controller
 
     public function index()
     {
-        return Order::all();
+        return Order::orderBy('id','DESC')->get();
     }
 
     public function store(Request $request)
@@ -68,6 +68,12 @@ class OrderController extends Controller
         DB::beginTransaction();
         try{
             $orderRequest = new StoreUpdateOrderRequest($request->all());
+            $newTicketNumber = Order::orderBy('id', 'DESC')->first()->ticket_number;
+            $newTicketNumber++;
+            if($newTicketNumber > 99){
+                $newTicketNumber = 1;
+            }
+            $orderRequest['ticket_number'] = $newTicketNumber;
             $validatedOrder = $orderRequest->validate($orderRequest->rules());
             $newOrder = Order::create($validatedOrder);
             $newOrder->save();
@@ -136,12 +142,22 @@ class OrderController extends Controller
         $order->delete();
     }
 
-    public function getAllCustomerOrders(int $user_id)
+    public function getAllCustomerOrders($user_id)
     {
-       $id = Customer::where('user_id', $user_id)->get('id');
-
+        $id = Customer::where('user_id', $user_id)->get('id');
         return Order::where('customer_id', $id[0]->id)->get();
     }
+    
+    public function getCustomerCurrentOrders($user_id)
+    {
+        $id = Customer::where('user_id', $user_id)->get('id');
+        $currentOrdersStatus = ['P', 'R'];
+
+        return Order::where('customer_id', $id[0]->id)
+                    ->whereIn('status', $currentOrdersStatus)
+                    ->get();
+    }
+
     public function getAllOrderProducts(int $order_id)
     {  
         $allProducts = null;
@@ -151,5 +167,16 @@ class OrderController extends Controller
             $allProducts[] = Product::where('id', $item->product_id)->get();
         }
         return $allProducts;
+    }
+
+    public function cancelOrder(Order $order){
+        if($order->customer != null){
+            $customer = $order->customer;
+            $customer->points = $customer->points + $order->points_used_to_pay - $order->points_gained;
+            $customer->save();    
+        }
+        $order->status='C';
+        $order->save();
+        return new OrderResource($order);
     }
 }

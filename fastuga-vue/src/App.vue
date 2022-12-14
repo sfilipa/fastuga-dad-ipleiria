@@ -1,6 +1,6 @@
 <script setup>
 import { useRouter, RouterLink, RouterView } from "vue-router"
-import { ref, onMounted, inject } from "vue";
+import { ref, onMounted, inject, watch } from "vue";
 
 import { useUserStore } from './stores/user.js'
 
@@ -10,7 +10,7 @@ const toast = inject("toast")
 
 const userStore = useUserStore()
 
-const workInProgressProjects = ref([]);
+const myCurrentOrders = ref([])
 
 const buttonSidebarExpand = ref(null)
 
@@ -31,16 +31,29 @@ const clickMenuOption = () => {
   }
 }
 
-onMounted(() => {
-  // const userId = 1
-  // axios.get("users/" + userId + "/projects/inprogress")
-  //   .then((response) => {
-  //     workInProgressProjects.value = response.data.data;
-  //   })
-  //   .catch((error) => {
-  //     console.log(error);
-  //   })
+watch(() => userStore.userId, (id) => {
+    myCurrentOrders.value = []
+    fetchCustomerOrders(id)
 })
+
+const fetchCustomerOrders = (userId) => {
+  if(userId != -1){
+    axios.get("/orders/current/customer/" + userId)
+    .then((response) => {
+      myCurrentOrders.value = response.data
+    })
+    .catch((error) => {
+      console.log(error)
+    })
+  }
+}
+
+onMounted(() => {
+  if(userStore.userId != -1){
+    fetchCustomerOrders(userStore.userId)
+  }
+})
+
 </script>
 
 <template>
@@ -208,13 +221,16 @@ onMounted(() => {
             </router-link>
           </h6>
           <ul class="nav flex-column mb-2">
-            <li class="nav-item" v-for="prj in workInProgressProjects" :key="prj.id">
+            <!-- <li class="nav-item" v-for="prj in workInProgressProjects" :key="prj.id">
               <router-link class="nav-link w-100 me-3"
                 :class="{ active: $route.name == 'ProjectTasks' && $route.params.id == prj.id }"
                 :to="{ name: 'ProjectTasks', params: { id: prj.id } }" @click="clickMenuOption">
                 <i class="bi bi-file-ruled"></i>
                 {{ prj.name }}
               </router-link>
+            </li> -->
+            <li class="nav-item" v-for="order in myCurrentOrders" :key="order.id">
+              Ticket Number: {{ order.ticket_number }}
             </li>
           </ul>
 

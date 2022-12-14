@@ -17,6 +17,10 @@ class CustomerController extends Controller
         return new CustomerResource(optional($order->customer));
     }
 
+    public function getCustomerByUserID($user_id) {
+        return new CustomerResource(Customer::where('user_id', $user_id)->firstOrFail());
+    }
+
     public function index()
     {
         return Customer::all();
@@ -43,4 +47,5 @@ class CustomerController extends Controller
     {
         $customer->softDeletes();
     }
+
 }
