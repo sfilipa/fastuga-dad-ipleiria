@@ -7,7 +7,7 @@ const props = defineProps({
     default: () => [],
     filterByType: String,
     ticketNumber: Number,
-    costumerId: Number
+    orderDate: Date
 })
 const emit = defineEmits(['show','edit','delete'])
 
@@ -39,7 +39,7 @@ const deleteClick = (order) => {
     <tbody>
       <tr v-for="order in props.orders.filter(order => props.filterByType === 'A' ? true : order.status === props.filterByType)
                                       .filter(order => !props.ticketNumber ? true : order.ticket_number === props.ticketNumber)
-                                      .filter(order => !props.costumerId ? true : order.costumer_id === props.costumerId)" :key="order.id">
+                                      .filter(order => isNaN(props.orderDate.getTime()) ? true : order.date === `${props.orderDate.getFullYear()}-${props.orderDate.getMonth() + 1}-${props.orderDate.getDate()}`)" :key="order.id">
         <td> {{ order.id }} </td>
         <td> {{order.ticket_number}} </td>
 
@@ -59,12 +59,14 @@ const deleteClick = (order) => {
               <i class="bi bi-xs bi-search"></i>
             </button>
 
-            <button
-              class="btn btn-xs btn-light"
-              @click="deleteClick(order)"
-              >
-              <i class="bi bi-xs bi-x-square-fill"></i>
-            </button>
+            <div v-if="order.status == 'P' || order.status == 'R'">
+              <button
+                class="btn btn-xs btn-light"
+                @click="deleteClick(order)"
+                >
+                <i class="bi bi-xs bi-x-square-fill"></i>
+              </button>
+            </div>
           </div>
         </td>
       </tr>

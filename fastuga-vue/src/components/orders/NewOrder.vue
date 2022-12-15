@@ -52,7 +52,7 @@
             'total_paid_with_points': store.totalPrice - finalPrice.value,
             'points_gained': user.userId != -1 ? calculatePointsGained() : 0,
             'points_used_to_pay': pointsToUse.value,
-            'payment_type': finalPrice.value == 0 ? null : paymentType.value,
+            'payment_type': finalPrice.value == 0 ? null : paymentType.value, //It's zero when the customer paid for the whole order with just their points
             'payment_reference': finalPrice.value == 0 ? null : paymentReference.value,
             'date': getTimestamp(),
             'delivered_by':null,
@@ -62,7 +62,8 @@
         if(finalPrice.value == 0){
             axiosLaravel.post('/orders', paymentBody)
                 .then((response)=>{
-                    // console.log(response.data.data)
+                    console.log(response.data.data)
+                    ticketNumber.value = response.data.data.ticket_number
                     orderCompletedDialog.value.show()
                 })
                 .catch((error)=>{
@@ -96,18 +97,17 @@
                 'reference': paymentReference.value,
                 'value': finalPrice.value
         }
-
+        
         axios.post(`${PAYMENT_URL}/api/payments`, requestBody)
             .then(() => {
-                paymentBody.payment_type = paymentType.value
-                paymentBody.payment_reference = paymentReference.value
                 axiosLaravel.post('/orders', paymentBody)
                 .then((response)=>{
-                    // console.log(response.data.data)
+                    console.log(response.data.data)
                     ticketNumber.value = response.data.data.ticket_number
                     orderCompletedDialog.value.show()
                 })
                 .catch((error)=>{
+                    console.log(error)
                     toast.error('Order was not created due to ' + error.response.data.message)
                 })
             })
@@ -169,7 +169,7 @@
     }
 
     const LoadCustomerInfo = () => {
-        axiosLaravel.get(`/customers/${user.userId}`)
+        axiosLaravel.get(`/customers/user/${user.userId}`)
             .then((response) => {
                 customer.value = response.data.data
                 paymentReference.value = customer.value.default_payment_reference
@@ -394,15 +394,12 @@
     position: relative;
     border: 1px solid rgb(12, 12, 12);
 }
-
 input[type="radio"]{
     margin-right: 10px;
     cursor: pointer;
 }
-
 img, svg {
     vertical-align: middle;
     width: 65px;
 }
-
 </style>
