@@ -2,10 +2,15 @@
   import { ref, watch, inject } from 'vue'
   import UserDetail from "./UserDetail.vue"
   import { useRouter, onBeforeRouteLeave } from 'vue-router'  
+import { useUserStore } from "../../stores/user.js"
   
   const router = useRouter()  
   const axios = inject('axios')
   const toast = inject('toast')
+
+const userStore = useUserStore()
+
+const socket = inject("socket")
 
   const props = defineProps({
       id: {
@@ -48,6 +53,13 @@
       axios.put('users/' + props.id, user.value)
         .then((response) => {
           user.value = response.data.data
+
+          // Web Socket - Sends Message to websocket that the user was updated
+          socket.emit('updateUser', user.value)
+          if (user.value.id == userStore.user.id) {
+            userStore.user = user.value
+          }
+
           originalValueStr = dataAsString()
           toast.success('User #' + user.value.id + ' was updated successfully.')
           router.back()
