@@ -41,6 +41,7 @@ Route::prefix('orders')->group(function () {
     Route::get('/{order}/customer', [CustomerController::class, 'getCostumerOfOrder']);
     Route::get('/{order}/user', [UserController::class, 'getUserOfOrder']);
     Route::put('/{order}/cancel', [OrderController::class, 'cancelOrder']);
+    Route::patch('/{order}/{status}', [OrderController::class, 'updateOrderStatus']);
     Route::get('/customer/{user_id}', [OrderController::class, 'getAllCustomerOrders']);
     Route::get('/current/customer/{user_id}', [OrderController::class, 'getCustomerCurrentOrders']);
     Route::get('/order/orderItems/{order_id}', [OrderController::class, 'getAllOrderProducts']);

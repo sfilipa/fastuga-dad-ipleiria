@@ -10,8 +10,6 @@ const toast = inject("toast")
 
 const userStore = useUserStore()
 
-const myCurrentOrders = ref([])
-
 const buttonSidebarExpand = ref(null)
 
 const logout = async () => {
@@ -32,26 +30,17 @@ const clickMenuOption = () => {
 }
 
 watch(() => userStore.userId, (id) => {
-    myCurrentOrders.value = []
     fetchCustomerOrders(id)
 })
 
 const fetchCustomerOrders = (userId) => {
   if(userId != -1){
-    axios.get("/orders/current/customer/" + userId)
-    .then((response) => {
-      myCurrentOrders.value = response.data
-    })
-    .catch((error) => {
-      console.log(error)
-    })
+    userStore.loadMyCurrentOrders()
   }
 }
 
 onMounted(() => {
-  if(userStore.userId != -1){
-    fetchCustomerOrders(userStore.userId)
-  }
+  fetchCustomerOrders(userStore.userId)
 })
 
 </script>
@@ -160,6 +149,14 @@ onMounted(() => {
             </li>
 
             <li class="nav-item">
+              <router-link class="nav-link" :class="{ active: $route.name === 'OrdersChefs' }" :to="{ name: 'OrdersChefs' }"
+                           @click="clickMenuOption">
+                <i class="bi bi-people"></i>
+                Chefs Orders
+              </router-link>
+            </li>
+
+            <li class="nav-item">
               <router-link class="nav-link" :class="{ active: $route.name === 'Employees' }" :to="{ name: 'Employees' }"
                 @click="clickMenuOption">
                 <i class="bi bi-people"></i>
@@ -213,7 +210,7 @@ onMounted(() => {
             </li>
           </ul>
 
-          <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+          <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted" >
             <span>My Orders</span>
             <router-link class="link-secondary" :to="{ name: 'NewOrder' }" aria-label="Make a new order"
               @click="clickMenuOption">
@@ -229,7 +226,7 @@ onMounted(() => {
                 {{ prj.name }}
               </router-link>
             </li> -->
-            <li class="nav-item" v-for="order in myCurrentOrders" :key="order.id">
+            <li class="nav-item" v-for="order in userStore.myCurrentOrders" :key="order.id">
               Ticket Number: {{ order.ticket_number }}
             </li>
           </ul>

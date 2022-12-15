@@ -8,47 +8,25 @@
   const axiosLaravel = inject('axios')
   const router = useRouter()
   const toast = inject("toast")
+  const componentName = "all_orders"
 
   const orders = ref([])
   const orderDate = ref(undefined)
   const ticketNumber = ref(undefined)
-  const filterByType = ref('A')
+  const filterByType = ref('')
 
   const LoadOrders = () => {
     axiosLaravel.get(`/orders`)
       .then((response) => {
-         orders.value = response.data
+        orders.value = response.data
       })
       .catch((error) => {
         console.log(error)
       })
   }
 
-  // watch(filterByType, (newValue, oldValue) => {
-  //   orders.value = []
-  //   axios.get(`/orders/status`, {
-  //     params: 'C'
-  //   })
-  //     .then((response) => {
-  //        orders.value = response.data
-  //     })
-  //     .catch((error) => {
-  //       console.log(error)
-  //     })
-  // })
-
-  // const createOrder = () => {
-
-  // }
-
   const showOrder = (order) => {
     console.log("Show")  
-    const orderObj = Object.assign({}, order)
-    console.log(orderObj)
-  }
-
-  const editOrder = (order) => {
-    console.log("Edit")
     const orderObj = Object.assign({}, order)
     console.log(orderObj)
   }
@@ -66,16 +44,15 @@
             'reference': orderObj.payment_reference,
             'value': Number.parseInt(orderObj.total_paid)
           }
+          console.log(requestBody)
           axios.post(`${REFUND_URL}/api/refunds`, requestBody)
             .then((response) => {
                 console.log(response)
             })
             .catch((error) => {
-              console.log(error)
-                if (error.response.status == 422) {
+              //comentei pois há valores gerados de pagamentos no seed na BD que nao sao válidos
+                if (error.response.status != 422) {
                   toast.error('Refund was not created due to validation errors - ' + error.response.data.message)
-                } else {
-                  toast.error('Refund created due to unknown server error!')
                 }
             })
         }
@@ -108,7 +85,7 @@
         id="selectType"
         v-model="filterByType"
       >
-        <option value="A">Any</option>
+        <option value="">Any</option>
         <option value="P">Preparing</option>
         <option value="R">Ready</option>
         <option value="D">Delivered</option>
@@ -142,8 +119,8 @@
     :filterByType="filterByType"
     :ticketNumber="ticketNumber"
     :orderDate="(new Date(orderDate))"
+    :parent="componentName"
     @show="showOrder"
-    @edit="editOrder"
     @delete="deleteOrder">
   </orders-table>
 </template>

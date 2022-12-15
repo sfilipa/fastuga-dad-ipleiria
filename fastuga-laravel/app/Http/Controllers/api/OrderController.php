@@ -175,7 +175,14 @@ class OrderController extends Controller
             $customer->points = $customer->points + $order->points_used_to_pay - $order->points_gained;
             $customer->save();    
         }
-        $order->status='C';
+        $order->status = 'C';
+        $order->save();
+        return new OrderResource($order);
+    }
+
+    public function updateOrderStatus(Order $order, $status)
+    {
+        $order->status = $status;
         $order->save();
         return new OrderResource($order);
     }

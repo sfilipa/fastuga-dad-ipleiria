@@ -7,10 +7,24 @@ export const useUserStore = defineStore('user', () => {
     const serverBaseUrl = inject('serverBaseUrl')
 
     const user = ref(null)
+    const userCurrentOrders = ref([])
 
     const userId = computed(() => {
         return user.value?.id ?? -1
         })
+
+    async function loadMyCurrentOrders () {
+        if(user.value.id != -1 && user.value.type == 'C'){
+            try{
+                const response = await axios.get("/orders/current/customer/" + user.value.id)
+                userCurrentOrders.value = response.data
+            }catch(error){
+                console.log(error)
+            }
+        }
+    }
+
+    const myCurrentOrders = computed(() => userCurrentOrders.value.filter(o => o.status.toLowerCase() == 'p' || o.status.toLowerCase() == 'r'))
 
     const userPhotoUrl = computed(() => {
         if (!user.value?.photo_url) {
@@ -34,6 +48,10 @@ export const useUserStore = defineStore('user', () => {
         user.value = null
     }
 
+    function clearMyOrders(){
+        userCurrentOrders.value = []
+    }
+
     async function login(credentials) {
         try {
             const response = await axios.post('login', credentials)
@@ -52,6 +70,7 @@ export const useUserStore = defineStore('user', () => {
         try {
             await axios.post('logout')
             clearUser()
+            clearMyOrders()
             return true
         } catch (error) {
             return false
@@ -78,5 +97,5 @@ export const useUserStore = defineStore('user', () => {
         return false
        }
 
-    return { user, userId, userPhotoUrl, loadUser, clearUser, login, logout, restoreToken  }
+    return { user, userId, userPhotoUrl, loadUser, clearUser, login, logout, restoreToken, myCurrentOrders, loadMyCurrentOrders  }
 })

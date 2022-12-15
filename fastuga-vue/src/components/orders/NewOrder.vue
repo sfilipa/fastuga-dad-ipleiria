@@ -229,8 +229,9 @@
     }
 
     const dialogConfirm = () => {
-        store.resetOrderItems()
-        //redirect to somewhere
+      user.loadMyCurrentOrders()
+      store.resetOrderItems()
+      //redirect to somewhere
 
     }
 
