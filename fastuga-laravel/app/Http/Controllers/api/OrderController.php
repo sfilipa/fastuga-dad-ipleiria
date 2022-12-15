@@ -138,20 +138,19 @@ class OrderController extends Controller
     }
 
     //Statistics - Customer
-    public function getAllCustomerOrders(int $user_id)
+    public function getAllCustomerOrders($user_id)
     {
        $id = Customer::where('user_id', $user_id)->get('id');
 
         return Order::where('customer_id', $id[0]->id)->get();
     }
-    public function getAllOrderProducts(int $order_id)
+    
+    public function getAllOrderProducts($order_id)
     {  
-        $allProducts = null;
         $products_id = OrderItems::where('order_id', $order_id)->get('product_id');
 
-        foreach($products_id as $item){
-            $allProducts[] = Product::where('id', $item->product_id)->get();
-        }
+        $allProducts = Product::whereIn('id', $products_id)->get();
+
         return $allProducts;
     }
 
@@ -180,18 +179,54 @@ class OrderController extends Controller
         $i=0;
         foreach($items as $key =>$item){
             $months[$i] = $item;
-            if($months[$i] == 9){
-                $months[$i] = 'Setembro';
-            }else if($months[$i] == 10){
-                $months[$i] = 'Outubro';
-            }else if($months[$i] == 11){
-                $months[$i] = 'Novembro';
-            }else if($months[$i] == 12){
+
+            switch ($months[$i]){
+                case 1:
+                    $months[$i] = 'Janeiro';
+                    break;
+                case 2:
+                    $months[$i] = 'Fevereiro';   
+                    break;
+                case 3:
+                    $months[$i] = 'Março';  
+                    break;
+                case 4:
+                    $months[$i] = 'Abril';
+                    break;
+                case 5:
+                    $months[$i] = 'Maio';
+                    break;
+                case 6:
+                    $months[$i] = 'Junho';
+                    break;
+                case 7:
+                    $months[$i] = 'Julho';
+                    break;
+                case 8:
+                    $months[$i] = 'Agosto';
+                    break;
+                case 9:
+                    $months[$i] = 'Setembro';
+                    break;
+                case 10:
+                    $months[$i] = 'Outubro';
+                    break;
+                case 11:
+                    $months[$i] = 'Novembro';
+                    break;
+                default:
                 $months[$i] = 'Dezembro';
             }
             $i++;
         }
 
         return $months;
+    }
+
+    //Statistics - Driver
+    public function getAllOrdersDelivered(int $user_id)
+    {
+        $orders = Order::where('delivered_by', $user_id)->paginate(10);
+        return $orders;
     }
 }

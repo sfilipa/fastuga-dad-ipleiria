@@ -6,12 +6,15 @@ import BarChartWorstProducts from './BarChartWorstProducts.vue'
 import HistoryTable from './HistoryTable.vue'
 import OrderItemsHistoryTable from './OrderItemsHistoryTable.vue'
 import BarChartOrdersByMonth from './BarChartOrdersByMonth.vue'
+import HistoryTableOrdersDelivered from './HistoryTableOrdersDelivered.vue'
+import HistoryTableDishPrepared from './HistoryTableDishPrepared.vue'
 
 import { useUserStore } from "../../stores/user.js"
 
+let laravelData = ref();
+
 //Customers
 const orders = ref([]);
-const orderItems = ref([null]);
 
 //bar charts - managers
 const topProducts = ref([]);
@@ -21,28 +24,40 @@ const worstProductsTotal = ref([]);
 const ordersByMonth = ref([]);
 const ordersByMonthTotal = ref([]);
 
+//Driver
+const ordersDelivered = ref([]);
+
+//Chef
+const dishPrepared = ref([]);
+
 //filters
 const filterByPaymentType = ref("A");
+const filterByDishType = ref("A");
 const filterByDate = ref(undefined);
-let isActive = ref(false);
+const filterByName = ref(undefined);
 
+//Statistic - customer
 const LoadOrders = () => {
     axios
         .get(`http://localhost:8081/api/orders/customer/${userStore.user.id}`)
         .then((response) => {
             orders.value = response.data;
+            console.log(orders.value);
         })
         .catch((error) => {
             console.log(error);
         });
 };
 
+
+//Statistic - Manager
+
 async function loadTopProducts() {
     try {
         const response = await axios.get(`http://localhost:8081/api/products/top`)
         topProducts.value = response.data;
 
-       // console.log(topProducts.value[0]);
+        // console.log(topProducts.value[0]);
     } catch (error) {
 
         console.log(error);
@@ -68,7 +83,7 @@ async function loadWorstProducts() {
         const response = await axios.get(`http://localhost:8081/api/products/worst`)
         worstProducts.value = response.data;
 
-       // console.log(worstProducts.value[0]);
+        // console.log(worstProducts.value[0]);
     } catch (error) {
 
         console.log(error);
@@ -81,7 +96,7 @@ async function loadWorstProductsTotal() {
         const response = await axios.get(`http://localhost:8081/api/products/worst/total`)
         worstProductsTotal.value = response.data;
 
-       // console.log(worstProductsTotal.value[0]);
+        // console.log(worstProductsTotal.value[0]);
     } catch (error) {
 
         console.log(error);
@@ -115,20 +130,32 @@ async function loadOrdersByMonthTotal() {
     }
 }
 
-const showOrder = (order) => {
+//Statistics - Driver
+
+const LoadOrdersDriverDelivered = () => {
     axios
-        .get(`http://localhost:8081/api/orders/order/orderItems/${order.id}`)
+        .get(`http://localhost:8081/api/orders/delivered/${userStore.user.id}`)
         .then((response) => {
-            orderItems.value = response.data;
-
-            isActive = true;
-
-            console.log(isActive);
+            ordersDelivered.value = response.data.data;
         })
         .catch((error) => {
             console.log(error);
         });
 };
+
+//Statistics - Chef
+
+const LoadOrdersCooked = () => {
+    axios
+        .get(`http://localhost:8081/api/order-items/prepared/${userStore.user.id}`)
+        .then((response) => {
+            dishPrepared.value = response.data.data;
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+};
+
 
 const data = reactive({
     checkins: null
@@ -155,10 +182,10 @@ onMounted(async () => {
     if (userStore.user.type == 'EM') {
         await loadTopProducts();
         await loadTopProductsTotal();
-        
+
         await loadWorstProducts();
         await loadWorstProductsTotal();
-        
+
         await loadOrdersByMonth();
         await loadOrdersByMonthTotal();
 
@@ -201,7 +228,7 @@ onMounted(async () => {
                 }
             }
         }
-        
+
         chartOrdersByMonth.barConfig = {
             data: {
                 labels: ordersByMonth.value,
@@ -221,8 +248,12 @@ onMounted(async () => {
                 }
             }
         }
-    } else {
+    } else if (userStore.user.type == 'C') {
         LoadOrders();
+    } else if (userStore.user.type == 'ED') {
+        LoadOrdersDriverDelivered();
+    } else {
+        LoadOrdersCooked();
     }
 })
 </script>
@@ -245,19 +276,18 @@ onMounted(async () => {
             <div>
                 <h5 class="center">Worst Products</h5>
                 <bar-chart-worst-products v-if="chartWorstProducts.barConfig"
-                    :chart-options="chartWorstProducts.barConfig.options" :chart-data="chartWorstProducts.barConfig.data"
-                    :width="400" :height="300" />
+                    :chart-options="chartWorstProducts.barConfig.options"
+                    :chart-data="chartWorstProducts.barConfig.data" :width="400" :height="300" />
             </div>
             <div>
                 <h5 class="center">Orders By Month</h5>
                 <bar-chart-orders-by-month v-if="chartOrdersByMonth.barConfig"
-                    :chart-options="chartOrdersByMonth.barConfig.options" :chart-data="chartOrdersByMonth.barConfig.data"
-                    :width="400" :height="300" />
+                    :chart-options="chartOrdersByMonth.barConfig.options"
+                    :chart-data="chartOrdersByMonth.barConfig.data" :width="400" :height="275" />
             </div>
         </div>
     </div>
     <div v-if="userStore.user.type == 'C'">
-        <div v-if="!isActive">
             <div class="d-flex justify-content-between">
                 <div class="mx-2">
                     <h3 class="mt-4">Orders History</h3>
@@ -283,21 +313,65 @@ onMounted(async () => {
                     </div>
                 </div>
             </div>
-            <history-table :orders="orders" :filterByPaymentType="filterByPaymentType" :date="filterByDate"
-                @show="showOrder">
+            <history-table :orders="orders" :filterByPaymentType="filterByPaymentType" :date="filterByDate">
             </history-table>
+    </div>
+    <div v-if="userStore.user.type == 'ED'">
+        <div class="d-flex justify-content-between">
+            <div class="mx-2">
+                <h3 class="mt-4">Orders Delivered History</h3>
+            </div>
         </div>
-        <div v-else>
-            <div class="d-flex justify-content-between">
-                <div class="mx-2">
-                    <h3 class="mt-4">Order Items</h3>
+        <hr />
+        <div class="mb-3 d-flex justify-content-between flex-wrap">
+            <div class="mx-2 mt-2 flex-grow-1 filter-div">
+                <label for="selectType" class="form-label">Filter by Payment Type:</label>
+                <select class="form-select" id="selectType" v-model="filterByPaymentType">
+                    <option value="A">Any</option>
+                    <option value="VISA">VISA</option>
+                    <option value="PAYPAL">PAYPAL</option>
+                    <option value="MBWAY">MBWAY</option>
+                </select>
+            </div>
+
+            <div class="mx-2 mt-2 flex-grow-1 filter-div">
+                <div class="inner-addon left-addon">
+                    <label for="searchbar" class="form-label">Filter by Payment Date:</label>
+                    <i class="glyphicon glyphicon-user"></i>
+                    <input v-model="filterByDate" type="date" name="date" class="form-control" />
                 </div>
             </div>
-            <hr />
-            <order-items-history-table :orderItems="orderItems">
-            </order-items-history-table>
-
         </div>
+        <history-table-orders-delivered :ordersDelivered="ordersDelivered" :filterByPaymentType="filterByPaymentType"
+            :date="filterByDate">
+        </history-table-orders-delivered>
+    </div>
+    <div v-if="userStore.user.type == 'EC'">
+        <div class="d-flex justify-content-between">
+            <div class="mx-2">
+                <h3 class="mt-4">Prepared Dishes History</h3>
+            </div>
+        </div>
+        <hr />
+        <div class="mb-3 d-flex justify-content-between flex-wrap">
+            <div class="mx-2 mt-2 flex-grow-1 filter-div">
+                <div class="inner-addon left-addon">
+                    <label for="searchbar" class="form-label">Search for Name:</label>
+                    <i class="glyphicon glyphicon-user"></i>
+                    <input v-model="filterByName" type="text" name="name" class="form-control" />
+                </div>
+            </div>
+
+            <div class="mx-2 mt-2 flex-grow-1 filter-div">
+                <div class="inner-addon left-addon">
+                    <label for="searchbar" class="form-label">Filter by Date:</label>
+                    <i class="glyphicon glyphicon-user"></i>
+                    <input v-model="filterByDate" type="date" name="date" class="form-control" />
+                </div>
+            </div>
+        </div>
+        <history-table-dish-prepared :dishPrepared="dishPrepared" :filterByName="filterByName" :date="filterByDate">
+        </history-table-dish-prepared>
     </div>
 </template>
 

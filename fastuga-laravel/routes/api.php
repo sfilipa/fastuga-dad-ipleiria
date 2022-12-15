@@ -32,22 +32,25 @@ Route::get('customers/{customer}/user', [UserController::class, 'getUserOfCustom
 Route::apiResource("customers", CustomerController::class);
 
 // Order Routes
-Route::get('/orders/bymonth', [OrderController::class, 'getTotalOrdersMonths']);//statistics - managers
-Route::get('/orders/bymonth/total', [OrderController::class, 'getTotalOrdersByMonth']);//statistics - managers
 Route::prefix('orders')->group(function () {
     Route::get('/status', [OrderController::class, 'getOrdersStatus']);
     Route::get('/statusTAES', [OrderController::class, 'getOrderByStatusTAES']);
     Route::get('/status/{status}', [OrderController::class, 'getOrderByStatus']);
     Route::get('/{order}/customer', [CustomerController::class, 'getCostumerOfOrder']);
     Route::get('/{order}/user', [UserController::class, 'getUserOfOrder']);
+    Route::get('/delivered/{user_id}', [OrderController::class, 'getAllOrdersDelivered']);//statistics - driver
+    Route::get('/bymonth/total', [OrderController::class, 'getTotalOrdersByMonth']);//statistics - managers
+    Route::get('/bymonth', [OrderController::class, 'getTotalOrdersMonths']);//statistics - managers
     Route::get('/customer/{user_id}', [OrderController::class, 'getAllCustomerOrders']);//statistics - customers
-    Route::get('/order/orderItems/{order_id}', [OrderController::class, 'getAllOrderProducts']);//statistics - customers
+    Route::get('/{order_id}/orderItems', [OrderController::class, 'getAllOrderProducts']);//statistics - customers
 });
 Route::post('ordersTAES',[OrderController::class, 'storeTAES']);
 Route::get('unassignedOrders', [OrderController::class, 'getUnassignedOrders']);
 Route::apiResource("orders", OrderController::class);
 
 // OrderItems Routes
+
+Route::get('/order-items/prepared/{user_id}', [OrderItemsController::class, 'getAllChefOrdersPrepared']);
 Route::prefix('order-items')->group(function () {
     Route::get('/{orderItems}/user', [UserController::class, 'getUserOfOrderItems']);
     Route::get('/{orderItems}/order', [OrderController::class, 'getOrderOfOrderItems']);

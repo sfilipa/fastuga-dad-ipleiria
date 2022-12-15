@@ -112,7 +112,7 @@ const deleteEmployee = async (employee) => {
     LoadEmployees();
 };
 
-const addEmployee = async () => {
+const addEmployee = () => {
       router.push({ name: "AddEmployee" })
 }
 
