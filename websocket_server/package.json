@@ -1,6 +1,7 @@
 {
   "name": "websocket_server",
   "version": "1.0.0",
+  "description": "websocket server",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -9,6 +10,5 @@
   "license": "ISC",
   "dependencies": {
     "socket.io": "^4.5.4"
-  },
-  "description": ""
+  }
 }

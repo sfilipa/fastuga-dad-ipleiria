@@ -29,15 +29,22 @@ Route::apiResource("users", UserController::class);
 
 // Customer Routes
 Route::get('customers/{customer}/user', [UserController::class, 'getUserOfCustomer']);
+Route::get('customers/user/{user_id}', [CustomerController::class, 'getCustomerByUserID']);
 Route::apiResource("customers", CustomerController::class);
 
 // Order Routes
+
 Route::prefix('orders')->group(function () {
     Route::get('/status', [OrderController::class, 'getOrdersStatus']);
     Route::get('/statusTAES', [OrderController::class, 'getOrderByStatusTAES']);
     Route::get('/status/{status}', [OrderController::class, 'getOrderByStatus']);
     Route::get('/{order}/customer', [CustomerController::class, 'getCostumerOfOrder']);
     Route::get('/{order}/user', [UserController::class, 'getUserOfOrder']);
+    Route::put('/{order}/cancel', [OrderController::class, 'cancelOrder']);
+    Route::patch('/{order}/{status}', [OrderController::class, 'updateOrderStatus']);
+    Route::get('/customer/{user_id}', [OrderController::class, 'getAllCustomerOrders']);
+    Route::get('/current/customer/{user_id}', [OrderController::class, 'getCustomerCurrentOrders']);
+    Route::get('/order/orderItems/{order_id}', [OrderController::class, 'getAllOrderProducts']);
     Route::get('/delivered/{user_id}', [OrderController::class, 'getAllOrdersDelivered']);//statistics - driver
     Route::get('/bymonth/total', [OrderController::class, 'getTotalOrdersByMonth']);//statistics - managers
     Route::get('/bymonth', [OrderController::class, 'getTotalOrdersMonths']);//statistics - managers
@@ -61,7 +68,7 @@ Route::apiResource("order-items", OrderItemsController::class);
 // Product Routes
 Route::get('products/types', [ProductController::class, 'getProductsTypes']);
 
-//Statistics 
+//Statistics
 Route::get('/products/top', [ProductController::class, 'getBestProducts']);
 Route::get('/products/top/total', [ProductController::class, 'getTotalOrdersOfTopProducts']);
 Route::get('/products/worst', [ProductController::class, 'getWorstProducts']);

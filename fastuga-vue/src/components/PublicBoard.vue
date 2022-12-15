@@ -33,7 +33,7 @@
     }, {});
 
     var countsExtended = Object.keys(counts).map(productName => {
-      return {name: productName, count: counts[productName], price: orderItems.find(order => order.product!=null ? order.product.name==productName : false).price*counts[productName]}; 
+      return {name: productName, count: counts[productName], price: (orderItems.find(order => order.product!=null ? order.product.name==productName : false).price*counts[productName]).toFixed(2)}; 
     });
 
     return countsExtended;

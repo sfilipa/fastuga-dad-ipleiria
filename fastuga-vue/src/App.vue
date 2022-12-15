@@ -1,6 +1,6 @@
 <script setup>
 import { useRouter, RouterLink, RouterView } from "vue-router"
-import { ref, onMounted, inject } from "vue";
+import { ref, onMounted, inject, watch } from "vue";
 
 import { useUserStore } from './stores/user.js'
 
@@ -9,8 +9,6 @@ const axios = inject("axios")
 const toast = inject("toast")
 
 const userStore = useUserStore()
-
-const workInProgressProjects = ref([]);
 
 const buttonSidebarExpand = ref(null)
 
@@ -31,16 +29,20 @@ const clickMenuOption = () => {
   }
 }
 
-onMounted(() => {
-  // const userId = 1
-  // axios.get("users/" + userId + "/projects/inprogress")
-  //   .then((response) => {
-  //     workInProgressProjects.value = response.data.data;
-  //   })
-  //   .catch((error) => {
-  //     console.log(error);
-  //   })
+watch(() => userStore.userId, (id) => {
+    fetchCustomerOrders(id)
 })
+
+const fetchCustomerOrders = (userId) => {
+  if(userId != -1){
+    userStore.loadMyCurrentOrders()
+  }
+}
+
+onMounted(() => {
+  fetchCustomerOrders(userStore.userId)
+})
+
 </script>
 
 <template>
@@ -147,6 +149,14 @@ onMounted(() => {
             </li>
 
             <li class="nav-item">
+              <router-link class="nav-link" :class="{ active: $route.name === 'OrdersChefs' }" :to="{ name: 'OrdersChefs' }"
+                           @click="clickMenuOption">
+                <i class="bi bi-people"></i>
+                Chefs Orders
+              </router-link>
+            </li>
+
+            <li class="nav-item">
               <router-link class="nav-link" :class="{ active: $route.name === 'Employees' }" :to="{ name: 'Employees' }"
                 @click="clickMenuOption">
                 <i class="bi bi-people"></i>
@@ -200,7 +210,7 @@ onMounted(() => {
             </li>
           </ul>
 
-          <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+          <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted" >
             <span>My Orders</span>
             <router-link class="link-secondary" :to="{ name: 'NewOrder' }" aria-label="Make a new order"
               @click="clickMenuOption">
@@ -208,13 +218,16 @@ onMounted(() => {
             </router-link>
           </h6>
           <ul class="nav flex-column mb-2">
-            <li class="nav-item" v-for="prj in workInProgressProjects" :key="prj.id">
+            <!-- <li class="nav-item" v-for="prj in workInProgressProjects" :key="prj.id">
               <router-link class="nav-link w-100 me-3"
                 :class="{ active: $route.name == 'ProjectTasks' && $route.params.id == prj.id }"
                 :to="{ name: 'ProjectTasks', params: { id: prj.id } }" @click="clickMenuOption">
                 <i class="bi bi-file-ruled"></i>
                 {{ prj.name }}
               </router-link>
+            </li> -->
+            <li class="nav-item" v-for="order in userStore.myCurrentOrders" :key="order.id">
+              Ticket Number: {{ order.ticket_number }}
             </li>
           </ul>
 

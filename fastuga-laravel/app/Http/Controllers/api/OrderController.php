@@ -34,7 +34,7 @@ class OrderController extends Controller
 
     public function getOrderByStatusTAES()
     {
-        return OrderResource::collection(Order::where('status', 'R')->orWhere('status', 'P')->get()); 
+        return OrderResource::collection(Order::where('status', 'R')->orWhere('status', 'P')->get());
     }
 
     public function getUnassignedOrders(){
@@ -44,7 +44,7 @@ class OrderController extends Controller
             return json_decode($order->custom)->assigned==null;
         });
         // $subset = $orders->map(function ($order) {
-        //     // return 
+        //     // return
         //     return collect($order)
         //             ->whereNotNull(json_decode($order->custom)->address)
         //             ->all();
@@ -61,7 +61,7 @@ class OrderController extends Controller
 
     public function index()
     {
-        return Order::all();
+        return Order::orderBy('id','DESC')->get();
     }
 
     public function store(Request $request)
@@ -69,6 +69,12 @@ class OrderController extends Controller
         DB::beginTransaction();
         try{
             $orderRequest = new StoreUpdateOrderRequest($request->all());
+            $newTicketNumber = Order::orderBy('id', 'DESC')->first()->ticket_number;
+            $newTicketNumber++;
+            if($newTicketNumber > 99){
+                $newTicketNumber = 1;
+            }
+            $orderRequest['ticket_number'] = $newTicketNumber;
             $validatedOrder = $orderRequest->validate($orderRequest->rules());
             $newOrder = Order::create($validatedOrder);
             $newOrder->save();
@@ -79,7 +85,7 @@ class OrderController extends Controller
                 $this->store_each_order_item($item, $newOrder['id'], $local_number);
                 $local_number++;
             }
-            
+
             if($newOrder['customer_id'] != null){
                 $customer = Customer::find($newOrder['customer_id']);
                 $previousPoints = $customer->points;
@@ -140,13 +146,22 @@ class OrderController extends Controller
     //Statistics - Customer
     public function getAllCustomerOrders($user_id)
     {
-       $id = Customer::where('user_id', $user_id)->get('id');
-
+        $id = Customer::where('user_id', $user_id)->get('id');
         return Order::where('customer_id', $id[0]->id)->get();
     }
-    
+
+    public function getCustomerCurrentOrders($user_id)
+    {
+        $id = Customer::where('user_id', $user_id)->get('id');
+        $currentOrdersStatus = ['P', 'R'];
+
+        return Order::where('customer_id', $id[0]->id)
+                    ->whereIn('status', $currentOrdersStatus)
+                    ->get();
+    }
+
     public function getAllOrderProducts($order_id)
-    {  
+    {
         $products_id = OrderItems::where('order_id', $order_id)->get('product_id');
 
         $allProducts = Product::whereIn('id', $products_id)->get();
@@ -156,7 +171,7 @@ class OrderController extends Controller
 
     //Statistics - Manager - Orders
     public function getTotalOrdersByMonth()
-    { 
+    {
         $items = Order::orderBy('month', 'ASC')->groupBy('month')
         ->selectRaw('MONTH(date) as month, sum(id) as sum')
         ->pluck('month','sum');
@@ -171,7 +186,7 @@ class OrderController extends Controller
     }
 
     public function getTotalOrdersMonths()
-    { 
+    {
         $items = Order::orderBy('month', 'ASC')->groupBy('month')
         ->selectRaw('MONTH(date) as month, sum(id) as sum')
         ->pluck('month','sum');
@@ -185,10 +200,10 @@ class OrderController extends Controller
                     $months[$i] = 'Janeiro';
                     break;
                 case 2:
-                    $months[$i] = 'Fevereiro';   
+                    $months[$i] = 'Fevereiro';
                     break;
                 case 3:
-                    $months[$i] = 'Março';  
+                    $months[$i] = 'Março';
                     break;
                 case 4:
                     $months[$i] = 'Abril';
@@ -228,5 +243,23 @@ class OrderController extends Controller
     {
         $orders = Order::where('delivered_by', $user_id)->paginate(10);
         return $orders;
+    }
+
+    public function cancelOrder(Order $order){
+        if($order->customer != null){
+            $customer = $order->customer;
+            $customer->points = $customer->points + $order->points_used_to_pay - $order->points_gained;
+            $customer->save();
+        }
+        $order->status = 'C';
+        $order->save();
+        return new OrderResource($order);
+    }
+
+    public function updateOrderStatus(Order $order, $status)
+    {
+        $order->status = $status;
+        $order->save();
+        return new OrderResource($order);
     }
 }

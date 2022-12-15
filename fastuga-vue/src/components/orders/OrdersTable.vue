@@ -7,16 +7,13 @@ const props = defineProps({
     default: () => [],
     filterByType: String,
     ticketNumber: Number,
-    costumerId: Number
+    orderDate: Date,
+    parent: String
 })
-const emit = defineEmits(['show','edit','delete'])
+const emit = defineEmits(['show','delete'])
 
 const showClick = (order) => {
-    emit('show', order)
-}
-
-const editClick = (order) => {
-  emit('edit', order)
+  emit('show', order)
 }
 
 const deleteClick = (order) => {
@@ -37,16 +34,16 @@ const deleteClick = (order) => {
       </tr>
     </thead>
     <tbody>
-      <tr v-for="order in props.orders.filter(order => props.filterByType === 'A' ? true : order.status === props.filterByType)
+      <tr v-for="order in props.orders.filter(order => !props.filterByType ? true : order.status === props.filterByType)
                                       .filter(order => !props.ticketNumber ? true : order.ticket_number === props.ticketNumber)
-                                      .filter(order => !props.costumerId ? true : order.costumer_id === props.costumerId)" :key="order.id">
+                                      .filter(order => !props.orderDate || isNaN(props.orderDate.getTime()) ? true : order.date === `${props.orderDate.getFullYear()}-${props.orderDate.getMonth() + 1}-${props.orderDate.getDate()}`)" :key="order.id">
         <td> {{ order.id }} </td>
-        <td> {{order.ticket_number}} </td>
+        <td> {{ order.ticket_number }} </td>
 
-        <td v-if="order.status == 'P'">Preparing</td> <!-- <p class="text-primary">Preparing</p> -->
-        <td v-else-if="order.status == 'R'">Ready</td> <!-- <p class="text-info">Ready</p> -->
-        <td v-else-if="order.status == 'D'">Delivered</td> <!-- <p class="text-success">Delivered</p> -->
-        <td v-else-if="order.status == 'C'">Cancelled</td> <!-- <p class="text-danger">Cancelled</p> -->
+        <td v-if="order.status == 'P'">Preparing</td>
+        <td v-else-if="order.status == 'R'">Ready</td>
+        <td v-else-if="order.status == 'D'">Delivered</td>
+        <td v-else-if="order.status == 'C'">Cancelled</td>
 
         <td>{{ order.date }}</td>
         <td>{{ order.total_price }}€</td>
@@ -56,15 +53,19 @@ const deleteClick = (order) => {
               class="btn btn-xs btn-light"
               @click="showClick(order)"
               >
-              <i class="bi bi-xs bi-search"></i>
+              <i :class="{ 'bi bi-xs bi-search': props.parent=='all_orders',
+                                              'bi bi-check-circle-fill': props.parent=='chefs_orders'}"></i>
             </button>
 
-            <button
-              class="btn btn-xs btn-light"
-              @click="deleteClick(order)"
-              >
-              <i class="bi bi-xs bi-x-square-fill"></i>
-            </button>
+            <div v-if="order.status == 'P' || order.status == 'R'">
+              <button
+                class="btn btn-xs btn-light"
+                @click="deleteClick(order)"
+                v-if="props.parent == 'all_orders'"
+                >
+                <i class="bi bi-xs bi-x-square-fill"></i>
+              </button>
+            </div>
           </div>
         </td>
       </tr>
