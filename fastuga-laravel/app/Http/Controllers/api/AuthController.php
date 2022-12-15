@@ -17,10 +17,9 @@ use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Hash;
 
 const PASSPORT_SERVER_URL = "http://localhost";
-const CLIENT_ID = 2;
-//const CLIENT_SECRET = 'NnwPusaTbdGZmiVbt8FV2VtjCITzYR7Abe4CqSEn'; 
+const CLIENT_ID = 4;
+const CLIENT_SECRET = 'i0y7dnBurIvbBkNy2TthplyU08Iu20rVBxumEnu4';
 
-const CLIENT_SECRET = 'vabnHSSpaYqEAQwyMNKQlFNMbW6bEv0S1dgTICN4';
 class AuthController extends Controller
 {
     private function passportAuthenticationData($username, $password)
