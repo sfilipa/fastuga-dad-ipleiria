@@ -4,7 +4,6 @@ import { ref, computed, onMounted, inject, watch, reactive, toRef } from "vue";
 import BarChartTopProducts from './BarChartTopProducts.vue'
 import BarChartWorstProducts from './BarChartWorstProducts.vue'
 import HistoryTable from './HistoryTable.vue'
-import OrderItemsHistoryTable from './OrderItemsHistoryTable.vue'
 import BarChartOrdersByMonth from './BarChartOrdersByMonth.vue'
 import HistoryTableOrdersDelivered from './HistoryTableOrdersDelivered.vue'
 import HistoryTableDishPrepared from './HistoryTableDishPrepared.vue'
