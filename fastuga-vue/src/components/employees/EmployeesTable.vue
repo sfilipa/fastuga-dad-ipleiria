@@ -8,7 +8,7 @@ const props = defineProps({
 	employees: Array,
 	default: () => [],
 	filterByType: String,
-	name: String,
+	filterByName: String,
 });
 const emit = defineEmits(["show", "edit", "delete", "block", "unblock"]);
 
@@ -69,7 +69,8 @@ const unblockEmployeeClick = (employee) => {
 			<tr
 				v-for="employee in props.employees
 				.filter((employee) => (props.filterByType === 'A' ? true : employee.type === props.filterByType))
-				.filter((employee) => (!props.name ? true : employee.name === props.name))"
+				// Filter by name
+				.filter((employee) => (props.filterByName === null ? true : employee.name.toLowerCase().includes(props.filterByName.toLowerCase())))"
 				:key="employee.id">
 				<td>
 					<img
