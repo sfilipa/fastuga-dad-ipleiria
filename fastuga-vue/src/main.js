@@ -16,10 +16,13 @@ import "bootstrap";
 
 const app = createApp(App);
 
-// Listening WS
-app.provide("socket", io("http://localhost:8080"));
+const apiDomain = import.meta.env.VITE_API_DOMAIN
+const wsConnection = import.meta.env.VITE_WS_CONNECTION
 
-const serverBaseUrl = "http://localhost:8081";
+app.provide('serverUrl',`${apiDomain}/api`)
+app.provide('socket',io(wsConnection))
+
+const serverBaseUrl = `${apiDomain}`;
 app.provide(
   "axios",
   axios.create({
