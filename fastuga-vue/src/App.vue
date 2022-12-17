@@ -149,10 +149,10 @@ onMounted(() => {
             </li>
 
             <li class="nav-item">
-              <router-link class="nav-link" :class="{ active: $route.name === 'OrdersChefs' }" :to="{ name: 'OrdersChefs' }"
+              <router-link class="nav-link" :class="{ active: $route.name === 'OrdersEmployees' }" :to="{ name: 'OrdersEmployees' }"
                            @click="clickMenuOption">
                 <i class="bi bi-people"></i>
-                Chefs Orders
+                Employees Orders
               </router-link>
             </li>
 
@@ -227,7 +227,8 @@ onMounted(() => {
               </router-link>
             </li> -->
             <li class="nav-item" v-for="order in userStore.myCurrentOrders" :key="order.id">
-              Ticket Number: {{ order.ticket_number }}
+              <!--TODO é preciso atualizar isto no cliente quando a order muda de estado -->
+              Ticket Number: {{ order.ticket_number + " - " + (order.status == 'R' ? "Ready" : "Preparing")}}
             </li>
           </ul>
 

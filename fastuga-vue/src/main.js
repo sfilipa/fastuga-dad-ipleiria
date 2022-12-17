@@ -13,6 +13,7 @@ import router from "./router";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "bootstrap";
+import Paginate from "vuejs-paginate-next";
 
 const app = createApp(App);
 
@@ -43,6 +44,7 @@ app.provide("toast", app.config.globalProperties.$toast);
 app.use(createPinia());
 app.use(router);
 
+app.component("Paginate", Paginate)
 app.component("FieldErrorMessage", FieldErrorMessage);
 app.component("ConfirmationDialog", ConfirmationDialog);
 

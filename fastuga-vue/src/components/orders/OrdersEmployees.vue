@@ -19,14 +19,29 @@ const LoadOrders = () => {
 
 const getOrderReady = (order) => {
   const orderObj = Object.assign({}, order)
+  if(!checkOrderItemsAreReady(order)){
+    toast.error(`Couldn't get order number ${orderObj.ticket_number} ready - there are still items to prepare!`)
+    return
+  }
+  console.log(orderObj)
   axiosLaravel.patch(`/orders/${orderObj.id}/R`)
       .then(() => {
-        toast.success("Order is now ready!")
+        toast.success(`Order number ${orderObj.ticket_number} is now ready!`)
         LoadOrders()
       })
       .catch((error) => {
         console.log(error)
       })
+}
+
+const checkOrderItemsAreReady = (order) => {
+  for(const item of order.order_items){
+    console.log(item)
+    if(item.status != 'R'){
+        return false
+      }
+  }
+  return true
 }
 
 onMounted (() => {

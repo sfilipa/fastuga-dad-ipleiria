@@ -37,4 +37,6 @@ class OrderItemsController extends Controller
     {
         $orderItems->delete();
     }
+
+    //TODO: update ao status do item de W -> P -> R e meter o preparation_by para o chef
 }
