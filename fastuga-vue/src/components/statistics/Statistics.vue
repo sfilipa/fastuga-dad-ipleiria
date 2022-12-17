@@ -31,7 +31,6 @@ const dishPrepared = ref([]);
 
 //filters
 const filterByPaymentType = ref("A");
-const filterByDishType = ref("A");
 const filterByDate = ref(undefined);
 const filterByName = ref(undefined);
 
@@ -144,7 +143,7 @@ const LoadOrdersDriverDelivered = () => {
 
 //Statistics - Chef
 
-const LoadOrdersCooked = () => {
+const LoadOrdersPrepared = () => {
     axios
         .get(`http://localhost:8081/api/order-items/prepared/${userStore.user.id}`)
         .then((response) => {
@@ -252,7 +251,7 @@ onMounted(async () => {
     } else if (userStore.user.type == 'ED') {
         LoadOrdersDriverDelivered();
     } else {
-        LoadOrdersCooked();
+        LoadOrdersPrepared();
     }
 })
 </script>
@@ -279,7 +278,7 @@ onMounted(async () => {
                     :chart-data="chartWorstProducts.barConfig.data" :width="400" :height="300" />
             </div>
             <div>
-                <h5 class="center">Orders By Month</h5>
+                <h5 class="center" >Orders By Month</h5>
                 <bar-chart-orders-by-month v-if="chartOrdersByMonth.barConfig"
                     :chart-options="chartOrdersByMonth.barConfig.options"
                     :chart-data="chartOrdersByMonth.barConfig.data" :width="400" :height="275" />
@@ -381,17 +380,16 @@ onMounted(async () => {
 
 .flex-container {
     display: flex;
-    background-color: #f1f1f1;
+  background-color: #f1f1f1;
 }
 
 .flex-container>div {
-    margin: 30px;
+    margin: 20px;
     background-color: #f1f1f1;
     color: black;
     text-align: center;
     line-height: 75px;
     font-size: 30px;
-
 }
 
 .center {
@@ -399,4 +397,5 @@ onMounted(async () => {
     margin-right: auto;
     margin-left: auto;
 }
+
 </style>

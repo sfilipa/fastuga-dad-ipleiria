@@ -16,7 +16,7 @@ const logout = async () => {
   if (await userStore.logout()) {
     toast.success('User has logged out of the application.')
     clickMenuOption()
-    router.push({ name: 'home' })
+    router.push({ name: 'PublicBoard' })
     userStore.clearUser()
   } else {
     toast.error('There was a problem logging out of the application!')
@@ -82,8 +82,8 @@ onMounted(() => {
             </a>
             <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
               <li>
-                <router-link class="dropdown-item" :class="{ active: $route.name == 'User' && $route.params.id == 1 }"
-                  :to="{ name: 'User', params: { id: 1 } }" @click="clickMenuOption">
+                <router-link class="dropdown-item" :class="{ active: $route.name == 'User' && $route.params.id == userStore.userId }"
+                  :to="{ name: 'User', params: { id: userStore.userId } }" @click="clickMenuOption">
                   <!--Onde tem id = 1 $route.params.id == 1 e tem de se trocar para userStore.userId-->
                   <i class="bi bi-person-square"></i>Profile
                 </router-link>
@@ -93,6 +93,17 @@ onMounted(() => {
                   :to="{ name: 'ChangePassword' }" @click="clickMenuOption">
                   <i class="bi bi-key-fill"></i>
                   Change password
+                </router-link>
+              </li>
+              <li>
+                <hr class="dropdown-divider" />
+              </li>
+              <li>
+                <router-link class="dropdown-item" :class="{ active: $route.name === 'Statistics' }"
+                             :to="{ name: 'Statistics' }" @click="clickMenuOption">
+
+                  <i class="bi bi-graph-up"></i>
+                  Statistics
                 </router-link>
               </li>
               <li>
@@ -201,13 +212,6 @@ onMounted(() => {
                 Team Members
               </router-link>
             </li> -->
-            <li class="nav-item" v-show="userStore.user">
-                <router-link class="nav-link" :class="{ active: $route.name === 'Statistics' }" :to="{ name: 'Statistics' }"
-                  @click="clickMenuOption">
-                  <i class="bi bi-graph-up"></i>
-                  Statistics
-                </router-link>
-            </li>
           </ul>
 
           <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted" >
