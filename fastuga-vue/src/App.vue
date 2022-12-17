@@ -16,7 +16,7 @@ const logout = async () => {
   if (await userStore.logout()) {
     toast.success('User has logged out of the application.')
     clickMenuOption()
-    router.push({ name: 'PublicBoard' })
+    router.push( '/' )
     userStore.clearUser()
   } else {
     toast.error('There was a problem logging out of the application!')

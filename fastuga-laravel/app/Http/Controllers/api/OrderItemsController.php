@@ -44,7 +44,7 @@ class OrderItemsController extends Controller
     {//flitrar por dishes
         $products_id = OrderItems::where('preparation_by', $user_id)->get('product_id');
 
-        $allProducts = Product::whereIn('id', $products_id)->paginate(10);
+        $allProducts = Product::whereIn('id', $products_id)->where('type', 'hot dish')->paginate(10);
 
         return  $allProducts;
 

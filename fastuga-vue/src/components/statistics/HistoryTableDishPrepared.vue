@@ -33,7 +33,6 @@ const showClick = (order) => {
 				<th>Date</th>
 				<th>Name</th>
 				<th>Description</th>
-				<th>Total Paid</th>
 			</tr>
 		</thead>
 		<tbody>
