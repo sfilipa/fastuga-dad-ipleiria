@@ -59,14 +59,14 @@ class AuthController extends Controller
         try {
 
             $userRequest->validate($userRequest->rules());//validate password without hash
-            
-            $userRequest->query->add(['password' => Hash::make($userRequest->password)]); 
+
+            $userRequest->query->add(['password' => Hash::make($userRequest->password)]);
 
             $newUser = User::create($userRequest->validate($userRequest->rules()));
-            
+
             $responseUser = new UserResource($newUser);
 
-            $customerRequest->query->add(['user_id' => $newUser->id]); 
+            $customerRequest->query->add(['user_id' => $newUser->id]);
 
             $newCustomer = Customer::create($customerRequest->validate($customerRequest->rules()));
             $responseCustomer = new CustomerResource($newCustomer);

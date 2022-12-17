@@ -73,7 +73,7 @@
         }
 
         toast.success("Order was successfully cancelled!")
-        LoadOrders()
+        LoadOrders(currentPage.value)
       })
       .catch((error)=>{
           toast.error(error)

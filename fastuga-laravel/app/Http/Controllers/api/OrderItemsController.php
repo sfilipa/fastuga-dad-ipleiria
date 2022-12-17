@@ -7,6 +7,7 @@ use App\Http\Requests\StoreUpdateOrderItemsRequest;
 use App\Http\Resources\OrderItemsResource;
 use App\Models\OrderItems;
 use App\Models\User;
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 class OrderItemsController extends Controller
@@ -36,6 +37,17 @@ class OrderItemsController extends Controller
     public function destroy(OrderItems $orderItems)
     {
         $orderItems->delete();
+    }
+
+    //Statistics - Chef
+    public function getAllChefOrdersPrepared($user_id)
+    {//flitrar por dishes
+        $products_id = OrderItems::where('preparation_by', $user_id)->get('product_id');
+
+        $allProducts = Product::whereIn('id', $products_id)->paginate(10);
+
+        return  $allProducts;
+
     }
 
     //TODO: update ao status do item de W -> P -> R e meter o preparation_by para o chef

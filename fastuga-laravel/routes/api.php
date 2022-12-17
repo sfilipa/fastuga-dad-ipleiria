@@ -45,12 +45,19 @@ Route::prefix('orders')->group(function () {
     Route::get('/customer/{user_id}', [OrderController::class, 'getAllCustomerOrders']);
     Route::get('/current/customer/{user_id}', [OrderController::class, 'getCustomerCurrentOrders']);
     Route::get('/order/orderItems/{order_id}', [OrderController::class, 'getAllOrderProducts']);
+    Route::get('/delivered/{user_id}', [OrderController::class, 'getAllOrdersDelivered']);//statistics - driver
+    Route::get('/bymonth/total', [OrderController::class, 'getTotalOrdersByMonth']);//statistics - managers
+    Route::get('/bymonth', [OrderController::class, 'getTotalOrdersMonths']);//statistics - managers
+    Route::get('/customer/{user_id}', [OrderController::class, 'getAllCustomerOrders']);//statistics - customers
+    Route::get('/{order_id}/orderItems', [OrderController::class, 'getAllOrderProducts']);//statistics - customers
 });
 Route::post('ordersTAES',[OrderController::class, 'storeTAES']);
 Route::get('unassignedOrders', [OrderController::class, 'getUnassignedOrders']);
 Route::apiResource("orders", OrderController::class);
 
 // OrderItems Routes
+
+Route::get('/order-items/prepared/{user_id}', [OrderItemsController::class, 'getAllChefOrdersPrepared']);
 Route::prefix('order-items')->group(function () {
     Route::get('/{orderItems}/user', [UserController::class, 'getUserOfOrderItems']);
     Route::get('/{orderItems}/order', [OrderController::class, 'getOrderOfOrderItems']);
@@ -61,5 +68,10 @@ Route::apiResource("order-items", OrderItemsController::class);
 // Product Routes
 Route::get('products/types', [ProductController::class, 'getProductsTypes']);
 
+//Statistics
 Route::get('/products/top', [ProductController::class, 'getBestProducts']);
+Route::get('/products/top/total', [ProductController::class, 'getTotalOrdersOfTopProducts']);
+Route::get('/products/worst', [ProductController::class, 'getWorstProducts']);
+Route::get('/products/worst/total', [ProductController::class, 'getTotalOrdersOfWorstProducts']);
+
 Route::apiResource("products", ProductController::class);

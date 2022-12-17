@@ -14,6 +14,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Customer;
+use Carbon\Carbon;
 
 class OrderController extends Controller
 {
@@ -33,7 +34,7 @@ class OrderController extends Controller
 
     public function getOrderByStatusTAES()
     {
-        return OrderResource::collection(Order::where('status', 'R')->orWhere('status', 'P')->get()); 
+        return OrderResource::collection(Order::where('status', 'R')->orWhere('status', 'P')->get());
     }
 
     public function getUnassignedOrders(){
@@ -43,7 +44,7 @@ class OrderController extends Controller
             return json_decode($order->custom)->assigned==null;
         });
         // $subset = $orders->map(function ($order) {
-        //     // return 
+        //     // return
         //     return collect($order)
         //             ->whereNotNull(json_decode($order->custom)->address)
         //             ->all();
@@ -100,7 +101,7 @@ class OrderController extends Controller
                 $this->store_each_order_item($item, $newOrder['id'], $local_number);
                 $local_number++;
             }
-            
+
             if($newOrder['customer_id'] != null){
                 $customer = Customer::find($newOrder['customer_id']);
                 $previousPoints = $customer->points;
@@ -158,12 +159,13 @@ class OrderController extends Controller
         $order->delete();
     }
 
+    //Statistics - Customer
     public function getAllCustomerOrders($user_id)
     {
         $id = Customer::where('user_id', $user_id)->get('id');
         return Order::where('customer_id', $id[0]->id)->get();
     }
-    
+
     public function getCustomerCurrentOrders($user_id)
     {
         $id = Customer::where('user_id', $user_id)->get('id');
@@ -174,22 +176,96 @@ class OrderController extends Controller
                     ->get();
     }
 
-    public function getAllOrderProducts(int $order_id)
-    {  
-        $allProducts = null;
+    public function getAllOrderProducts($order_id)
+    {
         $products_id = OrderItems::where('order_id', $order_id)->get('product_id');
 
-        foreach($products_id as $item){
-            $allProducts[] = Product::where('id', $item->product_id)->get();
-        }
+        $allProducts = Product::whereIn('id', $products_id)->get();
+
         return $allProducts;
+    }
+
+    //Statistics - Manager - Orders
+    public function getTotalOrdersByMonth()
+    {
+        $items = Order::orderBy('month', 'ASC')->groupBy('month')
+        ->selectRaw('MONTH(date) as month, sum(id) as sum')
+        ->pluck('month','sum');
+
+        $i=0;
+        foreach($items as $key =>$item){
+            $total[$i] = $key;
+            $i++;
+        }
+
+        return $total;
+    }
+
+    public function getTotalOrdersMonths()
+    {
+        $items = Order::orderBy('month', 'ASC')->groupBy('month')
+        ->selectRaw('MONTH(date) as month, sum(id) as sum')
+        ->pluck('month','sum');
+
+        $i=0;
+        foreach($items as $key =>$item){
+            $months[$i] = $item;
+
+            switch ($months[$i]){
+                case 1:
+                    $months[$i] = 'Janeiro';
+                    break;
+                case 2:
+                    $months[$i] = 'Fevereiro';
+                    break;
+                case 3:
+                    $months[$i] = 'Março';
+                    break;
+                case 4:
+                    $months[$i] = 'Abril';
+                    break;
+                case 5:
+                    $months[$i] = 'Maio';
+                    break;
+                case 6:
+                    $months[$i] = 'Junho';
+                    break;
+                case 7:
+                    $months[$i] = 'Julho';
+                    break;
+                case 8:
+                    $months[$i] = 'Agosto';
+                    break;
+                case 9:
+                    $months[$i] = 'Setembro';
+                    break;
+                case 10:
+                    $months[$i] = 'Outubro';
+                    break;
+                case 11:
+                    $months[$i] = 'Novembro';
+                    break;
+                default:
+                $months[$i] = 'Dezembro';
+            }
+            $i++;
+        }
+
+        return $months;
+    }
+
+    //Statistics - Driver
+    public function getAllOrdersDelivered(int $user_id)
+    {
+        $orders = Order::where('delivered_by', $user_id)->paginate(10);
+        return $orders;
     }
 
     public function cancelOrder(Order $order){
         if($order->customer != null){
             $customer = $order->customer;
             $customer->points = $customer->points + $order->points_used_to_pay - $order->points_gained;
-            $customer->save();    
+            $customer->save();
         }
         $order->status = 'C';
         $order->save();
