@@ -67,16 +67,28 @@ class ProductController extends Controller
         $validatedData = $request->validated();
 
         // Check if New Photo Uploaded
-        if($request->hasFile('photo_url')){
+        // if($request->hasFile('photo_url')){
+        if($request->has('photo_url')){
             // Delete Existing Photo
             if(Storage::disk('public')->exists('products/'.$product->photo_url)) {
                 Storage::disk('public')->delete('products/'.$product->photo_url);
             }
 
-            // Save New Photo
-            $path = Storage::putFile('public/products',  $request->file('photo_url'));
-            $name = basename($path);
-            $validatedData["photo_url"] = $name;
+            $image_64 = $request["photo_url"];
+
+            $extension = explode('/', explode(':', substr($image_64, 0, strpos($image_64, ';')))[1])[1];   // .jpg .png, ... 
+            //  image data to decode (eg: data:image/png;base64,imgData..)
+            $replace = substr($image_64, 0, strpos($image_64, ',')+1); // 
+          
+            // find substring to replace      
+            $image = str_replace($replace, '', $image_64); 
+            $image = str_replace(' ', '+', $image); 
+    
+            $imageName = Str::random(16).'.'.$extension;
+            
+            Storage::put('public/products/'.$imageName, base64_decode($image));
+
+            $validatedData["photo_url"] = $imageName;
         }
         
         $product->fill($validatedData);

@@ -20,7 +20,7 @@ const PASSPORT_SERVER_URL = "http://localhost";
 const CLIENT_ID = 2;
 //const CLIENT_SECRET = 'NnwPusaTbdGZmiVbt8FV2VtjCITzYR7Abe4CqSEn'; 
 
-const CLIENT_SECRET = 'vabnHSSpaYqEAQwyMNKQlFNMbW6bEv0S1dgTICN4';
+const CLIENT_SECRET = 'aGjjy4Ntmv1mnlBSNMFA3uValmOdTZFjkMgNaRGR';
 class AuthController extends Controller
 {
     private function passportAuthenticationData($username, $password)
