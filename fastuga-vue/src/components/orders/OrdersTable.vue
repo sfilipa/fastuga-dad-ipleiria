@@ -34,9 +34,7 @@ const deleteClick = (order) => {
       </tr>
     </thead>
     <tbody>
-      <tr v-for="order in props.orders.filter(order => !props.filterByType ? true : order.status === props.filterByType)
-                                      .filter(order => !props.ticketNumber ? true : order.ticket_number === props.ticketNumber)
-                                      .filter(order => !props.orderDate || isNaN(props.orderDate.getTime()) ? true : order.date === `${props.orderDate.getFullYear()}-${props.orderDate.getMonth() + 1}-${props.orderDate.getDate()}`)" :key="order.id">
+      <tr v-for="order in props.orders">
         <td> {{ order.id }} </td>
         <td> {{ order.ticket_number }} </td>
 
@@ -53,7 +51,7 @@ const deleteClick = (order) => {
               class="btn btn-xs btn-light"
               @click="showClick(order)"
               >
-              <i :class="{ 'bi bi-xs bi-search': props.parent=='all_orders',
+              <i :class="{'bi bi-xs bi-search': props.parent=='all_orders',
                                               'bi bi-check-circle-fill': props.parent=='chefs_orders'}"></i>
             </button>
 

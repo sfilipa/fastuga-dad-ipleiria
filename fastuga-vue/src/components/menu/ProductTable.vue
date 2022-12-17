@@ -1,4 +1,5 @@
 <script setup>
+import { toNumber } from "@vue/shared";
 import { ref, watch, computed, inject, onUpdated } from "vue";
 import ConfirmationDialog from "../global/ConfirmationDialog.vue";
 
@@ -29,6 +30,7 @@ const props = defineProps({
   },
   filterByType: String,
   filterByPrice: Number,
+  filterByName: String,
 });
 
 const emit = defineEmits(["add", "edit", "deleted"]);
@@ -82,9 +84,19 @@ const updatePhoto = (e) => {
     return;
   }
 
-  editingProduct.value.photo_url = e.target.files[0];
-  currentImage.value = URL.createObjectURL(e.target.files[0]);
-  console.log(currentImage.value);
+  // Save uploaded image
+  const uploadedImage = e.target.files[0];
+
+  // Create temporary Url
+  currentImage.value = URL.createObjectURL(uploadedImage);
+
+  // Save image in base64
+  const reader = new FileReader();
+  reader.readAsDataURL(uploadedImage);
+  reader.onload = (event) => {
+    editingProduct.value.photo_url = event.target.result;
+    console.log(editingProduct.value.photo_url)
+  }
 };
 
 watch(
@@ -126,10 +138,6 @@ const saveOldProduct = (product) => {
 const editClick = (product) => {
   saveOldProduct(product);
   setRowActive(product);
-  console.log("Old Product: ");
-  console.log(oldProduct);
-  console.log("Editing Product: ");
-  console.log(editingProduct.value);
 };
 
 const doneClick = () => {
@@ -138,10 +146,6 @@ const doneClick = () => {
 };
 
 const cancelClick = () => {
-  console.log("Cancel old: ");
-  console.log(oldProduct);
-  console.log("Cancel editing: ");
-  console.log(editingProduct.value);
   restoreProduct();
   disableRowActive();
 };
@@ -208,8 +212,8 @@ onUpdated(() => {
       :msg="``"
       @confirmed="dialogConfirmAdd"
     >
-      <div>
-        <span>Product: {{ productToAddOrderName }}</span
+      <div class="confirmation-middle">
+        <span>{{ productToAddOrderName }}:</span
         ><input
           v-model="quantityToAddOrder"
           class="form-control confirmation-dialog-input"
@@ -234,7 +238,7 @@ onUpdated(() => {
   <div class="grid-container">
     <div v-if="props.products == null">
       <div class="d-flex justify-content-center spinner-font">
-        <div class="spinner-border" role="status" style="margin: 2%">
+        <div class="spinner-border" role="status">
           <span class="sr-only"></span>
         </div>
       </div>
@@ -252,10 +256,15 @@ onUpdated(() => {
           props.filterByPrice == null || (editRow && product == editingProduct)
             ? true
             : product.price <= props.filterByPrice
+        )
+        .filter((product) =>
+          props.filterByName == null || (editRow && product == editingProduct)
+            ? true
+            : product.name.toLowerCase().match(props.filterByName)
         )"
       :key="product.id"
     >
-      <div class="product-header product-font">
+      <div class="product-header fastuga-colored-font">
         <!-- Editing Row Photo -->
         <div v-if="editRow && product == editingProduct" class="mb-2">
           <!-- Uploaded Photo -->
@@ -275,7 +284,7 @@ onUpdated(() => {
             id="inputPhoto"
             accept="image/png, image/jpeg, image/jpg"
             @change="updatePhoto"
-            class="input-photo product-font"
+            class="input-photo fastuga-colored-font"
           />
           <!-- <field-error-message :errors="errors" fieldName="photo"></field-error-message> -->
         </div>
@@ -295,7 +304,7 @@ onUpdated(() => {
               id="inputName"
               required
               v-model="editingProduct.name"
-              class="product-input product-name"
+              class="form-control product-input product-name"
             />
             <!-- <field-error-message :errors="errors" fieldName="name"></field-error-message> -->
           </div>
@@ -309,7 +318,7 @@ onUpdated(() => {
             <!-- Editiing Row Type -->
             <div v-if="editRow && product == editingProduct" class="mb-3">
               <select
-                class="form-select product-input product-font"
+                class="form-select product-input fastuga-colored-font"
                 id="inputType"
                 v-model="editingProduct.type"
               >
@@ -330,25 +339,33 @@ onUpdated(() => {
           </div>
         </div>
       </div>
-      <div class="product-body product-font">
+      <div class="product-body fastuga-colored-font">
         <!-- Editiing Row Description -->
-        <div v-if="editRow && product == editingProduct" style="width: -moz-available;">
+        <div
+          v-if="editRow && product == editingProduct"
+          style="width: -moz-available"
+        >
           <textarea
             id="inputDescription"
             rows="2"
             v-model="editingProduct.description"
-            class="product-input product-font"
+            class="form-control product-input fastuga-colored-font"
           ></textarea>
           <!-- <field-error-message :errors="errors" fieldName="description"></field-error-message> -->
         </div>
 
         <!-- Product Description -->
         <div v-else class="product-description">
-          {{ product.description }}
+          <span v-if="product.description.length > 110">
+            {{ product.description.substring(0, 110 - 3) }} <abbr :title="product.description">...</abbr>
+          </span>
+          <span v-else>
+            {{ product.description }}
+          </span>
         </div>
       </div>
-      <hr class="product-font" />
-      <div class="product-footer product-font">
+      <hr class="fastuga-colored-font" />
+      <div class="product-footer fastuga-colored-font">
         <div v-if="product != editingProduct">
           <button
             class="btn btn-xs btn-light hvr-grow"
@@ -396,12 +413,12 @@ onUpdated(() => {
 
         <!-- Editiing Row Price -->
         <div v-if="editRow && product == editingProduct" class="mb-3">
-          <div >
+          <div>
             <input
               type="number"
-              class="product-input product-price"
+              class="form-control product-input product-price"
               id="inputPrice"
-              min="0"
+              min="0.1"
               max="99"
               step="0.1"
               v-model="editingProduct.price"
@@ -423,22 +440,25 @@ onUpdated(() => {
 <style scoped>
 @import url("https://fonts.googleapis.com/css2?family=Maven+Pro&display=swap");
 
+.confirmation-middle{
+  text-align: center;
+}
+
 .product-edit {
   display: flex;
 }
 
 .product-input {
-  background-color: #4e4646;
+  background-color: #e68310 !important;
   border-radius: 7%;
-  color: white;
+  color: white !important;
 }
-.spinner-font {
-  font-size: 10px;
-  font-family: "Maven Pro", sans-serif;
-}
+
 .confirmation-dialog-input {
-  margin-left: 20px;
-  display: inline;
+  margin-left: 4% !important;
+  display: inline !important;
+  width: 20% !important;
+  
 }
 
 .product-button {
@@ -483,7 +503,8 @@ onUpdated(() => {
   margin-top: 10px;
   overflow: auto;
   height: 72px;
-  text-align: justify;
+  text-align: start;
+  word-break: break-all;
 }
 
 .product-name {
@@ -503,12 +524,6 @@ onUpdated(() => {
   min-height: 94.5px;
 }
 
-.product-font {
-  color: white;
-  font-size: 15px;
-  font-family: "Maven Pro", sans-serif;
-}
-
 .grid-container {
   display: grid;
   padding: 10px;
@@ -525,7 +540,7 @@ onUpdated(() => {
   height: 82%;
   margin: 29px;
   border-radius: 2%;
-  background-image: linear-gradient(to top left, #4e4646, #7f7474);
+  background-image: linear-gradient(to top left, #ff8300, #ffa71dd6);
   /* background-color: #6f6161; */
   box-shadow: 0 10px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
@@ -556,7 +571,7 @@ input[type="text"] {
 }
 
 input[type="number"] {
-  width: 42%;
+  width: 50%;
   margin-left: auto;
   display: flex;
 }

@@ -7,7 +7,7 @@ import Register from "../components/auth/Register.vue"
 import ChangePassword from "../components/auth/ChangePassword.vue"
 import Tasks from "../components/tasks/Tasks.vue"
 import Orders from "../components/orders/Orders.vue"
-import OrdersChefs from "../components/orders/OrdersChefs.vue"
+import OrdersEmployees from "../components/orders/OrdersEmployees.vue"
 import NewOrder from "../components/orders/NewOrder.vue"
 import Projects from "../components/projects/Projects.vue"
 import Users from "../components/users/Users.vue"
@@ -30,7 +30,7 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
+      name: 'Home',
       component: HomeView
     },
     {
@@ -81,9 +81,9 @@ const router = createRouter({
       component: Orders,
     },
     {
-      path: '/ordersChefs',
-      name: 'OrdersChefs',
-      component: OrdersChefs,
+      path: '/ordersEmployees',
+      name: 'OrdersEmployees',
+      component: OrdersEmployees,
     },
     {
       path: '/employees',

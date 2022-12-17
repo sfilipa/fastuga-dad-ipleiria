@@ -23,7 +23,7 @@ const login = async () => {
     socket.emit('userLoggedIn', userStore.user)
     await userStore.loadUser()
     emit('login')
-    router.push({name: "PublicBoard"})
+    router.push('/')
   } else {
     userStore.clearUser()
     credentials.value.password = ''

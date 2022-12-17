@@ -46,12 +46,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <nav class="navbar navbar-expand-md navbar-dark bg-dark sticky-top flex-md-nowrap p-0 shadow">
+  <nav class="navbar navbar-dark navbar-expand-md sticky-top flex-md-nowrap p-0 shadow fastuga-navbar">
     <div class="container-fluid">
-      <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" :to="{ name: 'home' }">
-        <img src="@/assets/logo.svg" alt="" width="30" height="24" class="d-inline-block align-text-top" />
-        Fastuga
-      </a>
+      <router-link class="fastuga-colored-font fastuga-logo" :to="{ name: 'Home' }">
+        <div class="menu-header">
+          <img src="@/assets/restaurantFastugaLogo.png" alt="" class="d-inline-block align-text-top menu-logo" />
+        </div>
+      </router-link>
       <button id="buttonSidebarExpandId" ref="buttonSidebarExpand" class="navbar-toggler" type="button"
         data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false"
         aria-label="Toggle navigation">
@@ -61,14 +62,14 @@ onMounted(() => {
       <div class="collapse navbar-collapse justify-content-end">
         <ul class="navbar-nav">
           <li class="nav-item" v-show="!userStore.user">
-            <router-link class="nav-link" :class="{ active: $route.name === 'Register' }" :to="{ name: 'Register' }"
+            <router-link class="nav-link fastuga-colored-font" :class="{ active: $route.name === 'Register' }" :to="{ name: 'Register' }"
               @click="clickMenuOption">
               <i class="bi bi-box-arrow-in-right"></i>
               Register
             </router-link>
           </li>
           <li class="nav-item" v-show="!userStore.user">
-            <router-link class="nav-link" :class="{ active: $route.name === 'Login' }" :to="{ name: 'Login' }"
+            <router-link class="nav-link fastuga-colored-font" :class="{ active: $route.name === 'Login' }" :to="{ name: 'Login' }"
               @click="clickMenuOption">
               <i class="bi bi-box-arrow-in-right"></i>
               Login
@@ -82,14 +83,14 @@ onMounted(() => {
             </a>
             <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
               <li>
-                <router-link class="dropdown-item" :class="{ active: $route.name == 'User' && $route.params.id == userStore.userId }"
+                <router-link class="dropdown-item fastuga-font" :class="{ active: $route.name == 'User' && $route.params.id == userStore.userId }"
                   :to="{ name: 'User', params: { id: userStore.userId } }" @click="clickMenuOption">
                   <!--Onde tem id = 1 $route.params.id == 1 e tem de se trocar para userStore.userId-->
                   <i class="bi bi-person-square"></i>Profile
                 </router-link>
               </li>
               <li>
-                <router-link class="dropdown-item" :class="{ active: $route.name === 'ChangePassword' }"
+                <router-link class="dropdown-item fastuga-font" :class="{ active: $route.name === 'ChangePassword' }"
                   :to="{ name: 'ChangePassword' }" @click="clickMenuOption">
                   <i class="bi bi-key-fill"></i>
                   Change password
@@ -97,14 +98,6 @@ onMounted(() => {
               </li>
               <li>
                 <hr class="dropdown-divider" />
-              </li>
-              <li>
-                <router-link class="dropdown-item" :class="{ active: $route.name === 'Statistics' }"
-                             :to="{ name: 'Statistics' }" @click="clickMenuOption">
-
-                  <i class="bi bi-graph-up"></i>
-                  Statistics
-                </router-link>
               </li>
               <li>
                 <hr class="dropdown-divider" />
@@ -121,15 +114,15 @@ onMounted(() => {
     </div>
   </nav>
 
-  <div class="container-fluid">
-    <div class="row">
+  <div class="container-fluid menu-full-height">
+    <div class="row menu-full-height">
       <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
         <div class="position-sticky pt-3">
           <ul class="nav flex-column">
             <li class="nav-item">
-              <router-link class="nav-link" :class="{ active: $route.name === 'PublicBoard' }"
+              <router-link class="nav-link fastuga-font" :class="{ active: $route.name === 'PublicBoard' }"
                 :to="{ name: 'PublicBoard' }" @click="clickMenuOption">
-                <i class="bi bi-house"></i>
+                <i class="bi bi-card-checklist"></i>
                 Public Board
               </router-link>
             </li>
@@ -144,7 +137,7 @@ onMounted(() => {
               </router-link>
             </li> -->
             <li class="nav-item">
-              <router-link class="nav-link" :class="{ active: $route.name === 'Menu' }" :to="{ name: 'Menu' }"
+              <router-link class="nav-link fastuga-font" :class="{ active: $route.name === 'Menu' }" :to="{ name: 'Menu' }"
                 @click="clickMenuOption">
                 <i class="bi bi-cup-straw"></i>
                 Menu
@@ -152,7 +145,7 @@ onMounted(() => {
             </li>
 
             <li class="nav-item">
-              <router-link class="nav-link" :class="{ active: $route.name === 'Orders' }" :to="{ name: 'Orders' }"
+              <router-link class="nav-link fastuga-font" :class="{ active: $route.name === 'Orders' }" :to="{ name: 'Orders' }"
                 @click="clickMenuOption">
                 <i class="bi bi-list-stars"></i>
                 Orders
@@ -160,15 +153,15 @@ onMounted(() => {
             </li>
 
             <li class="nav-item">
-              <router-link class="nav-link" :class="{ active: $route.name === 'OrdersChefs' }" :to="{ name: 'OrdersChefs' }"
+              <router-link class="nav-link fastuga-font" :class="{ active: $route.name === 'OrdersEmployees' }" :to="{ name: 'OrdersEmployees' }"
                            @click="clickMenuOption">
                 <i class="bi bi-people"></i>
-                Chefs Orders
+                Employees Orders
               </router-link>
             </li>
 
             <li class="nav-item">
-              <router-link class="nav-link" :class="{ active: $route.name === 'Employees' }" :to="{ name: 'Employees' }"
+              <router-link class="nav-link fastuga-font" :class="{ active: $route.name === 'Employees' }" :to="{ name: 'Employees' }"
                 @click="clickMenuOption">
                 <i class="bi bi-people"></i>
                 Employees
@@ -176,45 +169,22 @@ onMounted(() => {
             </li>
 
             <li class="nav-item">
-              <router-link class="nav-link" :class="{ active: $route.name === 'Tasks' }" :to="{ name: 'Tasks' }"
+              <router-link class="nav-link fastuga-font" :class="{ active: $route.name === 'Tasks' }" :to="{ name: 'Tasks' }"
                 @click="clickMenuOption">
                 <i class="bi bi-bell"></i>
                 Notifications
               </router-link>
             </li>
-            <!-- <li class="nav-item">
-              <router-link
-                class="nav-link"
-                :class="{ active: $route.name === 'EmployeesMenu' }"
-                :to="{ name: 'EmployeesMenu' }"
-              >
-                <i class="bi bi-person-workspace"></i>
-                Employees
-              </router-link>
-            </li> -->
-            <!-- <li class="nav-item">
-              <router-link
-                class="nav-link"
-                :class="{ active: $route.name === 'Projects' }"
-                :to="{ name: 'Projects' }"
-              >
-                <i class="bi bi-files"></i>
-                Projects
-              </router-link>
+            <li class="nav-item" v-show="userStore.user">
+                <router-link class="nav-link fastuga-font" :class="{ active: $route.name === 'Statistics' }" :to="{ name: 'Statistics' }"
+                  @click="clickMenuOption">
+                  <i class="bi bi-graph-up"></i>
+                  Statistics
+                </router-link>
             </li>
-            <li class="nav-item">
-              <router-link
-                class="nav-link"
-                :class="{ active: $route.name === 'Users' }"
-                :to="{ name: 'Users' }"
-              >
-                <i class="bi bi-people"></i>
-                Team Members
-              </router-link>
-            </li> -->
           </ul>
 
-          <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted" >
+          <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted fastuga-font">
             <span>My Orders</span>
             <router-link class="link-secondary" :to="{ name: 'NewOrder' }" aria-label="Make a new order"
               @click="clickMenuOption">
@@ -222,16 +192,9 @@ onMounted(() => {
             </router-link>
           </h6>
           <ul class="nav flex-column mb-2">
-            <!-- <li class="nav-item" v-for="prj in workInProgressProjects" :key="prj.id">
-              <router-link class="nav-link w-100 me-3"
-                :class="{ active: $route.name == 'ProjectTasks' && $route.params.id == prj.id }"
-                :to="{ name: 'ProjectTasks', params: { id: prj.id } }" @click="clickMenuOption">
-                <i class="bi bi-file-ruled"></i>
-                {{ prj.name }}
-              </router-link>
-            </li> -->
             <li class="nav-item" v-for="order in userStore.myCurrentOrders" :key="order.id">
-              Ticket Number: {{ order.ticket_number }}
+              <!--TODO é preciso atualizar isto no cliente quando a order muda de estado -->
+              Ticket Number: {{ order.ticket_number + " - " + (order.status == 'R' ? "Ready" : "Preparing")}}
             </li>
           </ul>
 
@@ -276,8 +239,7 @@ onMounted(() => {
           </div>
         </div>
       </nav>
-
-      <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+      <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 menu-full-height">
         <router-view></router-view>
       </main>
     </div>
@@ -286,6 +248,38 @@ onMounted(() => {
 
 <style>
 @import "./assets/dashboard.css";
+@import url("https://fonts.googleapis.com/css2?family=Maven+Pro&display=swap");
+
+
+.fastuga-logo{
+  background-color: transparent;
+}
+
+.menu-header{
+  vertical-align: middle;
+  display: flex;
+}
+
+.menu-logo{
+  width: 189px;
+}
+
+.fastuga-colored-font{
+  color: white !important;
+  font-size: 15px;
+  font-family: "Maven Pro", sans-serif;
+}
+
+.fastuga-font {
+  font-size: 15px;
+  font-family: "Maven Pro", sans-serif;
+}
+
+.fastuga-navbar{
+  background-color: #362222;
+  height: 4rem;
+}
+
 
 .avatar-img {
   margin: -1.2rem 0.8rem -2rem 0.8rem;
@@ -310,5 +304,33 @@ onMounted(() => {
 
 #sidebarMenu {
   overflow-y: auto;
+}
+
+.spinner-font {
+  margin: 2%;
+  font-size: 10px;
+  font-family: "Maven Pro", sans-serif;
+}
+
+.form-select:focus{
+  border-color: rgba(164, 108, 108, 0.31) !important;
+  box-shadow: 0 0 0 .25rem rgba(164, 108, 108, 0.31) !important;
+}
+
+.form-control:focus{
+  border-color: rgba(164, 108, 108, 0.31) !important;
+  box-shadow: 0 0 0 .25rem rgba(164, 108, 108, 0.31) !important;
+}
+
+.sidebar .nav-link.active{
+  background-color: #ffa71dd6;
+}
+
+a:hover{
+    color: #af7777 !important;
+  }
+
+html, body, #app, .menu-full-height{
+  height: 100%;
 }
 </style>

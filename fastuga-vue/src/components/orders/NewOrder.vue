@@ -5,6 +5,7 @@
     import { useUserStore } from '@/stores/user.js'
     import axios from 'axios'
     import ConfirmationDialog from "../global/ConfirmationDialog.vue"
+    import router from "@/router";
 
     const axiosLaravel = inject('axios')
     const PAYMENT_URL = 'https://dad-202223-payments-api.vercel.app' 
@@ -45,7 +46,7 @@
     const confirmPayment = () => {
         const paymentBody = {
             'ticket_number': 1,
-            'status': checkOrderStatus(),
+            'status': 'P',
             'customer_id': customer.value != null ? customer.value.id : null,
             'total_price': store.totalPrice,
             'total_paid': finalPrice.value,
@@ -154,15 +155,6 @@
         }
     }
 
-    const checkOrderStatus = () => {
-        for(let elem of store.items){
-            if(elem.type.toLowerCase() == 'hot dish'){
-                return 'P'
-            }
-        }
-        return 'R'
-    }
-
     const getTimestamp = () => {
         var date = new Date()
         return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
@@ -178,7 +170,6 @@
             })
             .catch((error)=> {
                 console.log(error)
-                // toast.error("Couldn't load customer")
             })
     }
 
@@ -232,7 +223,7 @@
       user.loadMyCurrentOrders()
       store.resetOrderItems()
       //redirect to somewhere
-
+      // router.push('/publicBoard')
     }
 
 </script>

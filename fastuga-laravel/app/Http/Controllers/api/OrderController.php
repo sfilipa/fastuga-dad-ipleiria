@@ -59,9 +59,25 @@ class OrderController extends Controller
         return new OrderResource($orderItems->order);
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return Order::orderBy('id','DESC')->get();
+        $query = Order::query();
+        $status = $request->query('status');
+        if($status != null){
+            $query->where('status',$status);
+        }
+
+        $date = $request->query('date');
+        if($date != null){
+            $query->where('date',$date);
+        }
+
+        $ticketNumber = $request->query('ticket');
+        if($ticketNumber != null){
+            $query->where('ticket_number',$ticketNumber);
+        }
+
+        return $query->orderBy('id','DESC')->paginate(10);
     }
 
     public function store(Request $request)
@@ -258,8 +274,14 @@ class OrderController extends Controller
 
     public function updateOrderStatus(Order $order, $status)
     {
+        if($status == 'R'){
+            //verificar que todos os items estão ready
+        }
         $order->status = $status;
         $order->save();
         return new OrderResource($order);
+    }
+
+    public function checkIfOrderIsReady(Order $order){
     }
 }
