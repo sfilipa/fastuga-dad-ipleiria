@@ -8,9 +8,6 @@ const router = useRouter()
 const axios = inject('axios')
 const toast = inject('toast')
 
-// WS
-const socket = inject("socket")
-
 const userStore = useUserStore()
 
 const credentials = ref({

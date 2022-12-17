@@ -1,6 +1,6 @@
 <script setup>
 import { useRouter, RouterLink, RouterView } from "vue-router"
-import { ref, onMounted, inject } from "vue";
+import { ref, onMounted, inject, watch } from "vue";
 
 import { useUserStore } from './stores/user.js'
 
@@ -9,8 +9,6 @@ const axios = inject("axios")
 const toast = inject("toast")
 
 const userStore = useUserStore()
-
-const workInProgressProjects = ref([]);
 
 const buttonSidebarExpand = ref(null)
 
@@ -31,16 +29,20 @@ const clickMenuOption = () => {
   }
 }
 
-onMounted(() => {
-  // const userId = 1
-  // axios.get("users/" + userId + "/projects/inprogress")
-  //   .then((response) => {
-  //     workInProgressProjects.value = response.data.data;
-  //   })
-  //   .catch((error) => {
-  //     console.log(error);
-  //   })
+watch(() => userStore.userId, (id) => {
+    fetchCustomerOrders(id)
 })
+
+const fetchCustomerOrders = (userId) => {
+  if(userId != -1){
+    userStore.loadMyCurrentOrders()
+  }
+}
+
+onMounted(() => {
+  fetchCustomerOrders(userStore.userId)
+})
+
 </script>
 
 <template>
@@ -148,6 +150,14 @@ onMounted(() => {
             </li>
 
             <li class="nav-item">
+              <router-link class="nav-link fastuga-font" :class="{ active: $route.name === 'OrdersEmployees' }" :to="{ name: 'OrdersEmployees' }"
+                           @click="clickMenuOption">
+                <i class="bi bi-people"></i>
+                Employees Orders
+              </router-link>
+            </li>
+
+            <li class="nav-item">
               <router-link class="nav-link fastuga-font" :class="{ active: $route.name === 'Employees' }" :to="{ name: 'Employees' }"
                 @click="clickMenuOption">
                 <i class="bi bi-people"></i>
@@ -162,36 +172,6 @@ onMounted(() => {
                 Notifications
               </router-link>
             </li>
-            <!-- <li class="nav-item">
-              <router-link
-                class="nav-link"
-                :class="{ active: $route.name === 'EmployeesMenu' }"
-                :to="{ name: 'EmployeesMenu' }"
-              >
-                <i class="bi bi-person-workspace"></i>
-                Employees
-              </router-link>
-            </li> -->
-            <!-- <li class="nav-item">
-              <router-link
-                class="nav-link"
-                :class="{ active: $route.name === 'Projects' }"
-                :to="{ name: 'Projects' }"
-              >
-                <i class="bi bi-files"></i>
-                Projects
-              </router-link>
-            </li>
-            <li class="nav-item">
-              <router-link
-                class="nav-link"
-                :class="{ active: $route.name === 'Users' }"
-                :to="{ name: 'Users' }"
-              >
-                <i class="bi bi-people"></i>
-                Team Members
-              </router-link>
-            </li> -->
             <li class="nav-item" v-show="userStore.user">
                 <router-link class="nav-link fastuga-font" :class="{ active: $route.name === 'Statistics' }" :to="{ name: 'Statistics' }"
                   @click="clickMenuOption">
@@ -209,13 +189,9 @@ onMounted(() => {
             </router-link>
           </h6>
           <ul class="nav flex-column mb-2">
-            <li class="nav-item" v-for="prj in workInProgressProjects" :key="prj.id">
-              <router-link class="nav-link w-100 me-3"
-                :class="{ active: $route.name == 'ProjectTasks' && $route.params.id == prj.id }"
-                :to="{ name: 'ProjectTasks', params: { id: prj.id } }" @click="clickMenuOption">
-                <i class="bi bi-file-ruled"></i>
-                {{ prj.name }}
-              </router-link>
+            <li class="nav-item" v-for="order in userStore.myCurrentOrders" :key="order.id">
+              <!--TODO é preciso atualizar isto no cliente quando a order muda de estado -->
+              Ticket Number: {{ order.ticket_number + " - " + (order.status == 'R' ? "Ready" : "Preparing")}}
             </li>
           </ul>
 

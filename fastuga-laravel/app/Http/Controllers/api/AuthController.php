@@ -18,9 +18,8 @@ use Illuminate\Support\Facades\Hash;
 
 const PASSPORT_SERVER_URL = "http://localhost";
 const CLIENT_ID = 2;
-//const CLIENT_SECRET = 'NnwPusaTbdGZmiVbt8FV2VtjCITzYR7Abe4CqSEn'; 
+const CLIENT_SECRET = 'jK4F1tsBSqhrk83ux9O8iKlUPNOseknnCAgpdVNq';
 
-const CLIENT_SECRET = 'aGjjy4Ntmv1mnlBSNMFA3uValmOdTZFjkMgNaRGR';
 class AuthController extends Controller
 {
     private function passportAuthenticationData($username, $password)
@@ -60,14 +59,14 @@ class AuthController extends Controller
         try {
 
             $userRequest->validate($userRequest->rules());//validate password without hash
-            
-            $userRequest->query->add(['password' => Hash::make($userRequest->password)]); 
+
+            $userRequest->query->add(['password' => Hash::make($userRequest->password)]);
 
             $newUser = User::create($userRequest->validate($userRequest->rules()));
-            
+
             $responseUser = new UserResource($newUser);
 
-            $customerRequest->query->add(['user_id' => $newUser->id]); 
+            $customerRequest->query->add(['user_id' => $newUser->id]);
 
             $newCustomer = Customer::create($customerRequest->validate($customerRequest->rules()));
             $responseCustomer = new CustomerResource($newCustomer);

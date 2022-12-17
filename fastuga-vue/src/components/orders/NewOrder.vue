@@ -5,6 +5,7 @@
     import { useUserStore } from '@/stores/user.js'
     import axios from 'axios'
     import ConfirmationDialog from "../global/ConfirmationDialog.vue"
+    import router from "@/router";
 
     const axiosLaravel = inject('axios')
     const PAYMENT_URL = 'https://dad-202223-payments-api.vercel.app' 
@@ -45,14 +46,14 @@
     const confirmPayment = () => {
         const paymentBody = {
             'ticket_number': 1,
-            'status': checkOrderStatus(),
+            'status': 'P',
             'customer_id': customer.value != null ? customer.value.id : null,
             'total_price': store.totalPrice,
             'total_paid': finalPrice.value,
             'total_paid_with_points': store.totalPrice - finalPrice.value,
             'points_gained': user.userId != -1 ? calculatePointsGained() : 0,
             'points_used_to_pay': pointsToUse.value,
-            'payment_type': finalPrice.value == 0 ? null : paymentType.value,
+            'payment_type': finalPrice.value == 0 ? null : paymentType.value, //It's zero when the customer paid for the whole order with just their points
             'payment_reference': finalPrice.value == 0 ? null : paymentReference.value,
             'date': getTimestamp(),
             'delivered_by':null,
@@ -62,7 +63,8 @@
         if(finalPrice.value == 0){
             axiosLaravel.post('/orders', paymentBody)
                 .then((response)=>{
-                    // console.log(response.data.data)
+                    console.log(response.data.data)
+                    ticketNumber.value = response.data.data.ticket_number
                     orderCompletedDialog.value.show()
                 })
                 .catch((error)=>{
@@ -96,18 +98,17 @@
                 'reference': paymentReference.value,
                 'value': finalPrice.value
         }
-
+        
         axios.post(`${PAYMENT_URL}/api/payments`, requestBody)
             .then(() => {
-                paymentBody.payment_type = paymentType.value
-                paymentBody.payment_reference = paymentReference.value
                 axiosLaravel.post('/orders', paymentBody)
                 .then((response)=>{
-                    // console.log(response.data.data)
+                    console.log(response.data.data)
                     ticketNumber.value = response.data.data.ticket_number
                     orderCompletedDialog.value.show()
                 })
                 .catch((error)=>{
+                    console.log(error)
                     toast.error('Order was not created due to ' + error.response.data.message)
                 })
             })
@@ -154,22 +155,13 @@
         }
     }
 
-    const checkOrderStatus = () => {
-        for(let elem of store.items){
-            if(elem.type.toLowerCase() == 'hot dish'){
-                return 'P'
-            }
-        }
-        return 'R'
-    }
-
     const getTimestamp = () => {
         var date = new Date()
         return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
     }
 
     const LoadCustomerInfo = () => {
-        axiosLaravel.get(`/customers/${user.userId}`)
+        axiosLaravel.get(`/customers/user/${user.userId}`)
             .then((response) => {
                 customer.value = response.data.data
                 paymentReference.value = customer.value.default_payment_reference
@@ -178,7 +170,6 @@
             })
             .catch((error)=> {
                 console.log(error)
-                // toast.error("Couldn't load customer")
             })
     }
 
@@ -229,9 +220,10 @@
     }
 
     const dialogConfirm = () => {
-        store.resetOrderItems()
-        //redirect to somewhere
-
+      user.loadMyCurrentOrders()
+      store.resetOrderItems()
+      //redirect to somewhere
+      // router.push('/publicBoard')
     }
 
 </script>
@@ -394,15 +386,12 @@
     position: relative;
     border: 1px solid rgb(12, 12, 12);
 }
-
 input[type="radio"]{
     margin-right: 10px;
     cursor: pointer;
 }
-
 img, svg {
     vertical-align: middle;
     width: 65px;
 }
-
 </style>
