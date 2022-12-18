@@ -212,8 +212,8 @@ onMounted(() => {
                 <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink2">
                   <li>
                     <router-link class="dropdown-item"
-                      :class="{ active: $route.name == 'User' && $route.params.id == 1 }"
-                      :to="{ name: 'User', params: { id: 1 } }" @click="clickMenuOption">
+                      :class="{ active: $route.name == 'User' && $route.params.id == userStore.userId }"
+                      :to="{ name: 'User', params: { id: userStore.userId } }" @click="clickMenuOption">
                       <!--Onde tem id = 1 $route.params.id == 1 e tem de se trocar para userStore.userId-->
                       <i class="bi bi-person-square"></i>Profile
                     </router-link>

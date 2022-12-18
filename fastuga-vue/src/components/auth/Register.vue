@@ -1,48 +1,196 @@
 <script setup>
-import { ref, inject } from 'vue'
+import {ref, inject} from 'vue'
 
 import axios from 'axios'
-import { useRouter } from 'vue-router'
-import { useUserStore } from '../../stores/user.js'
+import {useRouter} from 'vue-router'
+import {useUserStore} from '../../stores/user.js'
 
 const router = useRouter()
 const toast = inject('toast')
 
-const userStore = useUserStore()
+const errors = ref(null)
 
-const credentials = ref({
-  email: '',
-  password: '',
-  confirmationPassword: '',
-  name: '',
-  phone: '',
-  nif: '',
-  default_payment_type: ref("visa"),
-  default_payment_reference: '',
-  type: 'C',
-  blocked: 0,
-  points: 0
-})
+const nameInput = ref('')
+const emailInput = ref('')
+const passwordInput = ref('')
+const confirmationPasswordInput = ref('')
 
+const phoneInput = ref('')
+const nifInput = ref('')
+const default_payment_typeInput = ref('visa')
+const default_payment_referenceInput = ref('')
 
 const emit = defineEmits(['register'])
 
 const register = async () => {
-  if (credentials.value.password == credentials.value.confirmationPassword) {
-    await axios.post(`http://localhost:8081/api/register`, credentials.value)
+  if (userValidations() == -1) {
+    return
+  }
+  if (customerValidations() == -1) {
+    return
+  }
+  if (paymentReferenceValidations() == -1) {
+    return
+  }
+  let formData = new FormData();
+
+  formData.append('name', nameInput.value);
+  formData.append('email', emailInput.value);
+  formData.append('password', passwordInput.value);
+  formData.append('blocked', 0);
+  formData.append('type', 'C');
+  formData.append('_method', 'POST');
+  formData.append('phone', phoneInput.value);
+  formData.append('nif', nifInput.value);
+  formData.append('default_payment_type', default_payment_typeInput.value);
+  formData.append('default_payment_reference', default_payment_referenceInput.value);
+  formData.append('points', 0);
+
+  await axios.post(`http://localhost:8081/api/register`, formData)
       .then((response) => {
         toast.success('Register Successful.')
         emit('register')
-        router.push({ name: "Login" })
+        router.push({name: "Login"})
       })
       .catch((error) => {
         const errorSplit = error.response.data.split('.')
         toast.error("Register Failed - " + errorSplit[0] + ".")
       });
-  } else {
-    toast.error('Password and Confirmation Password should match!')
+}
+
+const userValidations = () => {
+  if (nameInput.value == '') {
+    errors.value = {
+      name: ["Name field cannot be empty!"]
+    }
+    return -1
+  }
+  if (emailInput.value == '') {
+    errors.value = {
+      email: ["Email field cannot be empty!"]
+    }
+    return -1
+  }
+  var pattern = /^[a-zA-Z0-9.+_]+@[a-zA-Z0-9.+_]+\.[a-zA-Z]$/
+  if (!emailInput.value.match(pattern)) {
+    errors.value = {
+      email: ["Invalid Email Format!"]
+    }
+    return -1
+  }
+  if (passwordInput.value == '') {
+    errors.value = {
+      password: ["Password field cannot be empty!"]
+    }
+    return -1
+  }
+  if (!passwordInput.value.match('[0-9a-zA-Z]{8}')) {
+    errors.value = {
+      password: ["Invalid Password Format!"]
+    }
+    return -1
+  }
+  if (confirmationPasswordInput.value == '') {
+    errors.value = {
+      confirmationPassword: ["Password Confirmation field cannot be empty!"]
+    }
+    return -1
+  }
+  if (!confirmationPasswordInput.value.match('[0-9a-zA-Z]{8}')) {
+    errors.value = {
+      confirmationPassword: ["Invalid Confirmation Password Format!"]
+    }
+    return -1
+  }
+  if (confirmationPasswordInput.value != passwordInput.value) {
+    errors.value = {
+      confirmationPassword: ["Password and Confirmation Password don't match!"]
+    }
+    return -1
   }
 }
+
+const customerValidations = () => {
+  if (nifInput.value == '') {
+    errors.value = {
+      nif: ["NIF field cannot be empty!"]
+    }
+    return -1
+  }
+  var pattern = /^[1-9][0-9]{8}$/
+  if (!nifInput.value.match(patterm)) {
+    errors.value = {
+      nif: ["Invalid NIF Format"]
+    }
+    return -1
+  }
+  if (phoneInput.value == '') {
+    errors.value = {
+      phone: ["Phone field cannot be empty!"]
+    }
+    return -1
+  }
+  var pattern = /^[1-9][0-9]{8}$/
+  if (!phoneInput.value.match(pattern)) {
+    errors.value = {
+      phone: ["Invalid Phone Format"]
+    }
+    return -1
+  }
+}
+
+const paymentReferenceValidations = () => {
+  if (default_payment_typeInput.value == 'visa') {
+    if (!default_payment_referenceInput.value.match('[1-9][0-9]{15}')) {
+      errors.value = {
+        visa: ["Invalid Visa Reference"]
+      }
+      return -1
+    }
+    if (default_payment_referenceInput.value == '') {
+      errors.value = {
+        visa: ["Default Payment Reference field cannot be empty!"]
+      }
+      return -1
+    }
+  } else if (default_payment_typeInput.value == 'mbway') {
+    var pattern = /^[1-9][0-9]{8}$/
+    if (!default_payment_referenceInput.value.match(pattern)) {
+      errors.value = {
+        mbway: ["Invalid Phone Number"]
+      }
+      return -1
+    }
+    if (default_payment_referenceInput.value == '') {
+      errors.value = {
+        mbway: ["Default Payment Reference field cannot be empty!"]
+      }
+      return -1
+    }
+  } else if (default_payment_typeInput.value == 'paypal') {
+    var pattern = /^[a-zA-Z0-9.+_]+@[a-zA-Z0-9.+_]+\.[a-zA-Z]$/
+    if (!default_payment_referenceInput.value.match(pattern)) {
+      errors.value = {
+        paypal: ["Invalid Phone Format"]
+      }
+      if (default_payment_referenceInput.value == '') {
+        errors.value = {
+          paypal: ["Default Payment Reference field cannot be empty!"]
+        }
+        return -1
+      }
+      return -1
+    }
+  } else {
+    errors.value = {
+      default: ["Payment Type Not Supported"]
+    }
+    toast.error('Order was not created due to validation errors!')
+    return -1
+  }
+}
+
+
 
 </script>
 
@@ -54,42 +202,48 @@ const register = async () => {
       <div class="col-50">
         <label>Name:</label>
         <input type="text" class="form-control" id="inputName" placeholder="Enter Name" required
-          v-model="credentials.name">
+               v-model="nameInput">
+        <field-error-message :errors="errors" fieldName="name"></field-error-message>
       </div>
       <div class="col-50">
         <label>Email:</label>
         <input type="text" class="form-control" id="inputEmail" placeholder="Enter Email" required
-          v-model="credentials.email">
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-50">
-        <label>NIF:</label>
-        <input type="text" class="form-control" id="inputNif" placeholder="Enter NIF" required
-          v-model="credentials.nif">
-      </div>
-      <div class="col-50">
-        <label>Phone Number:</label>
-        <input type="text" class="form-control" id="inputPhoneNumber" placeholder="Enter Phone Number" required
-          v-model="credentials.phone">
+               v-model="emailInput">
+        <field-error-message :errors="errors" fieldName="email"></field-error-message>
       </div>
     </div>
     <div class="row">
       <div class="col-50">
         <label>Password:</label>
         <input type="password" class="form-control" id="inputPassword" placeholder="Enter Password" required
-          v-model="credentials.password">
+               v-model="passwordInput">
+        <field-error-message :errors="errors" fieldName="password"></field-error-message>
       </div>
       <div class="col-50">
         <label>Confirmation Password:</label>
         <input type="password" class="form-control" id="inputPasswordConfirmation"
-          placeholder="Enter Confirmation Password" required v-model="credentials.confirmationPassword">
+               placeholder="Enter Confirmation Password" required v-model="confirmationPasswordInput">
+        <field-error-message :errors="errors" fieldName="confirmationPassword"></field-error-message>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-50">
+        <label>NIF:</label>
+        <input type="text" class="form-control" id="inputNif" placeholder="Enter NIF" required
+               v-model="nifInput">
+        <field-error-message :errors="errors" fieldName="nif"></field-error-message>
+      </div>
+      <div class="col-50">
+        <label>Phone Number:</label>
+        <input type="text" class="form-control" id="inputPhoneNumber" placeholder="Enter Phone Number" required
+               v-model="phoneInput">
+        <field-error-message :errors="errors" fieldName="phone"></field-error-message>
       </div>
     </div>
     <div class="row">
       <div class="col-50">
         <label>Default Payment Type:</label>
-        <select class="form-select" id="selectType" v-model="credentials.default_payment_type">
+        <select class="form-select" id="selectType" v-model="default_payment_typeInput">
           <option value="visa">Visa</option>
           <option value="mbway">MBWay</option>
           <option value="paypal">PayPal</option>
@@ -97,17 +251,20 @@ const register = async () => {
       </div>
       <div class="col-50">
         <label>Default Payment Reference:</label>
-        <div v-if="credentials.default_payment_type == 'visa'">
+        <div v-if="default_payment_typeInput == 'visa'">
           <input type="text" class="form-control" id="inputVisaReference"
-            placeholder="Enter Visa Card ID Payment Reference" required v-model="credentials.default_payment_reference">
+                 placeholder="Enter Visa Card ID Payment Reference" required v-model="default_payment_referenceInput">
+          <field-error-message :errors="errors" fieldName="visa"></field-error-message>
         </div>
-        <div v-else-if="credentials.default_payment_type == 'mbway'">
+        <div v-else-if="default_payment_typeInput == 'mbway'">
           <input type="text" class="form-control" id="inputNumberReference"
-            placeholder="Enter Phone Number Payment Reference" required v-model="credentials.default_payment_reference">
+                 placeholder="Enter Phone Number Payment Reference" required v-model="default_payment_referenceInput">
+          <field-error-message :errors="errors" fieldName="mbway"></field-error-message>
         </div>
         <div v-else>
           <input type="text" class="form-control" id="inputEmailReference" placeholder="Enter Email Payment Reference"
-            required v-model="credentials.default_payment_reference">
+                 required v-model="default_payment_referenceInput">
+          <field-error-message :errors="errors" fieldName="paypal"></field-error-message>
         </div>
       </div>
     </div>
@@ -119,7 +276,7 @@ const register = async () => {
 
   <div class="mb-3 d-flex justify-content-center">
     <p>
-      <RouterLink to="/login"> Already have an account? </RouterLink>
+      <RouterLink to="/login"> Already have an account?</RouterLink>
     </p>
   </div>
 </template>

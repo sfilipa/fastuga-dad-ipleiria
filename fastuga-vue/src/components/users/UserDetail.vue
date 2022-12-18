@@ -72,9 +72,10 @@ const save = async () => {
         toast.success("Profile updated")
       })
       .catch((error) => {
-        if(error.response.data){
-          toast.error(error.response.data.message)
-        }else{
+        console.log(error)
+        if (error.response.data.message) {
+          toast.error('Edit Profile Failed! - ' + error.response.data.message)
+        } else {
           toast.error('Edit Profile Failed!')
         }
       });
@@ -93,7 +94,8 @@ const updateUserValidations = () => {
     }
     return -1
   }
-  if (!emailInput.value.match('[a-zA-Z0-9.+_]+@[a-zA-Z0-9.+_]+.[a-zA-Z]')) {
+  var pattern = /^[a-zA-Z0-9.+_]+@[a-zA-Z0-9.+_]+\.[a-zA-Z]$/
+  if (!emailInput.value.match(pattern)) {
     errors.value = {
       email: ["Invalid Email Format!"]
     }
@@ -110,7 +112,8 @@ const updateCustomerValidations = () => {
     }
     return -1
   }
-  if (!phoneInput.value.match('[1-9][0-9]{8}')) {
+  var pattern = /^[1-9][0-9]{8}$/
+  if (!phoneInput.value.match(pattern)) {
     errors.value = {
       phone: ["Invalid Phone Format"]
     }
@@ -122,7 +125,8 @@ const updateCustomerValidations = () => {
     }
     return -1
   }
-  if (!nifInput.value.match('[1-9][0-9]{8}')) {
+  var pattern = /^[1-9][0-9]{8}$/
+  if (!nifInput.value.match(pattern)) {
     errors.value = {
       nif: ["Invalid NIF Format"]
     }
@@ -145,7 +149,8 @@ const paymentReferenceValidations = () => {
       return -1
     }
   } else if (default_payment_typeInput.value == 'mbway') {
-    if (!default_payment_referenceInput.value.match('[1-9][0-9]{8}')) {
+    var pattern = /^[1-9][0-9]{8}$/
+    if (!default_payment_referenceInput.value.match(pattern)) {
       errors.value = {
         mbway: ["Invalid Phone Number"]
       }
@@ -158,7 +163,8 @@ const paymentReferenceValidations = () => {
       return -1
     }
   } else if (default_payment_typeInput.value == 'paypal') {
-    if (!default_payment_referenceInput.value.match('[a-zA-Z0-9.+_]+@[a-zA-Z0-9.+_]+.[a-zA-Z]')) {
+    var pattern = /^[a-zA-Z0-9.+_]+@[a-zA-Z0-9.+_]+\.[a-zA-Z]$/
+    if (!default_payment_referenceInput.value.match(pattern)) {
       errors.value = {
         paypal: ["Invalid Phone Format"]
       }
@@ -195,9 +201,19 @@ const updatePhoto = (e) => {
   if (!e.target.files.length) {
     return;
   }
+  // Save uploaded image
+  const uploadedImage = e.target.files[0];
 
-  photoInput.value = e.target.files[0];
-  newPhoto.value = URL.createObjectURL(e.target.files[0]);
+  // Create temporary Url
+  newPhoto.value = URL.createObjectURL(uploadedImage);
+
+  // Save image in base64
+  const reader = new FileReader();
+  reader.readAsDataURL(uploadedImage);
+  reader.onload = (event) => {
+    photoInput.value = event.target.result;
+    console.log(photoInput.value)
+  }
 }
 
 </script>
