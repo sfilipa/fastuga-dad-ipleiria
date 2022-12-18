@@ -23,7 +23,7 @@ class CustomerController extends Controller
 
     public function index()
     {
-        return Customer::all();
+        return CustomerResource::collection(Customer::paginate(15));
     }
 
     public function store(StoreUpdateCustomerRequest $request)

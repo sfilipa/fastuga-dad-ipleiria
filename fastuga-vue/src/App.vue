@@ -156,7 +156,7 @@ onMounted(() => {
               <router-link class="nav-link fastuga-font" :class="{ active: $route.name === 'OrdersEmployees' }" :to="{ name: 'OrdersEmployees' }"
                            @click="clickMenuOption">
                 <i class="bi bi-people"></i>
-                Employees Orders
+                Customers Orders
               </router-link>
             </li>
 
@@ -165,6 +165,14 @@ onMounted(() => {
                 @click="clickMenuOption">
                 <i class="bi bi-people"></i>
                 Employees
+              </router-link>
+            </li>
+
+            <li class="nav-item">
+              <router-link class="nav-link fastuga-font" :class="{ active: $route.name === 'Customers' }" :to="{ name: 'Customers' }"
+                @click="clickMenuOption">
+                <i class="bi bi-people"></i>
+                Customers
               </router-link>
             </li>
 
