@@ -14,7 +14,7 @@ class OrderItemsResource extends JsonResource
         return [
             'id' => $this->id,
             'order_id' => new OrderResource(Order::find($this->order_id)),
-            'order_local_number' => $this->status,
+            'order_local_number' => $this->order_local_number,
             'product_id' => new ProductResource(Product::find($this->product_id)),
             'status' => $this->status,
             'price' => $this->price,

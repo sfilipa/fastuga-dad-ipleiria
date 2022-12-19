@@ -98,7 +98,7 @@
                 'reference': paymentReference.value,
                 'value': finalPrice.value
         }
-        
+
         axios.post(`${PAYMENT_URL}/api/payments`, requestBody)
             .then(() => {
                 axiosLaravel.post('/orders', paymentBody)
@@ -123,7 +123,8 @@
 
     const paymentReferenceValidations = () => {
         if(paymentType.value == 'VISA'){
-            if(!paymentReference.value.match('[1-9][0-9]{15}')){
+          let pattern = /^[1-9][0-9]{15}$/
+            if(!paymentReference.value.match(pattern)){
                 errors.value = {
                 visa: ["Invalid Visa Reference"]
                 }
@@ -131,7 +132,8 @@
                 return -1
             }
         }else if(paymentType.value == 'MBWAY'){
-            if(!paymentReference.value.match('[1-9][0-9]{8}')){
+          let pattern = /^[1-9][0-9]{8}$/
+            if(!paymentReference.value.match(pattern)){
                 errors.value = {
                 mbway: ["Invalid Phone Number"]
                 }
@@ -139,7 +141,8 @@
                 return -1
             }
         }else if(paymentType.value == 'PAYPAL'){
-            if(!paymentReference.value.match('[a-zA-Z0-9.+_]+@[a-zA-Z0-9.+_]+.[a-zA-Z]')){
+          let pattern = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/ ///^([a-zA-Z0-9.+_])+@([a-zA-Z0-9.+_])+.([a-zA-Z])+$/
+            if(!paymentReference.value.match(pattern)){
                 errors.value = {
                 paypal: ["Invalid Email Format"]
                 }
@@ -156,8 +159,8 @@
     }
 
     const getTimestamp = () => {
-        var date = new Date()
-        return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
+      const date = new Date()
+      return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
     }
 
     const LoadCustomerInfo = () => {
@@ -174,34 +177,34 @@
     }
 
     const calculateAvailablePointsOptions = () => {
-        var total = Math.trunc(customer.value.points)
-        //Desired transformation - Example 1: 23 -> 20, Example 2: 46 -> 40
-        while(total % 10 != 0){
-            total--
-        }
-        var arrayElement = 10
-        while(arrayElement <= total){ 
-            pointsAvailableToUse.value.push(arrayElement)
-            arrayElement += 10
-        }
+      let total = Math.trunc(customer.value.points);
+      //Desired transformation - Example 1: 23 -> 20, Example 2: 46 -> 40
+      while(total % 10 != 0){
+          total--
+      }
+      let arrayElement = 10;
+      while(arrayElement <= total){
+          pointsAvailableToUse.value.push(arrayElement)
+          arrayElement += 10
+      }
     }
 
     const calculatePointsGained = () => {
-        var total = Math.trunc(finalPrice.value)
-        while(total % 10 != 0){
-            total--
-        }
-        if(total == 0){
-            return 0
-        }
-        return total / 10
+      let total = Math.trunc(finalPrice.value);
+      while(total % 10 != 0){
+          total--
+      }
+      if(total == 0){
+          return 0
+      }
+      return total / 10
     }
 
     onMounted(()=>{
-        pointsAvailableToUse.value = [0]
-        if(store.items.length != 0 && user.userId != -1){
-            LoadCustomerInfo()
-        }
+      pointsAvailableToUse.value = [0]
+      if(store.items.length != 0 && user.userId != -1){
+          LoadCustomerInfo()
+      }
     })
 
     const finalPrice = computed(()=> {

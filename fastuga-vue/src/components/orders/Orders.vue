@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, computed, onMounted, inject, watch } from 'vue'
+  import { ref, onMounted, inject } from 'vue'
   import { useRouter } from 'vue-router'
   import OrdersTable from "./OrdersTable.vue"
   import Paginate from "vuejs-paginate-next"
@@ -15,12 +15,11 @@
   const orderDate = ref("")
   const ticketNumber = ref(0)
   const filterByType = ref('')
-  const lastPage = ref(20)
-  const currentPage = ref(1)
+  const lastPage = ref(1)
+  const noResults = ref(false)
 
   const LoadOrders = (pageNumber) => {
-    currentPage.value = pageNumber
-    let URL = "/orders?page="+pageNumber;
+    let URL = "/orders?page="+pageNumber
 
     if(filterByType.value.length != 0){
       URL += `&status=${filterByType.value}`
@@ -36,6 +35,7 @@
       .then((response) => {
         lastPage.value = response.data.last_page
         orders.value = response.data.data
+        noResults.value = orders.value.length === 0
       })
       .catch((error) => {
         console.log(error)
@@ -73,7 +73,7 @@
         }
 
         toast.success("Order was successfully cancelled!")
-        LoadOrders(currentPage.value)
+        LoadOrders(1)
       })
       .catch((error)=>{
           toast.error(error)
@@ -81,7 +81,7 @@
   }
 
   onMounted (() => {
-    LoadOrders(currentPage.value) //start on page 1
+    LoadOrders(1)
   })
 </script>
 
@@ -99,7 +99,7 @@
         class="form-select"
         id="selectType"
         v-model="filterByType"
-        @change="LoadOrders(currentPage)"
+        @change="LoadOrders(1)"
       >
         <option value="">Any</option>
         <option value="P">Preparing</option>
@@ -112,7 +112,7 @@
     <div class="mx-2 mt-2 flex-grow-1 filter-div">
       <label for="selectType" class="form-label">Filter by Date:</label>
       <form id="costumerFilter">
-        <input v-model="orderDate" @change="LoadOrders(currentPage)" type="date" name="orderDate" class="form-control">
+        <input v-model="orderDate" @change="LoadOrders(1)" type="date" name="orderDate" class="form-control">
       </form>
     </div>
 
@@ -120,31 +120,38 @@
       <div class="inner-addon left-addon">
         <label for="selectType" class="form-label">Search for Ticket Number:</label>
         <i class="glyphicon glyphicon-user"></i>
-        <input v-model.lazy="ticketNumber" @change="LoadOrders(currentPage)" type="number" name="ticketnumber" class="form-control"/>
-        <!-- <form id="ticketNumberFilter"> -->
-        <!-- <input name="ticketnumber" v-model="ticketNumber"> -->
-        <!-- <button @click="searchByTicketNumber">Search</button> -->
-      <!-- </form> -->
+        <input v-model.lazy="ticketNumber" @change="LoadOrders(1)" type="number" min="0" max="99" name="ticketnumber" class="form-control"/>
+      </div>
     </div>
-    </div>
-
 
   </div>
-<!--  :filterByType="filterByType"-->
-<!--  :ticketNumber="ticketNumber"-->
-<!--  :orderDate="(new Date(orderDate))"-->
-  <orders-table
-    :orders="orders"
-    :parent="componentName"
-    @show="showOrder"
-    @delete="deleteOrder">
-  </orders-table>
-  <paginate
-      :page-count="lastPage"
-      :prev-text="'Previous'"
-      :next-text="'Next'"
-      :click-handler="LoadOrders"
-  >
-  </paginate>
+  <div v-if="noResults">
+    <p style="text-align: center"><b> No orders match current filters! </b></p>
+  </div>
+  <div v-else>
+    <orders-table
+        :orders="orders"
+        :parent="componentName"
+        @show="showOrder"
+        @delete="deleteOrder">
+    </orders-table>
+    <div v-if="orders.length != 0">
+      <paginate
+          :page-count="lastPage"
+          :prev-text="'Previous'"
+          :next-text="'Next'"
+          :click-handler="LoadOrders"
+      >
+      </paginate>
+    </div>
+  </div>
+
+<!--  <div>-->
+<!--    <div class="d-flex justify-content-center spinner-font">-->
+<!--      <div class="spinner-border" role="status">-->
+<!--        <span class="sr-only"></span>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
 </template>
 
