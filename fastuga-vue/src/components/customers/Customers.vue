@@ -10,12 +10,18 @@ const customers = ref([]);
 const searchByEmail = ref(null);
 const searchByNif = ref(null);
 
-const load = () => {
+const lastPage = ref(15)
+const currentPage = ref(1)
+const load = (pageNumber) => {
+  currentPage.value = pageNumber
+  let URL = "/customers?page=" + pageNumber;
   axios
-    .get(`/customers`)
+    .get(URL)
     .then((response) => {
-      customers.value = response.data;
       console.log(response.data);
+      lastPage.value = response.data.meta.last_page
+      customers.value = response.data;
+      console.log(customers.value);
     })
     .catch((error) => {
       console.log(error);
@@ -224,6 +230,13 @@ onMounted(() => {
     @unblock="unblock"
   >
   </CustomersTable>
+  <paginate
+    :page-count="lastPage"
+    :prev-text="'Previous'"
+    :next-text="'Next'"
+    :click-handler="load"
+  >
+  </paginate>
 </template>
 
 <style scoped>
