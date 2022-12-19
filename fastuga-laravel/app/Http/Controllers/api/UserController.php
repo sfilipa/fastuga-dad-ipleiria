@@ -6,11 +6,13 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\DB;
 
 use Illuminate\Support\Facades\App;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\StoreUpdateCustomerRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Requests\UpdateUserPasswordRequest;
 use App\Http\Requests\UpdateUserNameTAESRequest;
@@ -52,8 +54,8 @@ class UserController extends Controller
     public function store(StoreUserRequest $request)
     {
        $request->validated();//validate password without hash
-            
-       $request->query->add(['password' => Hash::make($request->password)]); 
+
+       $request->query->add(['password' => Hash::make($request->password)]);
 
        $newUser = User::create($request->validated());
 
@@ -67,23 +69,85 @@ class UserController extends Controller
         return new UserResource($newUser);
     }
 
-    public function update(UpdateUserRequest $request, User $user)
+    public function update(UpdateUserRequest $userRequest, User $user)
     {
-        $user->update($request->validated());
-        return new UserResource($user);
+
+        $customerRequest = new StoreUpdateCustomerRequest($userRequest->all());
+        DB::beginTransaction();
+
+        try {
+
+            $validatedData = $userRequest->validated();
+            //$user->update($userRequest->validated());
+
+            if($userRequest->hasFile('photo_url')){
+                // Delete Existing Photo
+                if(Storage::disk('public')->exists('fotos/'.$user->photo_url)) {
+                    Storage::disk('public')->delete('fotos/'.$user->photo_url);
+                }
+                // Save New Photo
+                $path = Storage::putFile('public/fotos',  $userRequest->file('photo_url'));
+                $name = basename($path);
+                $validatedData["photo_url"] = $name;
+            }
+
+            $user->fill($validatedData);
+            $user->save();
+            $responseUser = new UserResource($user);
+
+            if($user->type == 'C'){
+                $customerRequest->validate($customerRequest->rules());
+                $customer = $user->customer;
+                $customer->update($customerRequest->all());
+                $responseCustomer = new CustomerResource($customer);
+            }
+            DB::commit();
+            return response()->json("Good", 204);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json($e->getMessage(), 400);
+        }
+    }
+
+    public function blockUnblockUser(UpdateUserRequest $userRequest, User $user)
+    {
+        DB::beginTransaction();
+        try {
+
+            $validatedData = $userRequest->validated();
+            if($userRequest->hasFile('photo_url')){
+                // Delete Existing Photo
+                if(Storage::disk('public')->exists('fotos/'.$user->photo_url)) {
+                    Storage::disk('public')->delete('fotos/'.$user->photo_url);
+                }
+                // Save New Photo
+                $path = Storage::putFile('public/fotos',  $userRequest->file('photo_url'));
+                $name = basename($path);
+                $validatedData["photo_url"] = $name;
+            }
+
+            $user->fill($validatedData);
+            $user->save();
+            $responseUser = new UserResource($user);
+            DB::commit();
+            return response()->json("Good", 204);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json($e->getMessage(), 400);
+        }
     }
 
     public function updateTAESPassword(UpdateUserPasswordRequest $request, string $email)
     {
             try {
-            
+
             $user = User::where('email', $email)->firstOrFail();
 
             $userpassword = $request->validated();
-            
+
             User::whereId($user->id)->update([
                 'password' => Hash::make($request->password)
-            ]); 
+            ]);
 
             return new UserResource($user);
         } catch (\Exception $e) {
@@ -93,11 +157,11 @@ class UserController extends Controller
     public function updateTAESName(UpdateUserNameTAESRequest $request, string $email)
     {
         try {
-            
+
             $user = User::where('email', $email)->firstOrFail();
 
             $userName = $request->validated();
-            
+
             User::whereId($user->id)->update([
                 'name' => $request->name
             ]);
@@ -110,6 +174,7 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
+        $user = User::find($user->id);
         $user->delete();
     }
 
@@ -131,9 +196,5 @@ class UserController extends Controller
 
     public function getAllEmployees() {
         return User::whereIn('type', array('ec', 'ed', 'em'))->get();
-    }
-
-    public function getUserByEmail(string $email) {
-        return UserResource::collection(User::onlyTrashed()->where('email', $email)->get());
     }
 }

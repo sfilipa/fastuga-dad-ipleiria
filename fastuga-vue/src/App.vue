@@ -16,7 +16,7 @@ const logout = async () => {
   if (await userStore.logout()) {
     toast.success('User has logged out of the application.')
     clickMenuOption()
-    router.push({ name: 'Home' })
+    router.push({ name: 'PublicBoard' })
     userStore.clearUser()
   } else {
     toast.error('There was a problem logging out of the application!')
@@ -83,8 +83,8 @@ onMounted(() => {
             </a>
             <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
               <li>
-                <router-link class="dropdown-item fastuga-font" :class="{ active: $route.name == 'User' && $route.params.id == 1 }"
-                  :to="{ name: 'User', params: { id: 1 } }" @click="clickMenuOption">
+                <router-link class="dropdown-item fastuga-font" :class="{ active: $route.name == 'User' && $route.params.id == userStore.userId }"
+                  :to="{ name: 'User', params: { id: userStore.userId } }" @click="clickMenuOption">
                   <!--Onde tem id = 1 $route.params.id == 1 e tem de se trocar para userStore.userId-->
                   <i class="bi bi-person-square"></i>Profile
                 </router-link>
@@ -95,6 +95,9 @@ onMounted(() => {
                   <i class="bi bi-key-fill"></i>
                   Change password
                 </router-link>
+              </li>
+              <li>
+                <hr class="dropdown-divider" />
               </li>
               <li>
                 <hr class="dropdown-divider" />
@@ -153,7 +156,7 @@ onMounted(() => {
               <router-link class="nav-link fastuga-font" :class="{ active: $route.name === 'OrdersEmployees' }" :to="{ name: 'OrdersEmployees' }"
                            @click="clickMenuOption">
                 <i class="bi bi-people"></i>
-                Employees Orders
+                Customers Orders
               </router-link>
             </li>
 
@@ -162,6 +165,14 @@ onMounted(() => {
                 @click="clickMenuOption">
                 <i class="bi bi-people"></i>
                 Employees
+              </router-link>
+            </li>
+
+            <li class="nav-item">
+              <router-link class="nav-link fastuga-font" :class="{ active: $route.name === 'Customers' }" :to="{ name: 'Customers' }"
+                @click="clickMenuOption">
+                <i class="bi bi-people"></i>
+                Customers
               </router-link>
             </li>
 
