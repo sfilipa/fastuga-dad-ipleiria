@@ -22,7 +22,6 @@ Route::middleware('auth:api')->group(function () {
 // User Routes
 Route::get('users/employees', [UserController::class, 'getAllEmployees']);//->middleware('can:view, App\Models\User'); - so o manager consegue ver os employees assim
 Route::delete('users/{email}', [UserController::class, 'destroyWithEmail']);
-//Route::get('users/{email}', [UserController::class, 'getUserByEmail']);
 Route::put('users/blockUnblock/{user}', [UserController::class, 'blockUnblockUser']);
 Route::put('users/updatePasswordTAES/{email}', [UserController::class, 'updateTAESPassword']);
 Route::put('users/updateNameTAES/{email}', [UserController::class, 'updateTAESName']);
@@ -31,6 +30,8 @@ Route::apiResource("users", UserController::class);
 // Customer Routes
 Route::get('customers/{customer}/user', [UserController::class, 'getUserOfCustomer']);
 Route::get('customers/user/{user_id}', [CustomerController::class, 'getCustomerByUserID']);
+Route::get('customers/byEmail/{email}', [CustomerController::class, 'getCustomerByEmail']);
+Route::get('customers/byNif/{nif}', [CustomerController::class, 'getCustomerByNif']);
 Route::apiResource("customers", CustomerController::class);
 
 // Order Routes

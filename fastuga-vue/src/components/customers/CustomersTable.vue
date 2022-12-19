@@ -7,17 +7,11 @@ const toast = inject("toast")
 const props = defineProps({
 	customers: Object,
 	default: () => [],
-	searchByType: String,
-	searchByName: String,
 });
-const emit = defineEmits(["show", "edit", "delete", "block", "unblock"]);
+const emit = defineEmits(["show", "delete", "block", "unblock"]);
 
 const showClick = (customer) => {
 	emit("show", customer);
-};
-
-const editClick = (customer) => {
-	emit("edit", customer);
 };
 
 // Delete
@@ -65,7 +59,7 @@ const unblockClick = (customer) => {
 		</thead>
 		<tbody>
 			<tr
-				v-for="customer in props.customers"
+				v-for="customer in props.customers.data"
 				:key="customer">
 				<td>
 					<img
@@ -99,7 +93,7 @@ const unblockClick = (customer) => {
 							@click="unblockClick(customer.user_id)">
 							<i class="bi bi-x-octagon-fill"></i> Unblock
 						</button>
-						<button class="btn btn-xs btn-danger" @click="deleteClick(customer.user_id)">
+						<button class="btn btn-xs btn-danger" @click="deleteClick(customer.user_id	)">
 							<i class="bi bi-trash-fill"></i> Delete
 						</button>
 					</div>

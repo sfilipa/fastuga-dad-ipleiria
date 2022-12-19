@@ -7,14 +7,15 @@ const axios = inject("axios");
 const router = useRouter();
 
 const customers = ref([]);
-const searchByName = ref(null);
+const searchByEmail = ref(null);
 const searchByNif = ref(null);
 
 const load = () => {
   axios
     .get(`/customers`)
     .then((response) => {
-      customers.value = response.data.data;
+      customers.value = response.data;
+      console.log(response.data);
     })
     .catch((error) => {
       console.log(error);
@@ -23,12 +24,6 @@ const load = () => {
 
 const show = (customer) => {
   console.log("Show");
-  const obj = Object.assign({}, customer);
-  console.log(obj);
-};
-
-const edit = (customer) => {
-  console.log("Edit");
   const obj = Object.assign({}, customer);
   console.log(obj);
 };
@@ -90,6 +85,30 @@ const unblock = async (customer) => {
   load();
 };
 
+const search = () => {
+  if (searchByEmail.value != null) {
+    axios
+      .get(`/customers/byEmail/${searchByEmail.value}`)
+      .then((response) => {
+        customers.value = response;
+        console.log(customers.value);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  } else if (searchByNif.value != null) {
+    axios
+      .get(`/customers/byNif/${searchByNif.value}`)
+      .then((response) => {
+        customers.value = response;
+        console.log(customers.value);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+};
+
 const deleteFromDatabase = async (customer) => {
   console.log("Delete");
   const obj = Object.assign({}, customer);
@@ -114,6 +133,11 @@ const saveToDatabase = () => {
   router.push({ name: "Register" });
 };
 
+function clear() {
+  searchByEmail.value = null;
+  searchByNif.value = null;
+}
+
 onMounted(() => {
   load();
 });
@@ -124,11 +148,15 @@ onMounted(() => {
     <div class="mx-2">
       <h3 class="mt-4">Customers</h3>
     </div>
-        <div class="mx-2">
-          <button type="button" class="btn btn-primary px-4 btn-addtask" @click="saveToDatabase">
-            <i class="bi bi-xs bi-plus-circle"></i>&nbsp; Add Customer
-          </button>
-        </div>
+    <div class="mx-2">
+      <button
+        type="button"
+        class="btn btn-primary px-4 btn-addtask"
+        @click="saveToDatabase"
+      >
+        <i class="bi bi-xs bi-plus-circle"></i>&nbsp; Add Customer
+      </button>
+    </div>
   </div>
   <hr />
   <div class="mb-3 d-flex justify-content-between flex-wrap">
@@ -136,11 +164,18 @@ onMounted(() => {
       <div class="inner-addon left-addon">
         <label for="searchbar" class="form-label">Search by Email:</label>
         <i class="glyphicon glyphicon-user"></i>
-        <input v-model="searchByName" type="search" class="form-control rounded" placeholder="Email"
-          aria-label="Search" aria-describedby="search-addon" />
+        <input
+          v-model="searchByEmail"
+          :disabled="searchByNif"
+          type="search"
+          class="form-control rounded"
+          placeholder="Email"
+          aria-label="Search"
+          aria-describedby="search-addon"
+        />
       </div>
     </div>
-    
+
     <div class="mx-1 mt-5">
       <div class="inner-addon left-addon">
         <label for="searchbar" class="form-label">or</label>
@@ -151,22 +186,39 @@ onMounted(() => {
       <div class="inner-addon left-addon">
         <label for="searchbar" class="form-label">Search by NIF:</label>
         <i class="glyphicon glyphicon-user"></i>
-        <input v-model="searchByNif" type="search" class="form-control rounded" placeholder="NIF"
-          aria-label="Search" aria-describedby="search-addon" />
+        <input
+          v-model="searchByNif"
+          :disabled="searchByEmail"
+          type="number"
+          class="form-control rounded"
+          placeholder="NIF"
+          aria-label="Search"
+          aria-describedby="search-addon"
+        />
       </div>
     </div>
     <div class="mx-2 mt-2">
-      <button type="button" class="btn btn-primary px-4 btn-addtask" @click="saveToDatabase">
+      <button
+        type="button"
+        class="btn btn-primary px-4 btn-addtask"
+        @click="search"
+      >
         <i class="bi bi-xs bi-search-heart-fill"></i>&nbsp; Search
+      </button>
+    </div>
+    <div class="mx-2 mt-2">
+      <button
+        type="button"
+        class="btn btn-secondary px-4 btn-addtask"
+        @click="clear"
+      >
+        Clear
       </button>
     </div>
   </div>
   <CustomersTable
     :customers="customers"
-    :searchByName="searchByName"
-    :searchByNif="searchByNif"
     @show="show"
-    @edit="edit"
     @delete="deleteFromDatabase"
     @block="block"
     @unblock="unblock"

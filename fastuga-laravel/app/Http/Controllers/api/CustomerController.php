@@ -48,4 +48,13 @@ class CustomerController extends Controller
         $customer->softDeletes();
     }
 
+    public function getCustomerByEmail($email) {
+        $user = User::where('email', $email)->firstOrFail();
+        return new CustomerResource(Customer::where('user_id', $user->id)->firstOrFail());
+    }
+
+    public function getCustomerByNif($nif) {
+        return new CustomerResource(Customer::where('nif', $nif)->firstOrFail());
+    }
+
 }
