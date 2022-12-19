@@ -94,7 +94,7 @@ class UserController extends Controller
             $validatedData = $userRequest->validated();
             //$user->update($userRequest->validated());
 
-            if($userRequest->has('photo_url')){
+            if($userRequest->has('photo_url' && Str::length($userRequest["photo_url"]) > 21)){
 
                 // Delete Existing Photo
                 if(Storage::disk('public')->exists('fotos/'.$user->photo_url)) {
