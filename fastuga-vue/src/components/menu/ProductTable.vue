@@ -1,11 +1,10 @@
 <script setup>
-import { toNumber } from "@vue/shared";
 import { ref, watch, computed, inject, onUpdated } from "vue";
+import { useUserStore } from "../../stores/user.js";
 import ConfirmationDialog from "../global/ConfirmationDialog.vue";
 
-const axios = inject("axios");
-const toast = inject("toast");
 const serverBaseUrl = inject("serverBaseUrl");
+const userStore = useUserStore();
 
 const props = defineProps({
   products: {
@@ -28,12 +27,17 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  disableEditButtons: {
+    type: Boolean,
+    default: false,
+  },
+  errors: Object,
   filterByType: String,
   filterByPrice: Number,
   filterByName: String,
 });
 
-const emit = defineEmits(["add", "edit", "deleted"]);
+const emit = defineEmits(["add", "edit", "delete", "cancel"]);
 
 const editingProducts = ref(props.products);
 const productToDelete = ref(null);
@@ -45,8 +49,9 @@ const currentImage = ref(null);
 
 const editingProduct = ref(null);
 
-// Web Sockets
-const socket = inject("socket")
+const addItemsToMenuDialog = ref(null);
+const productToAddOrder = ref(null);
+const quantityToAddOrder = ref(1);
 
 const newProduct = () => {
   return {
@@ -64,10 +69,6 @@ let oldProduct = newProduct();
 const showAddDialog = (bool) => {
   addDialog.value = bool;
 };
-
-const addItemsToMenuDialog = ref(null);
-const productToAddOrder = ref(null);
-const quantityToAddOrder = ref(1);
 
 const productToAddOrderName = computed(() => {
   return productToAddOrder.value ? productToAddOrder.value.name : "";
@@ -95,8 +96,7 @@ const updatePhoto = (e) => {
   reader.readAsDataURL(uploadedImage);
   reader.onload = (event) => {
     editingProduct.value.photo_url = event.target.result;
-    console.log(editingProduct.value.photo_url)
-  }
+  };
 };
 
 watch(
@@ -104,6 +104,15 @@ watch(
   () => props.productsTypes,
   (newProducts) => {
     editingProducts.value = newProducts;
+  }
+);
+
+watch(
+  () => props.disableEditButtons,
+  () => {
+    if (!props.disableEditButtons && props.errors == null) {
+      disableRowActive();
+    }
   }
 );
 
@@ -142,10 +151,10 @@ const editClick = (product) => {
 
 const doneClick = () => {
   emit("edit", editingProduct.value);
-  disableRowActive();
 };
 
 const cancelClick = () => {
+  emit("cancel");
   restoreProduct();
   disableRowActive();
 };
@@ -164,22 +173,8 @@ const addClick = (product) => {
 };
 
 const dialogConfirmedDelete = () => {
-  axios
-    .delete("products/" + productToDelete.value.id)
-    .then((response) => {
-      addDialog.value = null;
-      emit("deleted", response.data.data);
-
-      // Send message to web socket
-      socket.emit('deleteProduct', productToDelete.value)
-
-      toast.info(
-        "Product " + productToDeleteDescription.value + " was deleted"
-      );
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+  emit("delete", productToDelete.value);
+  addDialog.value = null;
 };
 
 const deleteClick = (product) => {
@@ -208,7 +203,7 @@ onUpdated(() => {
   <div v-if="addDialog && !editRow">
     <ConfirmationDialog
       ref="addItemsToMenuDialog"
-      confirmationBtn="Add Items"
+      confirmationBtn="Add Item(s)"
       :msg="``"
       @confirmed="dialogConfirmAdd"
     >
@@ -286,7 +281,6 @@ onUpdated(() => {
             @change="updatePhoto"
             class="input-photo fastuga-colored-font"
           />
-          <!-- <field-error-message :errors="errors" fieldName="photo"></field-error-message> -->
         </div>
 
         <!-- Product Photo -->
@@ -306,7 +300,11 @@ onUpdated(() => {
               v-model="editingProduct.name"
               class="form-control product-input product-name"
             />
-            <!-- <field-error-message :errors="errors" fieldName="name"></field-error-message> -->
+            <field-error-message
+              class="error-field-align"
+              :errors="props.errors"
+              fieldName="name"
+            ></field-error-message>
           </div>
 
           <!-- Product Name -->
@@ -330,6 +328,11 @@ onUpdated(() => {
                   {{ prdtype }}
                 </option>
               </select>
+              <field-error-message
+                class=""
+                :errors="props.errors"
+                fieldName="type"
+              ></field-error-message>
             </div>
 
             <!-- Product Type -->
@@ -351,13 +354,18 @@ onUpdated(() => {
             v-model="editingProduct.description"
             class="form-control product-input fastuga-colored-font"
           ></textarea>
-          <!-- <field-error-message :errors="errors" fieldName="description"></field-error-message> -->
+          <field-error-message
+            class="error-field-align"
+            :errors="props.errors"
+            fieldName="description"
+          ></field-error-message>
         </div>
 
         <!-- Product Description -->
         <div v-else class="product-description">
           <span v-if="product.description.length > 110">
-            {{ product.description.substring(0, 110 - 3) }} <abbr :title="product.description">...</abbr>
+            {{ product.description.substring(0, 110 - 3) }}
+            <abbr :title="product.description">...</abbr>
           </span>
           <span v-else>
             {{ product.description }}
@@ -366,47 +374,66 @@ onUpdated(() => {
       </div>
       <hr class="fastuga-colored-font" />
       <div class="product-footer fastuga-colored-font">
+        <!-- Product Add to Order Button -->
         <div v-if="product != editingProduct">
-          <button
-            class="btn btn-xs btn-light hvr-grow"
-            @click="
-              showAddDialog(true);
-              addClick(product);
-            "
-            v-if="showAddButton"
-            :disabled="editRow"
-          >
-            <i class="bi bi-xs bi-cart-check"></i>
-          </button>
+          <div v-if="userStore.user == null || userStore.user.type == 'C'">
+            <button
+              class="btn btn-xs btn-light hvr-grow"
+              @click="
+                showAddDialog(true);
+                addClick(product);
+              "
+              v-if="showAddButton"
+              :disabled="editRow"
+            >
+              <i class="bi bi-xs bi-cart-check"></i>
+            </button>
+          </div>
 
-          <button
-            class="btn btn-xs btn-light"
-            @click="editClick(product)"
-            v-if="showEditButton"
-            :disabled="editRow"
+          <div
+            v-if="userStore.user != null && userStore.user.type == 'EM'"
+            class="manager-buttons"
           >
-            <i class="bi bi-xs bi-pencil"></i>
-          </button>
+            <!-- Product Edit Button -->
+            <button
+              class="btn btn-xs btn-light"
+              @click="editClick(product)"
+              v-if="showEditButton"
+              :disabled="editRow"
+            >
+              <i class="bi bi-xs bi-pencil"></i>
+            </button>
 
-          <button
-            class="btn btn-xs btn-light"
-            @click="
-              showAddDialog(false);
-              deleteClick(product);
-            "
-            v-if="showDeleteButton"
-            :disabled="editRow"
-          >
-            <i class="bi bi-xs bi-x-square-fill"></i>
-          </button>
+            <!-- Product Delete Button -->
+            <button
+              class="btn btn-xs btn-light"
+              @click="
+                showAddDialog(false);
+                deleteClick(product);
+              "
+              v-if="showDeleteButton"
+              :disabled="editRow"
+            >
+              <i class="bi bi-xs bi-x-square-fill"></i>
+            </button>
+          </div>
         </div>
+
         <!-- Editiing Row Buttons -->
         <div v-else-if="editRow" class="product-edit">
-          <button class="btn btn-xs btn-light" @click="doneClick(product)">
+          <button
+            class="btn btn-xs btn-light"
+            @click="doneClick(product)"
+            :disabled="props.disableEditButtons"
+          >
             <i class="bi bi-xs bi-check-lg"></i>
           </button>
 
-          <button class="btn btn-xs btn-light" @click="cancelClick">
+          <button
+            class="btn btn-xs btn-light"
+            @click="cancelClick"
+            :disabled="props.disableEditButtons"
+          >
             <i class="bi bi-xs bi-x-lg"></i>
           </button>
         </div>
@@ -419,14 +446,15 @@ onUpdated(() => {
               class="form-control product-input product-price"
               id="inputPrice"
               min="0.1"
-              max="99"
+              max="99.99"
               step="0.1"
               v-model="editingProduct.price"
             />
-            <!-- <field-error-message
-                  :errors="errors"
-                  fieldName="price"
-                ></field-error-message> -->
+            <field-error-message
+              class="price-error-field"
+              :errors="props.errors"
+              fieldName="price"
+            ></field-error-message>
           </div>
         </div>
 
@@ -440,7 +468,19 @@ onUpdated(() => {
 <style scoped>
 @import url("https://fonts.googleapis.com/css2?family=Maven+Pro&display=swap");
 
-.confirmation-middle{
+.error-field-align {
+  text-align: initial;
+}
+
+.price-error-field {
+  text-align: end;
+}
+
+.manager-buttons {
+  display: inline;
+}
+
+.confirmation-middle {
   text-align: center;
 }
 
@@ -458,7 +498,6 @@ onUpdated(() => {
   margin-left: 4% !important;
   display: inline !important;
   width: 20% !important;
-  
 }
 
 .product-button {
@@ -605,11 +644,4 @@ body {
   height: 100%;
 }
 
-/* @media (min-width: 880px) {
-  .grid-container { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (min-width: 900px) {
-  .grid-container { grid-template-columns: repeat(3, 1fr); }
-} */
 </style>

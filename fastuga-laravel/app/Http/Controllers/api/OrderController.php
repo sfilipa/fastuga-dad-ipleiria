@@ -32,6 +32,22 @@ class OrderController extends Controller
         }
     }
 
+    public function getOrderByStatusPaginate(Request $request, String $status)
+    {
+        $status = strtoupper($status);
+        if($status != 'P' and  $status != 'R' and $status != 'D' and $status != 'C'){
+            return response("Invalid order status", 404);
+        }
+        $query = Order::query();
+        $ticketNumber = $request->query('ticket');
+        if($ticketNumber != null){
+            $query->where('ticket_number',$ticketNumber);
+        }
+
+        return $query->where('status', $status)->with("orderItems", "orderItems.product")->paginate(10);
+
+    }
+
     public function getOrderByStatusTAES()
     {
         return OrderResource::collection(Order::where('status', 'R')->orWhere('status', 'P')->get());
@@ -85,6 +101,7 @@ class OrderController extends Controller
         DB::beginTransaction();
         try{
             $orderRequest = new StoreUpdateOrderRequest($request->all());
+            //só deixar fazer pedidos ou user == null ou user == customer
             $newTicketNumber = Order::orderBy('id', 'DESC')->first()->ticket_number;
             $newTicketNumber++;
             if($newTicketNumber > 99){
@@ -275,13 +292,22 @@ class OrderController extends Controller
     public function updateOrderStatus(Order $order, $status)
     {
         if($status == 'R'){
-            //verificar que todos os items estão ready
+            if(!$this->checkIfOrderIsReady($order)){
+                return response("Selected order still has items to prepare!", 403);
+            }
         }
         $order->status = $status;
         $order->save();
         return new OrderResource($order);
     }
 
-    public function checkIfOrderIsReady(Order $order){
+    public function checkIfOrderIsReady(Order $order)
+    {
+        foreach ($order->orderItems as $item){
+            if($item->status == 'W' || $item->status == 'P'){
+                return false;
+            }
+        }
+        return true;
     }
 }

@@ -19,7 +19,7 @@ export const useUserStore = defineStore("user", () => {
     });
 
     async function loadMyCurrentOrders() {
-        if (user.value.id != -1 && user.value.type == 'C') {
+        if (user.value?.id != -1 && user.value?.type == 'C') {
             try {
                 const response = await axios.get("/orders/current/customer/" + user.value.id)
                 userCurrentOrders.value = response.data

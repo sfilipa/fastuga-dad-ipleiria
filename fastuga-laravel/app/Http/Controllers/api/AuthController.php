@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Hash;
 
 const PASSPORT_SERVER_URL = "http://localhost";
 const CLIENT_ID = 2;
-const CLIENT_SECRET = '4LhwlS5FpGMJFjf7RodkpukvQrHsJupFHZDfLa0e';
+const CLIENT_SECRET = 'aGjjy4Ntmv1mnlBSNMFA3uValmOdTZFjkMgNaRGR';
 
 class AuthController extends Controller
 {
