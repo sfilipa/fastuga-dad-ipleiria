@@ -94,7 +94,7 @@ const updatePhoto = (e) => {
       }
       return -1
     }
-    var pattern = /^[a-zA-Z0-9.+_]+@[a-zA-Z0-9.+_]+\.[a-zA-Z]$/
+    var pattern = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
     if (!emailInput.value.match(pattern)) {
       errors.value = {
         email: ["Invalid Email Format!"]
