@@ -20,6 +20,8 @@ import Employees from "../components/employees/Employees.vue"
 import AddProduct from "../components/menu/AddProduct.vue"
 import AddEmployee from "../components/employees/AddEmployee.vue"
 import Statistics from "../components/statistics/Statistics.vue"
+import ChefsDishes from "../components/dishes/ChefsDishes.vue"
+import Customers from "../components/customers/Customers.vue"
 
 import { useUserStore } from "../stores/user.js"
 
@@ -79,6 +81,11 @@ const router = createRouter({
       path: '/orders',
       name: 'Orders',
       component: Orders,
+    },
+    {
+      path: '/chefsDishes',
+      name: 'ChefsDishes',
+      component: ChefsDishes,
     },
     {
       path: '/ordersEmployees',
@@ -178,7 +185,13 @@ const router = createRouter({
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
       component: () => import('../views/AboutView.vue')
-    }
+    },
+    // Customers
+    {
+      path: '/customers',
+      name: 'Customers',
+      component: Customers,
+    },
   ]
 })
 let handlingFirstRoute = true

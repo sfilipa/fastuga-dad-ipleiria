@@ -22,7 +22,7 @@ Route::middleware('auth:api')->group(function () {
 // User Routes
 Route::get('users/employees', [UserController::class, 'getAllEmployees']);//->middleware('can:view, App\Models\User'); - so o manager consegue ver os employees assim
 Route::delete('users/{email}', [UserController::class, 'destroyWithEmail']);
-Route::get('users/{email}', [UserController::class, 'getUserByEmail']);
+Route::put('users/blockUnblock/{user}', [UserController::class, 'blockUnblockUser']);
 Route::put('users/updatePasswordTAES/{email}', [UserController::class, 'updateTAESPassword']);
 Route::put('users/updateNameTAES/{email}', [UserController::class, 'updateTAESName']);
 Route::apiResource("users", UserController::class);
@@ -30,6 +30,8 @@ Route::apiResource("users", UserController::class);
 // Customer Routes
 Route::get('customers/{customer}/user', [UserController::class, 'getUserOfCustomer']);
 Route::get('customers/user/{user_id}', [CustomerController::class, 'getCustomerByUserID']);
+Route::get('customers/byEmail/{email}', [CustomerController::class, 'getCustomerByEmail']);
+Route::get('customers/byNif/{nif}', [CustomerController::class, 'getCustomerByNif']);
 Route::apiResource("customers", CustomerController::class);
 
 // Order Routes
@@ -37,6 +39,7 @@ Route::apiResource("customers", CustomerController::class);
 Route::prefix('orders')->group(function () {
     Route::get('/status', [OrderController::class, 'getOrdersStatus']);
     Route::get('/statusTAES', [OrderController::class, 'getOrderByStatusTAES']);
+    Route::get('/status/{status}/paginate', [OrderController::class, 'getOrderByStatusPaginate']);
     Route::get('/status/{status}', [OrderController::class, 'getOrderByStatus']);
     Route::get('/{order}/customer', [CustomerController::class, 'getCostumerOfOrder']);
     Route::get('/{order}/user', [UserController::class, 'getUserOfOrder']);
@@ -62,6 +65,8 @@ Route::prefix('order-items')->group(function () {
     Route::get('/{orderItems}/user', [UserController::class, 'getUserOfOrderItems']);
     Route::get('/{orderItems}/order', [OrderController::class, 'getOrderOfOrderItems']);
     Route::get('/{orderItems}/product', [ProductController::class, 'getProductOfOrderItems']);
+    Route::get('/hotdishes', [OrderItemsController::class, 'getHotDishesToPrepare']);
+    Route::patch('/{id}/{chefId}', [OrderItemsController::class, 'updateHotDish']);
 });
 Route::apiResource("order-items", OrderItemsController::class);
 

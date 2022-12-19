@@ -1,54 +1,88 @@
 <script setup>
 import { ref, onMounted, inject } from "vue";
 import ProductTable from "./ProductTable.vue";
+import { useUserStore } from "../../stores/user.js";
 import { useOrderItemsStore } from "@/stores/orderItems.js";
 
 const axios = inject("axios");
 const toast = inject("toast");
+const userStore = useUserStore();
 
 const products = ref(null);
 const productTypes = ref([]);
+
+// Filter Variables
 const filterByType = ref("any");
 const filterByPrice = ref(15);
 const filterByName = ref(null);
 
 const store = useOrderItemsStore();
 
+// Error messages variables
+const errors = ref(null);
+const disableEditButtons = ref(false);
+
+const props = defineProps({
+  menuTitle: {
+    type: String,
+    default: "Menu",
+  },
+});
+
 // Web Socket
 const socket = inject("socket");
 
-const editProduct = async (product) => {
-  let formData = new FormData();
-
-  formData.append("name", product.name);
-  formData.append("type", product.type);
-  formData.append("description", product.description);
-  formData.append("price", product.price);
-  formData.append("photo_url", product.photo_url);
-
-  await axios
-    .put(`/products/${product.id}`, formData)
-    .then((response) => {
-      LoadProducts();
-
+const deleteProduct = async (product) => {
+  axios
+    .delete("products/" + product.id)
+    .then(() => {
       // Send message to web socket
-      socket.emit("updateProduct", response.data.data);
+      socket.emit("deleteProduct", product.value);
 
-      toast.info("Product '" + response.data.data.name + "' was updated");
+      toast.info("Product " + product.name + " was deleted");
+      LoadProducts();
     })
     .catch((error) => {
       console.log(error);
     });
 };
 
+const editProduct = async (product) => {
+  errors.value = null;
+  disableEditButtons.value = true;
+
+  let newEditedProduct = {
+    name: product.name,
+    type: product.type,
+    description: product.description,
+    price: product.price,
+    photo_url: product.photo_url,
+  };
+
+  await axios
+    .put(`/products/${product.id}`, newEditedProduct)
+    .then((response) => {
+      // Send message to web socket
+      socket.emit("updateProduct", response.data.data);
+
+      toast.info("Product '" + response.data.data.name + "' was updated");
+      disableEditButtons.value = false;
+      LoadProducts();
+    })
+    .catch((error) => {
+      disableEditButtons.value = false;
+      errors.value = error.response.data.errors;
+    });
+};
+
+const cancelEdit = () => {
+  errors.value = null;
+};
+
 const addProductToOrder = (product, quantity) => {
   for (let index = 0; index < quantity; index++) {
     store.addItem(product);
   }
-};
-
-const makeOrder = () => {
-  console.log(store.items);
 };
 
 const LoadProducts = () => {
@@ -72,17 +106,6 @@ const LoadProductTypes = () => {
       console.log(error);
     });
 };
-
-const deletedProduct = () => {
-  LoadProducts();
-};
-
-const props = defineProps({
-  menuTitle: {
-    type: String,
-    default: "Menu",
-  },
-});
 
 onMounted(() => {
   LoadProducts();
@@ -121,25 +144,19 @@ socket.on("deleteProduct", (product) => {
     <div class="mx-2">
       <h3 class="mt-4">{{ menuTitle }}</h3>
     </div>
-    <router-link
-      class="mx-4 link-secondary fastuga-font"
-      :to="{ name: 'AddProduct' }"
-      aria-label="Add Product"
-    >
-      <button
-          type="button"
-          class="btn btn-success add-product"
-        >
+    <div v-if="userStore.user != null && userStore.user.type == 'EM'">
+      <router-link
+        class="mx-4 link-secondary fastuga-font"
+        :to="{ name: 'AddProduct' }"
+        aria-label="Add Product"
+      >
+        <button type="button" class="btn btn-success add-product">
           <i class="bi bi-plus-lg menu-bi"></i> Add Product
         </button>
-    </router-link>
+      </router-link>
+    </div>
   </div>
-
   <hr />
-  <!-- <div class="filter-div fastuga-font">
-    <label for="searchName" class="form-label">Search:</label>
-    <input v-model="filterByName" class="form-control" type="text" />
-  </div> -->
   <div class="mb-3 d-flex justify-content-between flex-wrap">
     <div class="mx-2 mt-2 filter-div fastuga-font">
       <label for="selectType" class="form-label">Filter by type:</label>
@@ -174,7 +191,7 @@ socket.on("deleteProduct", (product) => {
       />
       <i class="bi bi-search name-search"></i>
     </div>
-    <div class="mx-2 mt-2 input-group rounded fastuga-font filter-name">
+    <div class="mx-2 mt-2 input-group rounded fastuga-font filter-name" v-if="userStore.user == null || userStore.user.type == 'C'">
       <router-link
         class="link-secondary fastuga-font"
         :to="{ name: 'NewOrder' }"
@@ -183,11 +200,9 @@ socket.on("deleteProduct", (product) => {
         <button
           type="button"
           class="btn btn-success hvr-grow make-order"
-          @click="makeOrder"
         >
-          <i class="bi bi-check2-circle menu-bi"></i> Make Order
+          <i class="bi bi-check2-circle menu-bi"></i> Check Order
         </button>
-        <!-- <i class="bi bi-xs bi-plus-circle">Make Order</i> -->
       </router-link>
     </div>
     <div class="mx-2 mt-2"></div>
@@ -197,22 +212,24 @@ socket.on("deleteProduct", (product) => {
       :products="products"
       :productTypes="productTypes"
       @edit="editProduct"
-      @deleted="deletedProduct"
+      @delete="deleteProduct"
       @add="addProductToOrder"
+      @cancel="cancelEdit"
       :filterByType="filterByType"
       :filterByPrice="filterByPrice"
       :filterByName="filterByName"
+      :errors="errors"
+      :disableEditButtons="disableEditButtons"
     ></product-table>
   </div>
 </template>
 
 <style scoped>
-
-.menu-header{
+.menu-header {
   align-items: end;
 }
 
-.menu-bi{
+.menu-bi {
   font-size: 1rem;
 }
 
@@ -220,12 +237,13 @@ option:hover {
   background-color: #ffa71dd6 !important;
 }
 
-.add-product:hover, .make-order:hover, .btn:first-child:active{
+.add-product:hover,
+.make-order:hover,
+.btn:first-child:active {
   background-color: #ff8300;
 }
 
-
-.add-product{
+.add-product {
   height: 3rem;
   align-self: center;
   background-color: #ffa71dd6;
