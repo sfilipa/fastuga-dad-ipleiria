@@ -18,10 +18,8 @@ const load = (pageNumber) => {
   axios
     .get(URL)
     .then((response) => {
-      console.log(response.data);
       lastPage.value = response.data.meta.last_page
       customers.value = response.data;
-      console.log(customers.value);
     })
     .catch((error) => {
       console.log(error);
@@ -118,11 +116,10 @@ const search = () => {
 const deleteFromDatabase = async (customer) => {
   console.log("Delete");
   const obj = Object.assign({}, customer);
-  console.log(obj);
   try {
     const { data } = await axios({
       method: "delete",
-      url: `/users/${obj.id}`,
+      url: `/customers/${obj.id}`,
     });
     console.log(data);
   } catch (err) {

@@ -23,8 +23,7 @@ class CustomerController extends Controller
 
     public function index()
     {
-        //return Customer::all();
-        return CustomerResource::collection(Customer::paginate(16));
+        return CustomerResource::collection(Customer::paginate(15));
     }
 
     public function store(StoreUpdateCustomerRequest $request)
@@ -46,7 +45,7 @@ class CustomerController extends Controller
 
     public function destroy(Customer $customer)
     {
-        $customer->softDeletes();
+        $customer->delete();
     }
 
     public function getCustomerByEmail($email) {

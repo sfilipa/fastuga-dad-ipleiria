@@ -18,7 +18,7 @@ const showClick = (customer) => {
 const deleteConfirmationDialog = ref(null);
 const customerToDelete = ref(null);
 const customerToDeleteDescription = computed(() => {
-  return customerToDelete.value ? `${customerToDelete.value.name}` : "";
+  return customerToDelete.value ? `${customerToDelete.value.user_id.name}` : "";
 });
 const deleteClick = (customer) => {
   customerToDelete.value = customer;
@@ -29,7 +29,7 @@ const deleteClick = (customer) => {
 const dialogConfirmDelete = () => {
   emit("delete", customerToDelete.value);
   toast.info(
-    "Customer " + customerToDeleteDescription.value.name + " was deleted"
+    "Customer " + customerToDeleteDescription.value + " was deleted"
   );
 };
 
@@ -125,7 +125,7 @@ const unblockClick = (customer) => {
             </button>
             <button
               class="btn btn-xs btn-danger"
-              @click="deleteClick(customer.user_id)"
+              @click="deleteClick(customer)"
             >
               <i class="bi bi-trash-fill"></i> Delete
             </button>
