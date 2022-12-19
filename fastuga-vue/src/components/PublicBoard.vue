@@ -1,9 +1,11 @@
 <script setup>
 import { ref, onMounted, inject } from "vue";
 import { useRouter } from "vue-router";
+import { useUserStore } from '../stores/user.js'
 
 const axios = inject("axios");
 const router = useRouter();
+const userStore = useUserStore();
 
 const ordersReady = ref(null);
 const ordersPreparing = ref(null);
@@ -71,46 +73,8 @@ onMounted(() => {
   >
     <h1 class="h2">Public Board</h1>
   </div>
-  <div class="grid-container">
-    <div class="grid-item">
-      <div class="orders-preparing">
-        <p class="fastuga-font orders-title">Preparing...</p>
-      </div>
-      <div class="orders-body">
-        <div class="orders-container fastuga-font">
-          <div v-if="ordersPreparing == null" class="orders-loading">
-            <p>loading..</p>
-            <img src="@/assets/loadingCook.jpg" class="orders-loading-image" />
-          </div>
-          <div v-else-if="ordersPreparing.length == 0">
-            Without orders
-          </div>
-          <span v-else v-for="order in ordersPreparing" class="order-item">
-            0{{ order.ticket_number }}
-          </span>
-        </div>
-      </div>
-    </div>
-    <div class="grid-item">
-      <div class="orders-ready">
-        <p class="fastuga-font orders-title">Ready to Deliver</p>
-      </div>
-      <div class="orders-body">
-        <div class="orders-container fastuga-font">
-          <div v-if="ordersReady == null" class="orders-loading">
-            <p>loading..</p>
-            <img src="@/assets/loadingCook.jpg" class="orders-loading-image" />
-          </div>
-          <span v-else-if="ordersReady.length == 0"> Without orders </span>
-          <span v-else v-for="order in ordersReady" class="order-item">
-            0{{ order.ticket_number }}
-          </span>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <div style="margin-bottom: 5%">
+  <div v-if="userStore.user != null && userStore.user.type == 'EM'" style="margin-bottom: 5%">
     <h4 style="text-align: center">Orders Ready</h4>
     <div
       v-if="ordersReady == null"
@@ -164,6 +128,45 @@ onMounted(() => {
       </ul>
     </div>
   </div>
+
+  <div v-else class="grid-container">
+    <div class="grid-item">
+      <div class="orders-preparing">
+        <p class="fastuga-font orders-title">Preparing...</p>
+      </div>
+      <div class="orders-body">
+        <div class="orders-container fastuga-font">
+          <div v-if="ordersPreparing == null" class="orders-loading">
+            <p>loading..</p>
+            <img src="@/assets/loadingCook.jpg" class="orders-loading-image" />
+          </div>
+          <div v-else-if="ordersPreparing.length == 0">
+            Without orders
+          </div>
+          <span v-else v-for="order in ordersPreparing" class="order-item">
+            0{{ order.ticket_number }}
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="grid-item">
+      <div class="orders-ready">
+        <p class="fastuga-font orders-title">Ready to Deliver</p>
+      </div>
+      <div class="orders-body">
+        <div class="orders-container fastuga-font">
+          <div v-if="ordersReady == null" class="orders-loading">
+            <p>loading..</p>
+            <img src="@/assets/loadingCook.jpg" class="orders-loading-image" />
+          </div>
+          <span v-else-if="ordersReady.length == 0"> Without orders </span>
+          <span v-else v-for="order in ordersReady" class="order-item">
+            0{{ order.ticket_number }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped>
@@ -194,9 +197,7 @@ onMounted(() => {
 
 .order-item {
   text-align: flex-start;
-  height: 82%;
   border-radius: 2%;
-  flex: 1 1 20px;
 }
 
 .orders-container {
@@ -222,10 +223,10 @@ onMounted(() => {
 .grid-item {
   font-size: 30px;
   text-align: flex-start;
-  height: 82%;
   margin: 29px;
   border-radius: 2%;
   box-shadow: 0 10px 16px 0 rgba(139, 136, 136, 0.2), 0 6px 20px 0 rgba(128, 128, 128, 0.19);
+  max-height: 400px;
 }
 
 .grid-container {
@@ -234,7 +235,7 @@ onMounted(() => {
   width: auto;
   margin: auto;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  height: -moz-available;
+  height: inherit;
   margin: 0 8%;
 }
 

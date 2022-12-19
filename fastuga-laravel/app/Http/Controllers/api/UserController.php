@@ -109,6 +109,34 @@ class UserController extends Controller
         }
     }
 
+    public function blockUnblockUser(UpdateUserRequest $userRequest, User $user)
+    {
+        DB::beginTransaction();
+        try {
+
+            $validatedData = $userRequest->validated();
+            if($userRequest->hasFile('photo_url')){
+                // Delete Existing Photo
+                if(Storage::disk('public')->exists('fotos/'.$user->photo_url)) {
+                    Storage::disk('public')->delete('fotos/'.$user->photo_url);
+                }
+                // Save New Photo
+                $path = Storage::putFile('public/fotos',  $userRequest->file('photo_url'));
+                $name = basename($path);
+                $validatedData["photo_url"] = $name;
+            }
+
+            $user->fill($validatedData);
+            $user->save();
+            $responseUser = new UserResource($user);
+            DB::commit();
+            return response()->json("Good", 204);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json($e->getMessage(), 400);
+        }
+    }
+
     public function updateTAESPassword(UpdateUserPasswordRequest $request, string $email)
     {
             try {
@@ -146,6 +174,7 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
+        $user = User::find($user->id);
         $user->delete();
     }
 
@@ -167,9 +196,5 @@ class UserController extends Controller
 
     public function getAllEmployees() {
         return User::whereIn('type', array('ec', 'ed', 'em'))->get();
-    }
-
-    public function getUserByEmail(string $email) {
-        return UserResource::collection(User::onlyTrashed()->where('email', $email)->get());
     }
 }
