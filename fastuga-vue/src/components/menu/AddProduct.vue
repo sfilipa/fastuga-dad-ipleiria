@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, inject, watch } from "vue";
+import { ref, onMounted, inject} from "vue";
 import { useRouter } from "vue-router";
 import axiosImported from "axios";
 
@@ -14,6 +14,10 @@ const typeInput = ref(null);
 const descriptionInput = ref(null);
 const priceInput = ref(null);
 const photoInput = ref(null);
+
+const addProductBool = ref(false);
+
+const errors = ref(null);
 
 const productTypes = ref([]);
 
@@ -36,30 +40,40 @@ const updatePhoto = (e) => {
     return;
   }
 
-  photoInput.value = e.target.files[0];
+  // Save uploaded image
+  const uploadedImage = e.target.files[0];
+
+  // Save image in base64
+  const reader = new FileReader();
+  reader.readAsDataURL(uploadedImage);
+  reader.onload = (event) => {
+    photoInput.value = event.target.result;
+  };
 };
 
 const addProduct = async () => {
-  let formData = new FormData();
+  addProductBool.value = true;
 
-  formData.append("name", nameInput.value);
-  formData.append("type", typeInput.value);
-  formData.append("description", descriptionInput.value);
-  formData.append("price", priceInput.value);
-  formData.append("photo_url", photoInput.value);
+  let product = {
+    name: nameInput.value,
+    type: typeInput.value,
+    description: descriptionInput.value,
+    price: priceInput.value != null && priceInput.value == "" ? "non numeric" : priceInput.value,
+    photo_url: photoInput.value,
+  };
 
   await axiosImported
-    .post(`${serverBaseUrl}/api/products`, formData)
+    .post(`${serverBaseUrl}/api/products`, product)
     .then((response) => {
       router.push("/menu");
-
       // Send message to web socket
       socket.emit("newProduct", response.data.data);
 
       toast.info("Product '" + response.data.data.name + "' was created");
     })
     .catch((error) => {
-      console.log(error);
+      addProductBool.value = false;
+      errors.value = error.response.data.errors;
     });
 };
 
@@ -83,17 +97,20 @@ onMounted(() => {
           name="name"
           v-model="nameInput"
           class="form-control"
+          required
+          @focus="errors != null && errors.name != null ? errors.name = null : null"
         />
       </div>
+      <field-error-message class="add-product-field add-product-error" :errors="errors" fieldName="name"></field-error-message>
       <div class="add-product-field">
         <label class="add-product-label">Type: </label>
-        <select name="type" id="type" v-model="typeInput" class="form-select">
+        <select name="type" id="type" v-model="typeInput" class="form-select" @focus="errors != null && errors.type != null ? errors.type = null : null">
           <option v-for="productType in productTypes" :value="productType">
             {{ productType.charAt(0).toUpperCase() }}{{ productType.slice(1) }}
           </option>
         </select>
       </div>
-
+      <field-error-message class="add-product-field add-product-error" :errors="errors" fieldName="type"></field-error-message>
       <div class="add-product-field">
         <label class="add-product-label">Description: </label>
         <textarea
@@ -103,23 +120,27 @@ onMounted(() => {
           cols="50"
           v-model="descriptionInput"
           class="form-control"
+          required
+          @focus="errors != null &&  errors.description != null ? errors.description = null : null"
         ></textarea
         ><br />
       </div>
-
+      <field-error-message class="add-product-field add-product-error" :errors="errors" fieldName="description"></field-error-message>
       <div class="add-product-field">
         <label class="add-product-label">Price: </label>
         <input
           type="number"
           name="price"
           min="0.1"
-          max="99"
+          max="99.99"
           step="0.1"
           v-model="priceInput"
           class="form-control"
+          required
+          @focus="errors != null && errors.price != null ? errors.price = null : null"
         />
       </div>
-
+      <field-error-message class="add-product-field add-product-error" :errors="errors" fieldName="price"></field-error-message>
       <div class="add-product-field">
         <label class="add-product-label">Photo: </label>
         <input
@@ -129,39 +150,32 @@ onMounted(() => {
           accept="image/png, image/jpeg, image/jpg"
           @change="updatePhoto"
           class="form-control"
+          @focus="errors != null && errors.photo_url != null ? errors.photo_url = null : null"
         />
       </div>
-
+      <field-error-message class="add-product-field add-product-error" :errors="errors" fieldName="photo_url"></field-error-message>
       <div class="add-product-field add-product-button-field">
         <button
           type="submit"
           class="btn add-product"
           @click.prevent="addProduct"
+          :disabled="addProductBool"
         >
           <span aria-hidden="true"> Add Product </span>
         </button>
       </div>
-
-      <!-- <form
-        action="#"
-        class="form-inline row d-flex"
-        enctype="multipart/form-data"
-      >
-        <div class="flex-grow-2 d-flex"></div>
-        <div class="flex-grow-1 d-flex-direction-col"></div>
-
-        <div class="flex-grow-1 d-flex"></div>
-        <div class="flex-grow-1 d-flex">
-          <label>Photo: </label>
-        </div>
-
-        <div></div>
-      </form> -->
     </div>
   </div>
 </template>
 
 <style scoped>
+.add-product-error{
+  margin-left: 30%;
+  position: relative;
+  top: -15px;
+  margin-bottom: 0px !important;
+}
+
 hr {
   background: #362222;
   height: 6px;
