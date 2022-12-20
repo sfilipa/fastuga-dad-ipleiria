@@ -14,16 +14,15 @@ const props = defineProps({
     orderDate: Date,
     parent: String
 })
-const emit = defineEmits(['show','delete'])
+const emit = defineEmits(['delete'])
 
 const showItems = (order, indexRow) => {
   axiosLaravel.get(`/orders/${order.id}/orderItems`)
       .then((response) => {
         orderItems.value = response.data.data
         indexRow = indexRow + 1;
-        console.log(orderItems.value)
         if (indexesAdded.includes(order.id)) {
-          props.orders.splice(indexRow, orderItems.value.length)
+          props.orders.splice(indexRow, orderItems.value.length) //Delete order items from table
 
           let key = indexesAdded.indexOf(order.id)
           indexesAdded.splice(key, 1)
@@ -31,7 +30,7 @@ const showItems = (order, indexRow) => {
         } else {
           indexesAdded.push(order.id)
           orderItems.value.forEach((value, index) => {
-            props.orders.splice(indexRow, 0, value)
+            props.orders.splice(indexRow, 0, value) //Insert order items into table
             indexRow++
           })
         }
@@ -39,10 +38,6 @@ const showItems = (order, indexRow) => {
       .catch((error) => {
         console.log(error)
       })
-}
-
-const showClick = (order) => {
-  emit('show', order)
 }
 
 const deleteClick = (order) => {
@@ -91,20 +86,12 @@ const deleteClick = (order) => {
         <td v-else>{{ order.total_price }}€</td>
         <td class="text-end" :class="{'products': order.ticket_number === undefined}">
           <div class="d-flex justify-content-end" v-if="order.ticket_number !== undefined">
-            <div v-if="props.parent ==='delivery_orders'">
-              <button
-                  class="btn btn-xs btn-light"
-                  @click="showItems(order, index)"
-              >
-                <i class="bi bi-xs bi-search"></i>
-              </button>
-            </div>
+
             <button
               class="btn btn-xs btn-light"
-              @click="showClick(order)"
+              @click="showItems(order, index)"
               >
-              <i :class="{'bi bi-xs bi-search': props.parent=='all_orders',
-                                              'bi bi-xs  bi-check-circle-fill': props.parent=='delivery_orders'}"></i>
+              <i class="bi bi-xs bi-check-circle"></i>
             </button>
 
             <div v-if="order.status == 'P' || order.status == 'R'">
@@ -126,5 +113,11 @@ const deleteClick = (order) => {
 <style scoped>
 .products{
   background-color: #f1f1f1;
+}
+img,
+svg {
+  vertical-align: middle;
+  height: 50px;
+  width: auto;
 }
 </style>
