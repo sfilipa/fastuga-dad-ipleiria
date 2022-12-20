@@ -1,8 +1,10 @@
 <script setup>
 import { ref, inject } from 'vue'
+import {useUserStore} from "@/stores/user";
 
 const serverBaseUrl = inject("serverBaseUrl")
 const axiosLaravel = inject('axios')
+const user = useUserStore()
 const orderItems = ref([])
 let indexesAdded = []
 
@@ -98,7 +100,7 @@ const deleteClick = (order) => {
               <i class="bi bi-xs bi-search"></i>
             </button>
 
-            <div v-if="order.status == 'P' || order.status == 'R'">
+            <div v-if="props.parent ==='all_orders' && user.user?.type === 'EM' && (order.status === 'P' || order.status === 'R')">
               <button
                 class="btn btn-xs btn-light"
                 @click="deleteClick(order)"
@@ -108,7 +110,7 @@ const deleteClick = (order) => {
               </button>
             </div>
 
-            <div v-if="props.parent ==='delivery_orders'">
+            <div v-if="props.parent ==='delivery_orders' && user.user?.type === 'ED'">
               <button
                   class="btn btn-xs btn-light"
                   @click="changeOrderClick(order)"

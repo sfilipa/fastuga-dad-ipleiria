@@ -17,6 +17,25 @@ Route::post('login', [AuthController::class, 'login']);
 Route::middleware('auth:api')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('users/me', [UserController::class, 'show_me']);
+
+    // Order Routes
+    Route::prefix('orders')->group(function () {
+        Route::patch('/{order}/{status}', [OrderController::class, 'updateOrderStatus'])
+            ->middleware('can:update,order');
+        Route::get('/current/customer/{user_id}', [OrderController::class, 'getCustomerCurrentOrders'])
+            ->middleware('can:viewCustomerOrders, App\Models\Order');
+        Route::get('/{order_id}/orderItems', [OrderController::class, 'getItemsAndProducts']);
+        Route::get('/delivery', [OrderController::class, 'getOrderForDelivery'])
+            ->middleware('can:viewDeliveryOrders, App\Models\Order');
+    });
+
+    Route::prefix('order-items')->group(function () {
+        Route::get('/hotdishes/{chefId}', [OrderItemsController::class, 'getHotDishesToPrepare'])
+            ->middleware('can:viewHotDishes, App\Models\OrderItems');
+        Route::patch('/{id}', [OrderItemsController::class, 'updateHotDish'])
+            ->middleware('can:update,App\Models\OrderItems');
+    });
+
 });
 
 // User Routes
@@ -37,25 +56,20 @@ Route::apiResource("customers", CustomerController::class);
 // Order Routes
 
 Route::prefix('orders')->group(function () {
-    Route::get('/active', [OrderController::class, 'getNumberOfActiveOrders']);
+    Route::get('/status/{status}', [OrderController::class, 'getOrderByStatus']); //tentei meter no middleware lá em cima mas como na public board um user anonimo tbm pode ver, nunca dá bem
     Route::get('/status', [OrderController::class, 'getOrdersStatus']);
     Route::get('/statusTAES', [OrderController::class, 'getOrderByStatusTAES']);
-    Route::get('/delivery', [OrderController::class, 'getOrderForDelivery']);
-    Route::get('/status/{status}', [OrderController::class, 'getOrderByStatus']);
     Route::get('/{order}/customer', [CustomerController::class, 'getCostumerOfOrder']);
     Route::get('/{order}/user', [UserController::class, 'getUserOfOrder']);
-    Route::put('/{order}/cancel', [OrderController::class, 'cancelOrder']);
-    Route::patch('/{order}/{status}', [OrderController::class, 'updateOrderStatus']);
-    Route::get('/customer/{user_id}', [OrderController::class, 'getAllCustomerOrders']);
-    Route::get('/current/customer/{user_id}', [OrderController::class, 'getCustomerCurrentOrders']);
-    Route::get('/order/orderItems/{order_id}', [OrderController::class, 'getAllOrderProducts']);
     Route::get('/delivered/{user_id}', [OrderController::class, 'getAllOrdersDelivered']);//statistics - driver
     Route::get('/bymonth/total', [OrderController::class, 'getTotalOrdersByMonth']);//statistics - managers
     Route::get('/bymonth', [OrderController::class, 'getTotalOrdersMonths']);//statistics - managers
     Route::get('/customer/{user_id}', [OrderController::class, 'getAllCustomerOrders']);//statistics - customers
     Route::get('/{order_id}/products', [OrderController::class, 'getAllOrderProducts']);//statistics - customers
-    Route::get('/{order_id}/orderItems', [OrderController::class, 'getItemsAndProducts']);
+    Route::get('/active', [OrderController::class, 'getNumberOfActiveOrders']); //anyone can see this - even anonymous users
 });
+
+
 Route::post('ordersTAES',[OrderController::class, 'storeTAES']);
 Route::get('unassignedOrders', [OrderController::class, 'getUnassignedOrders']);
 Route::apiResource("orders", OrderController::class);
@@ -67,8 +81,7 @@ Route::prefix('order-items')->group(function () {
     Route::get('/{orderItems}/user', [UserController::class, 'getUserOfOrderItems']);
     Route::get('/{orderItems}/order', [OrderController::class, 'getOrderOfOrderItems']);
     Route::get('/{orderItems}/product', [ProductController::class, 'getProductOfOrderItems']);
-    Route::get('/hotdishes/{chefId}', [OrderItemsController::class, 'getHotDishesToPrepare']);
-    Route::patch('/{id}', [OrderItemsController::class, 'updateHotDish']);
+
 });
 Route::apiResource("order-items", OrderItemsController::class);
 

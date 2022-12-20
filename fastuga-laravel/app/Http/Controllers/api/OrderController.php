@@ -274,17 +274,6 @@ class OrderController extends Controller
         return $orders;
     }
 
-    public function cancelOrder(Order $order){
-        if($order->customer != null){
-            $customer = $order->customer;
-            $customer->points = $customer->points + $order->points_used_to_pay - $order->points_gained;
-            $customer->save();
-        }
-        $order->status = 'C';
-        $order->save();
-        return new OrderResource($order);
-    }
-
     public function updateOrderStatus(Request $request, Order $order, $status)
     {
         $userId = $request['userId'];
@@ -293,17 +282,30 @@ class OrderController extends Controller
             return response("Couldn't find current logged user", 403);
         }
 
-        if($employee->type != 'ED'){
-            return response("Current logged user isn't an delivery employee!", 403);
+        if($status == 'C'){
+            if($employee->type != 'EM'){
+                return response("Current logged user isn't a manager!", 403);
+            }
+
+            if($order->customer != null){
+                $customer = $order->customer;
+                $customer->points = $customer->points + $order->points_used_to_pay - $order->points_gained;
+                $customer->save();
+            }
+        }else{
+            if($employee->type != 'ED'){
+                return response("Current logged user isn't an delivery employee!", 403);
+            }
+
+            if($status == 'R'){
+                if(!$this->checkIfOrderIsReady($order)){
+                    //TODO - confirmar se isto nao vai entrar em conflito com os items que ja estão do db:seed
+                    return response("Selected order still has items to prepare!", 403);
+                }
+            }
+            $order->delivered_by = $userId;
         }
 
-        if($status == 'R'){
-            if(!$this->checkIfOrderIsReady($order)){
-                //TODO - confirmar se isto nao vai entrar em conflito com os items que ja estão do db:seed
-                return response("Selected order still has items to prepare!", 403);
-            }
-        }
-        $order->delivered_by = $userId;
         $order->status = $status;
         $order->save();
         return new OrderResource($order);

@@ -16,13 +16,10 @@ const LoadHotDishes = () => {
   axiosLaravel.get(`/order-items/hotdishes/${user.userId}`)
       .then((response)=>{
         products.value = response.data
-        if(products.value.length === 0){
-          noResults.value = true
-        }else{
-          noResults.value = false
-        }
+        noResults.value = products.value.length === 0
       })
       .catch((error)=>{
+        console.log(error)
         toast.error(error.response.data)
       })
 }
@@ -73,8 +70,15 @@ onMounted(()=>{
   </div>
 
   <div class="grid-container">
-    <div v-if="products.length === 0">
+    <div v-if="noResults">
         <p style="text-align: center"><b>No hot dishes to show!</b></p>
+    </div>
+    <div v-if="!noResults && products.length === 0">
+      <div class="d-flex justify-content-center spinner-font">
+        <div class="spinner-border" role="status">
+          <span class="sr-only"></span>
+        </div>
+      </div>
     </div>
     <div v-else class="grid-item hvr-grow" v-for="product in products.filter((p) => (ticketNumberFilter == null || ticketNumberFilter === '' ? true : p.order_id.ticket_number === ticketNumberFilter))
                                                                      .filter((p) => (orderLocalNumberFilter == null || orderLocalNumberFilter === '' ? true : p.order_local_number === orderLocalNumberFilter))" :key="product.id">
@@ -93,10 +97,11 @@ onMounted(()=>{
             <button
                 class="btn btn-xs btn-light hvr-grow"
                 @click="changeStatus(product)"
+                v-if="product.status === 'W' || product.preparation_by?.id === user.userId"
             >
               <i class="bi-check-circle-fill"></i>
             </button>
-          <div class="product-price">{{(product.status == 'W' ? "Waiting" : "Preparing")}}</div>
+          <div class="product-price">{{(product.status === 'W' ? "Waiting" : "Preparing")}}</div>
         </div>
       </div>
 
