@@ -1,6 +1,19 @@
 <script setup>
 import { RouterLink } from "vue-router"
+import { inject } from "vue";
 
+
+//==================================================
+// Web Sockets
+//==================================================
+
+const socket = inject("socket");
+const toast = inject("toast");
+
+// user logged in 
+socket.on("joinedRoom", (user) => {
+  toast.info(`${user.name} as joined the room`);
+});
 </script>
 
 <template>

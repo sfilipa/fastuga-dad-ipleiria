@@ -7,6 +7,7 @@ import { useUserStore } from './stores/user.js'
 const router = useRouter()
 const axios = inject("axios")
 const toast = inject("toast")
+const socket = inject("socket")
 
 const userStore = useUserStore()
 
@@ -42,6 +43,29 @@ const fetchCustomerOrders = (userId) => {
 onMounted(() => {
   fetchCustomerOrders(userStore.userId)
 })
+
+
+// User Blocked
+socket.on("userBlocked", (users) => {
+  const user = users.user;
+  const manager = users.manager;
+  if (user.id === userStore.user.id) {
+    toast.warning(`You have been blocked by ${manager}!`);
+    return
+  }
+  toast.warning(`${user.name} as been blocked by ${manager}!`);
+});
+
+// User Unblocked
+socket.on("userUnblocked", (users) => {
+  const user = users.user;
+  const manager = users.manager;
+  if (user.id === userStore.user.id) {
+    toast.warning(`You have been unblocked by ${manager}!`);
+    return
+  }
+  toast.warning(`${user.name} as been unblocked by ${manager}!`);
+});
 
 </script>
 
