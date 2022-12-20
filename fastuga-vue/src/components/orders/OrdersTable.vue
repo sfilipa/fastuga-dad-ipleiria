@@ -14,7 +14,7 @@ const props = defineProps({
     orderDate: Date,
     parent: String
 })
-const emit = defineEmits(['delete'])
+const emit = defineEmits(['changeOrderStatus', 'delete'])
 
 const showItems = (order, indexRow) => {
   axiosLaravel.get(`/orders/${order.id}/orderItems`)
@@ -38,6 +38,10 @@ const showItems = (order, indexRow) => {
       .catch((error) => {
         console.log(error)
       })
+}
+
+const changeOrderClick = (order) => {
+  emit('changeOrderStatus', order)
 }
 
 const deleteClick = (order) => {
@@ -91,7 +95,7 @@ const deleteClick = (order) => {
               class="btn btn-xs btn-light"
               @click="showItems(order, index)"
               >
-              <i class="bi bi-xs bi-check-circle"></i>
+              <i class="bi bi-xs bi-search"></i>
             </button>
 
             <div v-if="order.status == 'P' || order.status == 'R'">
@@ -101,6 +105,15 @@ const deleteClick = (order) => {
                 v-if="props.parent == 'all_orders'"
                 >
                 <i class="bi bi-xs bi-x-square-fill"></i>
+              </button>
+            </div>
+
+            <div v-if="props.parent ==='delivery_orders'">
+              <button
+                  class="btn btn-xs btn-light"
+                  @click="changeOrderClick(order)"
+              >
+                <i class="bi bi-xs bi-check-circle-fill"></i>
               </button>
             </div>
           </div>
