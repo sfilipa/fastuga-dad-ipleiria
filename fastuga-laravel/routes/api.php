@@ -7,6 +7,7 @@ use App\Http\Controllers\api\ProductController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\UserController;
 use App\Http\Controllers\api\AuthController;
+use App\Policies\UserPolicy;
 
 
 /*Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -25,6 +26,7 @@ Route::delete('users/{email}', [UserController::class, 'destroyWithEmail']);
 Route::put('users/blockUnblock/{user}', [UserController::class, 'blockUnblockUser']);
 Route::put('users/updatePasswordTAES/{email}', [UserController::class, 'updateTAESPassword']);
 Route::put('users/updateNameTAES/{email}', [UserController::class, 'updateTAESName']);
+Route::patch('users/{user}/password', [UserController::class, 'update_password'])/*->middleware('can:updatePassword, App\Models\User')*/;
 Route::apiResource("users", UserController::class);
 
 // Customer Routes

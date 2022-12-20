@@ -45,9 +45,6 @@ const updatePhoto = (e) => {
 }
 
   const addEmployee = async () => {
-    if (userValidations() == -1) {
-      return
-    }
     let formData = new FormData();
 
     formData.append('name', nameInput.value);
@@ -65,23 +62,12 @@ const updatePhoto = (e) => {
           router.push({name: "Employees"})
         })
         .catch((error) => {
-          if (error.response.data.errors.name != undefined) {
-            toast.error(error.response.data.errors.name)
-          } else {
-            if (error.response.data.errors.email != undefined) {
-              toast.error(error.response.data.errors.email)
-            } else {
-              if (error.response.data.errors.password != undefined) {
-                toast.error(error.response.data.errors.password)
-              } else {
-                toast.error('Add Employee Failed!')
-              }
-            }
-          }
+          console.log(error)
+          errors.value = error.response.data.errors;
         });
   }
 
-  const userValidations = () => {
+  /*const userValidations = () => {
     if (nameInput.value == '') {
       errors.value = {
         name: ["Name field cannot be empty!"]
@@ -113,7 +99,7 @@ const updatePhoto = (e) => {
       }
       return -1
     }
-  }
+  }*/
 
 </script>
 

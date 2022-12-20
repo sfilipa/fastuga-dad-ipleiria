@@ -44,10 +44,10 @@ const LoadOrders = (pageNumber) => {
   currentPage.value = pageNumber
   let URL = `http://localhost:8081/api/orders/customer/${userStore.user.id}?page=${pageNumber}`;
 
-  if(filterByPaymentType.value != "A"){
+  if (filterByPaymentType.value != "A") {
     URL += `&type=${filterByDate.value}`
   }
-  if(filterByDate.value != ""){
+  if (filterByDate.value != "") {
     URL += `&date=${filterByDate.value}`
   }
 
@@ -151,10 +151,10 @@ const LoadOrdersDriverDelivered = (pageNumber) => {
   currentPage.value = pageNumber
   let URL = `http://localhost:8081/api/orders/delivered/${userStore.user.id}?page=${pageNumber}`;
 
-  if(filterByPaymentType.value != "A"){
+  if (filterByPaymentType.value != "A") {
     URL += `&type=${filterByDate.value}`
   }
-  if(filterByDate.value != ""){
+  if (filterByDate.value != "") {
     URL += `&date=${filterByDate.value}`
   }
 
@@ -175,10 +175,10 @@ const LoadOrdersPrepared = (pageNumber) => {
   currentPage.value = pageNumber
   let URL = `http://localhost:8081/api/order-items/prepared/${userStore.user.id}?page=${pageNumber}`;
 
-  if(filterByDate.value != ""){
+  if (filterByDate.value != "") {
     URL += `&date=${filterByDate.value}`
   }
-  if(filterByName.value != ""){
+  if (filterByName.value != "") {
     URL += `&name=${filterByName.value}`
   }
 
@@ -303,26 +303,36 @@ onMounted(async () => {
       </div>
     </div>
     <hr/>
-    <div class="flex-container">
-      <div>
-        <h5 class="center">Top Products</h5>
-        <bar-chart-top-products v-if="chartTopProducts.barConfig"
-                                :chart-options="chartTopProducts.barConfig.options"
-                                :chart-data="chartTopProducts.barConfig.data"
-                                :width="400" :height="345"/>
 
+    <div v-if="orders.length == 0">
+      <div class="d-flex justify-content-center spinner-font">
+        <div class="spinner-border" role="status">
+          <span class="sr-only"></span>
+        </div>
       </div>
-      <div>
-        <h5 class="center">Worst Products</h5>
-        <bar-chart-worst-products v-if="chartWorstProducts.barConfig"
-                                  :chart-options="chartWorstProducts.barConfig.options"
-                                  :chart-data="chartWorstProducts.barConfig.data" :width="400" :height="300"/>
-      </div>
-      <div>
-        <h5 class="center">Orders By Month</h5>
-        <bar-chart-orders-by-month v-if="chartOrdersByMonth.barConfig"
-                                   :chart-options="chartOrdersByMonth.barConfig.options"
-                                   :chart-data="chartOrdersByMonth.barConfig.data" :width="400" :height="275"/>
+    </div>
+    <div v-else>
+      <div class="flex-container">
+        <div>
+          <h5 class="center">Top Products</h5>
+          <bar-chart-top-products v-if="chartTopProducts.barConfig"
+                                  :chart-options="chartTopProducts.barConfig.options"
+                                  :chart-data="chartTopProducts.barConfig.data"
+                                  :width="400" :height="345"/>
+
+        </div>
+        <div>
+          <h5 class="center">Worst Products</h5>
+          <bar-chart-worst-products v-if="chartWorstProducts.barConfig"
+                                    :chart-options="chartWorstProducts.barConfig.options"
+                                    :chart-data="chartWorstProducts.barConfig.data" :width="400" :height="300"/>
+        </div>
+        <div>
+          <h5 class="center">Orders By Month</h5>
+          <bar-chart-orders-by-month v-if="chartOrdersByMonth.barConfig"
+                                     :chart-options="chartOrdersByMonth.barConfig.options"
+                                     :chart-data="chartOrdersByMonth.barConfig.data" :width="400" :height="275"/>
+        </div>
       </div>
     </div>
   </div>
@@ -352,15 +362,24 @@ onMounted(async () => {
         </div>
       </div>
     </div>
-    <history-table :orders="orders" :filterByPaymentType="filterByPaymentType" :date="filterByDate">
-    </history-table>
-    <paginate
-        :page-count="lastPage"
-        :prev-text="'Previous'"
-        :next-text="'Next'"
-        :click-handler="LoadOrders"
-    >
-    </paginate>
+    <div v-if="orders.length == 0">
+      <div class="d-flex justify-content-center spinner-font">
+        <div class="spinner-border" role="status">
+          <span class="sr-only"></span>
+        </div>
+      </div>
+    </div>
+    <div v-else>
+      <history-table :orders="orders" :filterByPaymentType="filterByPaymentType" :date="filterByDate">
+      </history-table>
+      <paginate
+          :page-count="lastPage"
+          :prev-text="'Previous'"
+          :next-text="'Next'"
+          :click-handler="LoadOrders"
+      >
+      </paginate>
+    </div>
   </div>
   <div v-if="userStore.user.type == 'ED'">
     <div class="d-flex justify-content-between">
@@ -388,17 +407,27 @@ onMounted(async () => {
         </div>
       </div>
     </div>
-    <history-table-orders-delivered :ordersDelivered="ordersDelivered" :filterByPaymentType="filterByPaymentType"
-                                    :date="filterByDate">
-    </history-table-orders-delivered>
 
-    <paginate
-        :page-count="lastPage"
-        :prev-text="'Previous'"
-        :next-text="'Next'"
-        :click-handler="LoadOrdersDriverDelivered"
-    >
-    </paginate>
+    <div v-if="orders.length == 0">
+      <div class="d-flex justify-content-center spinner-font">
+        <div class="spinner-border" role="status">
+          <span class="sr-only"></span>
+        </div>
+      </div>
+    </div>
+    <div v-else>
+      <history-table-orders-delivered :ordersDelivered="ordersDelivered" :filterByPaymentType="filterByPaymentType"
+                                      :date="filterByDate">
+      </history-table-orders-delivered>
+
+      <paginate
+          :page-count="lastPage"
+          :prev-text="'Previous'"
+          :next-text="'Next'"
+          :click-handler="LoadOrdersDriverDelivered"
+      >
+      </paginate>
+    </div>
   </div>
   <div v-if="userStore.user.type == 'EC'">
     <div class="d-flex justify-content-between">
@@ -424,16 +453,25 @@ onMounted(async () => {
         </div>
       </div>
     </div>
-    <history-table-dish-prepared :dishPrepared="dishPrepared" :filterByName="filterByName" :date="filterByDate">
-    </history-table-dish-prepared>
+    <div v-if="orders.length == 0">
+      <div class="d-flex justify-content-center spinner-font">
+        <div class="spinner-border" role="status">
+          <span class="sr-only"></span>
+        </div>
+      </div>
+    </div>
+    <div v-else>
+      <history-table-dish-prepared :dishPrepared="dishPrepared" :filterByName="filterByName" :date="filterByDate">
+      </history-table-dish-prepared>
 
-    <paginate
-        :page-count="lastPage"
-        :prev-text="'Previous'"
-        :next-text="'Next'"
-        :click-handler="LoadOrdersPrepared"
-    >
-    </paginate>
+      <paginate
+          :page-count="lastPage"
+          :prev-text="'Previous'"
+          :next-text="'Next'"
+          :click-handler="LoadOrdersPrepared"
+      >
+      </paginate>
+    </div>
   </div>
 </template>
 
