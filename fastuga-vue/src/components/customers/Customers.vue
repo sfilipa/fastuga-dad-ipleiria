@@ -1,12 +1,12 @@
 <script setup>
-import { ref, computed, onMounted, inject, watch } from "vue";
+import { ref, computed, onMounted, inject, watch, toRaw } from "vue";
 import { useRouter } from "vue-router";
 import CustomersTable from "./CustomersTable.vue";
 
 const axios = inject("axios");
 const router = useRouter();
 
-const customers = ref([]);
+let customers = ref({});
 const searchByEmail = ref(null);
 const searchByNif = ref(null);
 
@@ -18,8 +18,8 @@ const load = (pageNumber) => {
   axios
     .get(URL)
     .then((response) => {
-      lastPage.value = response.data.meta.last_page
       customers.value = response.data;
+      lastPage.value = Object.keys(response.data).length
     })
     .catch((error) => {
       console.log(error);

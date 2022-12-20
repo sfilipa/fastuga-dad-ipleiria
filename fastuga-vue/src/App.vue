@@ -155,7 +155,7 @@ onMounted(() => {
             <li class="nav-item">
               <router-link class="nav-link fastuga-font" :class="{ active: $route.name === 'ChefsDishes' }" :to="{ name: 'ChefsDishes' }"
                            @click="clickMenuOption">
-                <i class="bi bi-cup-hot-fill"></i>
+                <i class="bi bi-cup-hot"></i>
                 Hot Dishes
               </router-link>
             </li>

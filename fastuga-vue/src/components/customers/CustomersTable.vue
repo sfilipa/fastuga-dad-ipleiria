@@ -78,7 +78,7 @@ const unblockClick = (customer) => {
       </tr>
     </thead>
     <tbody>
-      <tr v-for="customer in props.customers.data" :key="customer">
+      <tr v-for="customer in props.customers" :key="customer">
         <td>
           <img
             v-if="customer.user_id.photo_url"

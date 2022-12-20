@@ -23,7 +23,8 @@ class CustomerController extends Controller
 
     public function index()
     {
-        return CustomerResource::collection(Customer::paginate(15));
+        // dd(Customer::with('user')->whereNotNull('user.deleted_at')->get());
+        return CustomerResource::collection(Customer::paginate(15))->whereNotNull('user')->all();
     }
 
     public function store(StoreUpdateCustomerRequest $request)

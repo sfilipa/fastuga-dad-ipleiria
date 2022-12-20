@@ -654,6 +654,7 @@ const groupItems = (orderItems) => {
   border-radius: 50%;
   margin-right: 15%;
   background-color: white;
+  margin-left: 15%;
   /* border: 3.5px solid #ffa71dd6; */
   /* border: 3.5px solid white;
   background-color: #c47801d6; */
@@ -667,6 +668,7 @@ const groupItems = (orderItems) => {
   /* background-color: #ffa71dd6; */
   border: 3.5px solid #ffa71dd6;
   background-color: white;
+  margin-left: 15%;
 }
 
 .payment-input-label {
