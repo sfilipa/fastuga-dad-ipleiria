@@ -16,8 +16,8 @@ class UserPolicy
     {
         return $user->type == "EM"; //|| $user->id == $model->id;
     }
-   /* public function updatePassword(User $user, User $model)-
+    public function updatePassword(User $user/*, User $model*/)
     {
-        return $user->id == $model->id;
-    }*/
+        return true /*== $model->id*/;
+    }
 }

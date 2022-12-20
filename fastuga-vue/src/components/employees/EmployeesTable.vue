@@ -34,7 +34,7 @@ const deleteClick = (employee) => {
 };
 const dialogConfirmDelete = () => {
 	emit("delete", employeeToDelete.value);
-	toast.info("Employee " + employeeToDeleteDescription.value.name + " was deleted")
+	toast.info("Employee " + employeeToDeleteDescription.value + " was deleted")
 }
 
 // Block and Unblock

@@ -7,6 +7,7 @@ use App\Http\Controllers\api\ProductController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\UserController;
 use App\Http\Controllers\api\AuthController;
+use App\Policies\UserPolicy;
 
 
 /*Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -21,10 +22,10 @@ Route::middleware('auth:api')->group(function () {
 
 // User Routes
 Route::get('users/employees', [UserController::class, 'getAllEmployees']);//->middleware('can:view, App\Models\User'); - so o manager consegue ver os employees assim
-Route::delete('users/{email}', [UserController::class, 'destroyWithEmail']);
 Route::put('users/blockUnblock/{user}', [UserController::class, 'blockUnblockUser']);
 Route::put('users/updatePasswordTAES/{email}', [UserController::class, 'updateTAESPassword']);
 Route::put('users/updateNameTAES/{email}', [UserController::class, 'updateTAESName']);
+Route::patch('users/{user}/password', [UserController::class, 'update_password'])/*->middleware('can:updatePassword, App\Models\User')*/;
 Route::apiResource("users", UserController::class);
 
 // Customer Routes
