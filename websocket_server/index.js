@@ -56,19 +56,19 @@ io.on("connection", (socket) => {
 
 function userDeleted(socket, users) {
 	const user = users.user;
-	socket.in(user.id).in("managers").emit("userDeleted", users);
+	socket.in(user.user_id).in("managers").emit("userDeleted", users);
 	socket.broadcast.emit("update");
 }
 
 function userBlocked(socket, users) {
 	const user = users.user;
-	socket.in(user.id).in("managers").emit("userBlocked", users);
+	socket.in(user.user_id).in("managers").emit("userBlocked", users);
 	socket.broadcast.emit("update");
 }
 
 function userUnblocked(socket, users) {
 	const user = users.user;
-	socket.in(user.id).in("managers").emit("userUnblocked", users);
+	socket.in(user.user_id).in("managers").emit("userUnblocked", users);
 	socket.broadcast.emit("update");
 }
 

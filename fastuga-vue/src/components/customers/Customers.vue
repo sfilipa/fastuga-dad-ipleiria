@@ -71,11 +71,10 @@ const block = async (customer) => {
         custom: obj.custom,
       },
     });
-
 	console.log(data)
 
     const users = new Object();
-    users.user = obj.user_id;
+    users.user = obj;
     users.manager = userStore.user.name;
     socket.emit("userBlocked", users);
     toast.warning(`You have blocked ${obj.name}!`);
@@ -91,10 +90,11 @@ const block = async (customer) => {
 
 const unblock = async (customer) => {
   const obj = Object.assign({}, customer);
+  console.log(obj);
   try {
     const { data } = await axios({
       method: "put",
-      url: `/users/blockUnblock/${obj.id}`,
+      url: `/users/blockUnblock/${obj.user_id}`,
       data: {
         name: obj.name,
         email: obj.email,
@@ -128,12 +128,13 @@ const deleteFromDatabase = async (customer) => {
       method: "delete",
       url: `/customers/${obj.id}`,
     });
-
+    
     const users = new Object();
     users.user = obj;
     users.manager = userStore.user.name;
     socket.emit("userDeleted", users);
-    toast.warning(`You have deleted ${obj.name}!`);
+    toast.error(`You have deleted ${obj.name}!`);
+    return
   } catch (err) {
     if (err.response.status === 404) {
       console.log("Resource could not be found!");

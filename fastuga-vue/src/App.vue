@@ -55,7 +55,7 @@ onMounted(() => {
 socket.on("userBlocked", (users) => {
   const user = users.user;
   const manager = users.manager;
-  if (user.id === userStore.user.id) {
+  if (user.user_id === userStore.user.id) {
     toast.warning(`You have been blocked by ${manager}!`);
     return
   }
@@ -66,7 +66,7 @@ socket.on("userBlocked", (users) => {
 socket.on("userUnblocked", (users) => {
   const user = users.user;
   const manager = users.manager;
-  if (user.id === userStore.user.id) {
+  if (user.user_id === userStore.user.id) {
     toast.warning(`You have been unblocked by ${manager}!`);
     return
   }
@@ -77,13 +77,14 @@ socket.on("userUnblocked", (users) => {
 socket.on("userDeleted", (users) => {
   const user = users.user;
   const manager = users.manager;
-  if (user.id === userStore.user.id) {
+  console.log(users);
+  if (user.user_id === userStore.user.id) {
     toast.error(`Your account has been deleted by ${manager}!`);
     router.push('/')
     userStore.clearUser()
     return
   }
-  toast.warning(`${user.name} as been deleted by ${manager}!`);
+  toast.error(`${user.name} as been deleted by ${manager}!`);
 });
 
 </script>
