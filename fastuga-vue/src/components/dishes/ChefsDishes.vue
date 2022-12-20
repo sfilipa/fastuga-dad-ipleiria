@@ -13,27 +13,29 @@ const ticketNumberFilter = ref(null)
 const orderLocalNumberFilter = ref(null)
 
 const LoadHotDishes = () => {
-  axiosLaravel.get('/order-items/hotdishes')
+  axiosLaravel.get(`/order-items/hotdishes/${user.userId}`)
       .then((response)=>{
         products.value = response.data
-        if(products.value.length == 0){
+        if(products.value.length === 0){
           noResults.value = true
         }else{
           noResults.value = false
         }
       })
       .catch((error)=>{
-        console.log(error)
+        toast.error(error.response.data)
       })
 }
 
 const changeStatus = (productInOrder) => {
   const productItemObject = Object.assign({}, productInOrder)
   console.log(productItemObject)
-  axiosLaravel.patch(`/order-items/${productInOrder.id}/${user.userId}`)
+  axiosLaravel.patch(`/order-items/${productInOrder.id}`, {
+    userId : user.userId
+  })
       .then((response) => {
         console.log(response.data)
-        if(response.data.data.status == 'R'){
+        if(response.data.data.status === 'R'){
           toast.success(`Dish ${productInOrder.product_id.name} with number ${productInOrder.order_id.ticket_number}-${productInOrder.order_local_number} is now ready!`)
         }else{
           toast.success(`Dish ${productInOrder.product_id.name} with number ${productInOrder.order_id.ticket_number}-${productInOrder.order_local_number} is in preparation!`)
@@ -71,15 +73,8 @@ onMounted(()=>{
   </div>
 
   <div class="grid-container">
-    <div v-if="products.length == 0">
-      <div class="d-flex justify-content-center spinner-font">
-        <div class="spinner-border" role="status">
-          <span class="sr-only"></span>
-        </div>
-      </div>
-    </div>
-    <div v-else-if="noResults">
-        <p>There are no hot dishes to prepare!</p>
+    <div v-if="products.length === 0">
+        <p style="text-align: center"><b>No hot dishes to show!</b></p>
     </div>
     <div v-else class="grid-item hvr-grow" v-for="product in products.filter((p) => (ticketNumberFilter == null || ticketNumberFilter === '' ? true : p.order_id.ticket_number === ticketNumberFilter))
                                                                      .filter((p) => (orderLocalNumberFilter == null || orderLocalNumberFilter === '' ? true : p.order_local_number === orderLocalNumberFilter))" :key="product.id">

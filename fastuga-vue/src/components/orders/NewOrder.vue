@@ -43,7 +43,25 @@
         }
     }
 
+    const checkCurrentOrdersLimit = () => {
+      axiosLaravel.get('/orders/active')
+          .then((response)=>{
+            const currentOrdersCount = response.data
+            if(currentOrdersCount > 99){
+              return false
+            }
+          })
+          .catch((error)=>{
+            console.log(error)
+          })
+      return true
+    }
+
     const confirmPayment = () => {
+        if(!checkCurrentOrdersLimit()){
+          toast.error("Can't place a new order - we're currently at full capacity (max. 99 orders)")
+        }
+
         const paymentBody = {
             'ticket_number': 1,
             'status': 'P',
@@ -63,7 +81,6 @@
         if(finalPrice.value == 0){
             axiosLaravel.post('/orders', paymentBody)
                 .then((response)=>{
-                    console.log(response.data.data)
                     ticketNumber.value = response.data.data.ticket_number
                     orderCompletedDialog.value.show()
                 })
@@ -78,7 +95,7 @@
                 default: ["Empty Reference Value"]
             }
             toast.error('Order was not created due to validation errors!')
-            return 
+            return
         }
 
         if(store.totalPrice < 0){
@@ -103,12 +120,10 @@
             .then(() => {
                 axiosLaravel.post('/orders', paymentBody)
                 .then((response)=>{
-                    console.log(response.data.data)
                     ticketNumber.value = response.data.data.ticket_number
                     orderCompletedDialog.value.show()
                 })
                 .catch((error)=>{
-                    console.log(error)
                     toast.error('Order was not created due to ' + error.response.data.message)
                 })
             })

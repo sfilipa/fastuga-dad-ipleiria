@@ -24,7 +24,7 @@ const showOrder = (order, indexRow) => {
   let indexOriginal = indexRow
 
   axios
-      .get(`http://localhost:8081/api/orders/${order.id}/orderItems`)
+      .get(`http://localhost:8081/api/orders/${order.id}/products`)
       .then((response) => {
         //console.log(showDetails.value)
         orderItems.value = response.data
