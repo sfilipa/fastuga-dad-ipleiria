@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, inject } from "vue";
+import { ref, computed, onUpdated, inject, toRaw } from "vue";
 import ConfirmationDialog from "../global/ConfirmationDialog.vue";
 
 const toast = inject("toast");
@@ -14,59 +14,122 @@ const showClick = (customer) => {
   emit("show", customer);
 };
 
-// Delete
-const deleteConfirmationDialog = ref(null);
-const customerToDelete = ref(null);
 const customerToDeleteDescription = computed(() => {
   return customerToDelete.value ? `${customerToDelete.value.user_id.name}` : "";
 });
+
+const deleteDialog = ref(null);
+
+const showDeleteDialog = (bool) => {
+  deleteDialog.value = bool;
+};
+
+// Show Customer Info
+const customerInfoDialog = ref(null);
+let customerInfo = ref(null);
+
+const showCustomerInfo = (customer) => {
+  customerInfo.value = toRaw(customer);
+  console.log(toRaw(customer))
+  if (customerInfoDialog.value !== null && deleteDialog.value !== null) {
+    customerInfoDialog.value.show();
+  }
+};
+
+const closeInfo = () => {
+  deleteDialog.value = null;
+};
+
+// Delete
+const deleteConfirmationDialog = ref(null);
+const customerToDelete = ref(null);
+
 const deleteClick = (customer) => {
   customerToDelete.value = customer;
-  if (deleteConfirmationDialog.value !== null) {
+  console.log( deleteConfirmationDialog.value)
+  if (deleteConfirmationDialog.value !== null && deleteDialog.value !== null) {
     deleteConfirmationDialog.value.show();
   }
 };
 const dialogConfirmDelete = () => {
   emit("delete", customerToDelete.value);
-  toast.info(
-    "Customer " + customerToDeleteDescription.value + " was deleted"
-  );
+  deleteDialog.value = null;
+  toast.info("Customer " + customerToDeleteDescription.value + " was deleted");
 };
 
-// Show Customer Info
-const customerInfoDialog = ref(null);
-const customerInfo = ref(null);
-const showCustomerInfo = (customer) => {
-  customerInfo.value = customer;
-  if (customerInfoDialog.value !== null) {
-    customerInfoDialog.value.show();
+onUpdated(() => {
+  if (deleteDialog.value === true) {
+    deleteConfirmationDialog.value != null
+      ? deleteConfirmationDialog.value.show()
+      : (deleteDialog.value = null);
   }
-};
+
+  if (deleteDialog.value === false) {
+    customerInfoDialog.value != null
+      ? customerInfoDialog.value.show()
+      : (deleteDialog.value = null);
+  }
+
+  if(deleteConfirmationDialog.value == null || customerInfoDialog.value == null){
+    deleteDialog.value = null;
+  }
+});
 
 // Block and Unblock
 const blockClick = (customer) => {
   emit("block", customer);
 };
+
 const unblockClick = (customer) => {
   emit("unblock", customer);
 };
 </script>
 
 <template>
-  <ConfirmationDialog
-    ref="deleteConfirmationDialog"
-    confirmationBtn="Delete Customer"
-    :msg="`Do you really want to delete: ${customerToDeleteDescription}`"
-    @confirmed="dialogConfirmDelete"
-  >
-  </ConfirmationDialog>
-  <ConfirmationDialog
-    ref="customerInfoDialog"
-    confirmationBtn="Close Info"
-    :msg="`Customer Information:\n 
-    ${customerInfo}`"
-  >
-  </ConfirmationDialog>
+  <div v-if="deleteDialog">
+    <ConfirmationDialog
+      ref="deleteConfirmationDialog"
+      confirmationBtn="Delete Customer"
+      :msg="`Do you really want to delete: ${customerToDeleteDescription}`"
+      @confirmed="dialogConfirmDelete"
+    >
+    </ConfirmationDialog>
+  </div>
+
+  <div v-if="deleteDialog != null && !deleteDialog">
+    <ConfirmationDialog
+      ref="customerInfoDialog"
+      confirmationBtn="Close Info"
+      :msg="``"
+      :title="`Customer Information`"
+      @confirmed="closeInfo"
+    >
+    <div class="confirmation-container fastuga-font">
+        <div class="confirmation-row">
+          <span class="confirmation-label">Name: </span><span>{{customerInfo.user_id.name}}</span>
+        </div>
+        <div class="confirmation-row">
+          <span class="confirmation-label">Email: </span><span>{{customerInfo.user_id.email}}</span>
+        </div>
+        <div class="confirmation-row">
+          <span class="confirmation-label">NIF: </span><span>{{customerInfo.nif}}</span>
+        </div>
+        <div class="confirmation-row">
+          <span class="confirmation-label">Phone: </span><span>{{customerInfo.phone}}</span>
+        </div>
+        <div class="confirmation-row">
+          <span class="confirmation-label">Points: </span><span>{{customerInfo.points}}</span>
+        </div>
+        <div class="confirmation-row">
+          <span class="confirmation-label">Default Payment Reference: </span><span>{{customerInfo.default_payment_reference}}</span>
+        </div>
+        <div class="confirmation-row">
+          <span class="confirmation-label">Default Payment Type: </span><span>{{customerInfo.default_payment_type}}</span>
+        </div>
+      </div>
+    </ConfirmationDialog>
+  </div>
+
   <table class="table">
     <thead>
       <tr>
@@ -105,7 +168,10 @@ const unblockClick = (customer) => {
           <div class="d-flex justify-content-around">
             <button
               class="btn btn-xs btn-info"
-              @click="showCustomerInfo(customer)"
+              @click="
+                showDeleteDialog(false);
+                showCustomerInfo(customer);
+              "
             >
               <i class="bi bi-info-square-fill"></i> About
             </button>
@@ -125,7 +191,10 @@ const unblockClick = (customer) => {
             </button>
             <button
               class="btn btn-xs btn-danger"
-              @click="deleteClick(customer)"
+              @click="
+                showDeleteDialog(true);
+                deleteClick(customer);
+              "
             >
               <i class="bi bi-trash-fill"></i> Delete
             </button>
@@ -136,4 +205,22 @@ const unblockClick = (customer) => {
   </table>
 </template>
 
-<style></style>
+<style scoped>
+
+.confirmation-label{
+  width: 50%;
+  font-weight: bold;
+}
+
+.confirmation-row{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.confirmation-container{
+  display: flex;
+  flex-direction: column;
+
+}
+</style>
