@@ -1,15 +1,11 @@
 <script setup>
-import { ref, computed, onMounted, inject, watch, toRaw } from "vue";
-import { useRouter } from "vue-router";
+import { ref, onMounted, inject } from "vue";
 import CustomersTable from "./CustomersTable.vue";
 import Paginate from "vuejs-paginate-next";
 
 const axios = inject("axios");
-const router = useRouter();
 
 let customers = ref({});
-const searchByEmail = ref(null);
-const searchByNif = ref(null);
 
 const lastPage = ref(15);
 const currentPage = ref(1);
@@ -122,9 +118,9 @@ const deleteFromDatabase = async (customer) => {
 };
 
 function clear() {
-  filterByName.value = null;
-  filterByEmail.value = null;
-  filterByNif.value = null;
+  filterByName.value = "";
+  filterByEmail.value = "";
+  filterByNif.value = "";
   loadUsers(1);
 }
 
@@ -145,8 +141,6 @@ onMounted(() => {
   >
     <div class="mx-2 mt-2 flex-grow-1 filter-div">
       <div class="inner-addon left-addon">
-        <!-- <label for="searchbar" class="form-label">Search By Name:</label>
-        <i class="glyphicon glyphicon-user"></i> -->
         <input
           v-model="filterByName"
           type="search"
@@ -161,8 +155,6 @@ onMounted(() => {
 
     <div class="mx-2 mt-2 flex-grow-1 filter-div">
       <div class="inner-addon left-addon">
-        <!-- <label for="searchbar" class="form-label">Search by Email:</label> -->
-        <!-- <i class="glyphicon glyphicon-user"></i> -->
         <input
           v-model="filterByEmail"
           type="search"
@@ -177,8 +169,6 @@ onMounted(() => {
 
     <div class="mx-2 mt-2 flex-grow-1 filter-div">
       <div class="inner-addon left-addon">
-        <!-- <label for="searchbar" class="form-label">Search by NIF:</label>
-        <i class="glyphicon glyphicon-user"></i> -->
         <input
           v-model="filterByNif"
           type="search"

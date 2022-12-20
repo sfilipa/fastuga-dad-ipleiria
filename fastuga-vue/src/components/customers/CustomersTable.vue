@@ -68,7 +68,7 @@ onUpdated(() => {
   }
 
   if (
-    deleteConfirmationDialog.value == null ||
+    deleteConfirmationDialog.value == null &&
     customerInfoDialog.value == null
   ) {
     deleteDialog.value = null;
