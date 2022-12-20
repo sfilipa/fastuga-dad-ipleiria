@@ -116,14 +116,6 @@ const socket = inject("socket")
 </script>
 
 <template>
-  <confirmation-dialog
-    ref="confirmationLeaveDialog"
-    confirmationBtn="Discard changes and leave"
-    msg="Do you really want to leave? You have unsaved changes!"
-    @confirmed="leaveConfirmed"
-  >
-  </confirmation-dialog>  
-
   <user-detail
     :user="user"
     :errors="errors"

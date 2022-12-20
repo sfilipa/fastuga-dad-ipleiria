@@ -2,20 +2,17 @@
 import { ref, computed, onUpdated, inject, toRaw } from "vue";
 import ConfirmationDialog from "../global/ConfirmationDialog.vue";
 
+const serverBaseUrl = inject("serverBaseUrl");
 const toast = inject("toast");
 
 const props = defineProps({
   customers: Object,
   default: () => [],
 });
-const emit = defineEmits(["show", "delete", "block", "unblock"]);
-
-const showClick = (customer) => {
-  emit("show", customer);
-};
+const emit = defineEmits(["delete", "block", "unblock"]);
 
 const customerToDeleteDescription = computed(() => {
-  return customerToDelete.value ? `${customerToDelete.value.user_id.name}` : "";
+  return customerToDelete.value ? `${customerToDelete.value.name}` : "";
 });
 
 const deleteDialog = ref(null);
@@ -30,7 +27,7 @@ let customerInfo = ref(null);
 
 const showCustomerInfo = (customer) => {
   customerInfo.value = toRaw(customer);
-  console.log(toRaw(customer))
+  console.log(toRaw(customer));
   if (customerInfoDialog.value !== null && deleteDialog.value !== null) {
     customerInfoDialog.value.show();
   }
@@ -46,7 +43,7 @@ const customerToDelete = ref(null);
 
 const deleteClick = (customer) => {
   customerToDelete.value = customer;
-  console.log( deleteConfirmationDialog.value)
+  console.log(deleteConfirmationDialog.value);
   if (deleteConfirmationDialog.value !== null && deleteDialog.value !== null) {
     deleteConfirmationDialog.value.show();
   }
@@ -70,13 +67,17 @@ onUpdated(() => {
       : (deleteDialog.value = null);
   }
 
-  if(deleteConfirmationDialog.value == null || customerInfoDialog.value == null){
+  if (
+    deleteConfirmationDialog.value == null &&
+    customerInfoDialog.value == null
+  ) {
     deleteDialog.value = null;
   }
 });
 
 // Block and Unblock
 const blockClick = (customer) => {
+  console.log(customer);
   emit("block", customer);
 };
 
@@ -104,99 +105,104 @@ const unblockClick = (customer) => {
       :title="`Customer Information`"
       @confirmed="closeInfo"
     >
-    <div class="confirmation-container fastuga-font">
+      <div class="confirmation-container fastuga-font">
         <div class="confirmation-row">
-          <span class="confirmation-label">Name: </span><span>{{customerInfo.user_id.name}}</span>
+          <span class="confirmation-label">Name: </span
+          ><span>{{ customerInfo.name }}</span>
         </div>
         <div class="confirmation-row">
-          <span class="confirmation-label">Email: </span><span>{{customerInfo.user_id.email}}</span>
+          <span class="confirmation-label">Email: </span
+          ><span>{{ customerInfo.email }}</span>
         </div>
         <div class="confirmation-row">
-          <span class="confirmation-label">NIF: </span><span>{{customerInfo.nif}}</span>
+          <span class="confirmation-label">NIF: </span
+          ><span>{{ customerInfo.nif }}</span>
         </div>
         <div class="confirmation-row">
-          <span class="confirmation-label">Phone: </span><span>{{customerInfo.phone}}</span>
+          <span class="confirmation-label">Phone: </span
+          ><span>{{ customerInfo.phone }}</span>
         </div>
         <div class="confirmation-row">
-          <span class="confirmation-label">Points: </span><span>{{customerInfo.points}}</span>
+          <span class="confirmation-label">Points: </span
+          ><span>{{ customerInfo.points }}</span>
         </div>
         <div class="confirmation-row">
-          <span class="confirmation-label">Default Payment Reference: </span><span>{{customerInfo.default_payment_reference}}</span>
+          <span class="confirmation-label">Default Payment Reference: </span
+          ><span>{{ customerInfo.default_payment_reference }}</span>
         </div>
         <div class="confirmation-row">
-          <span class="confirmation-label">Default Payment Type: </span><span>{{customerInfo.default_payment_type}}</span>
+          <span class="confirmation-label">Default Payment Type: </span
+          ><span>{{ customerInfo.default_payment_type }}</span>
         </div>
       </div>
     </ConfirmationDialog>
   </div>
 
-  <table class="table">
+  <table class="table fastuga-font">
     <thead>
       <tr>
         <th>Photo</th>
         <th>Name</th>
         <th>Email</th>
-        <th>Blocked</th>
-        <th>Actions</th>
+        <th style="text-align: center">Actions</th>
       </tr>
     </thead>
     <tbody>
       <tr v-for="customer in props.customers" :key="customer">
         <td>
           <img
-            v-if="customer.user_id.photo_url"
-            :src="
-              'http://localhost:8081/storage/fotos/' +
-              customer.user_id.photo_url
-            "
-            class="rounded-circle z-depth-0 avatar-img"
+            v-if="customer.photo_url"
+            :src="`${serverBaseUrl}/storage/fotos/${customer.photo_url}`"
+            class="rounded-circle z-depth-0 avatar-img table-img"
             alt="avatar image"
           />
           <img
             v-else
             :src="'https://via.placeholder.com/150'"
-            class="rounded-circle z-depth-0 avatar-img"
+            class="rounded-circle z-depth-0 avatar-img table-img"
             alt="avatar image"
           />
         </td>
-        <td>{{ customer.user_id.name }}</td>
-        <td>{{ customer.user_id.email }}</td>
+        <td>{{ customer.name }}</td>
+        <td>{{ customer.email }}</td>
 
-        <td v-if="customer.user_id.blocked === 0">No</td>
-        <td v-if="customer.user_id.blocked === 1">Yes</td>
         <td class="text-end">
-          <div class="d-flex justify-content-around">
+          <div class="d-flex justify-content-around customers-buttons fastuga-font">
             <button
-              class="btn btn-xs btn-info"
+              class="btn customers-button btn-info"
               @click="
                 showDeleteDialog(false);
                 showCustomerInfo(customer);
               "
             >
-              <i class="bi bi-info-square-fill"></i> About
+              <span><i class="bi bi-info-circle"></i></span>
+              <span> Info </span>
             </button>
             <button
-              v-if="customer.user_id.blocked === 0"
-              class="btn btn-xs btn-warning"
-              @click="blockClick(customer.user_id)"
+              v-if="customer.blocked === 0"
+              class="btn customers-button button-block"
+              @click="blockClick(customer)"
             >
-              <i class="bi bi-x-octagon-fill"></i> Block
+              <span><i class="bi bi-slash-circle"></i></span>
+              <span> Block </span>
             </button>
             <button
-              v-if="customer.user_id.blocked === 1"
-              class="btn btn-xs btn-warning"
-              @click="unblockClick(customer.user_id)"
+              v-else
+              class="btn customers-button button-unblock"
+              @click="unblockClick(customer)"
             >
-              <i class="bi bi-x-octagon-fill"></i> Unblock
+              <span><i class="bi bi-slash-circle-fill"></i></span>
+              <span>Unblock</span>
             </button>
             <button
-              class="btn btn-xs btn-danger"
+              class="btn customers-button btn-delete"
               @click="
                 showDeleteDialog(true);
                 deleteClick(customer);
               "
             >
-              <i class="bi bi-trash-fill"></i> Delete
+              <span><i class="bi bi-trash3"></i></span>
+              <span> Delete </span>
             </button>
           </div>
         </td>
@@ -206,21 +212,112 @@ const unblockClick = (customer) => {
 </template>
 
 <style scoped>
-
-.confirmation-label{
-  width: 50%;
-  font-weight: bold;
+.customers-button{
+  width: 30%;
 }
 
-.confirmation-row{
+.customers-buttons{
   display: flex;
   flex-direction: row;
   align-items: center;
 }
 
-.confirmation-container{
+.btn-delete:hover,
+.btn-delete:active {
+  border: 2.5px solid #c53b3b !important;
+  color: #c53b3b !important;
+  background-color: rgb(242, 241, 241) !important;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.btn-delete {
+  border: 2.5px solid #ff5b5b;
+  color: #ff5b5b;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.btn-info:hover,
+.btn-info:active {
+  border: 2.5px solid #4d3838 !important;
+  color: #4d3838 !important;
+  background-color: rgb(242, 241, 241)  !important;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.btn-info {
+  border: 2.5px solid #5e4444;
+  color: #5e4444;
+  background-color: white;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.button-unblock:hover, .button-unblock:active{
+  background-color: #ff8300 !important;
+  color: white !important;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.button-unblock {
+  background-color: #ffa71dd6;
+  color: white;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.button-block:hover, .button-block:active {
+  border: 2.5px solid #ff8300 !important;
+  color: #ff8300 !important;
+  background-color: rgb(242, 241, 241)  !important;
+  height: fit-content;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.button-block {
+  border: 2.5px solid #ffa71dd6;
+  color: #ffa71dd6;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.confirmation-label {
+  width: 50%;
+  font-weight: bold;
+}
+
+.confirmation-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.confirmation-container {
   display: flex;
   flex-direction: column;
+}
 
+.table-img {
+  margin: auto;
+}
+
+.bi {
+  display: flex;
+}
+
+td {
+  vertical-align: middle;
 }
 </style>

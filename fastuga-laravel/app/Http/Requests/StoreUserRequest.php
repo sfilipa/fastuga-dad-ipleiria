@@ -33,4 +33,17 @@ class StoreUserRequest extends FormRequest
             'custom' => 'nullable'
         ];
     }
+
+    public function messages()
+    {
+        return [
+            'name.required' => 'Name field cannot be empty',
+            'name.min' => 'Name too short',
+            'email.required' => 'Email filed cannot be empty',
+            'email.email' => 'Wrong email format',
+            'email.unique' => 'Email already exists',
+            'password.required' => 'Password field cannot be empty',
+            'password.min' => 'Password too short at least 8 characters'
+    ];
+    }
 }

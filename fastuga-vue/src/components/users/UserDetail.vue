@@ -387,12 +387,6 @@ input[type=text] {
   padding: 12px;
 }
 
-input[type=password] {
-  width: 100%;
-  margin-bottom: 20px;
-  padding: 12px;
-}
-
 .btn-success:hover {
   background-color: #0b450f;
 }
@@ -425,27 +419,10 @@ body {
   margin: 0 -16px;
 }
 
-.col-25 {
-  -ms-flex: 25%;
-  /* IE10 */
-  flex: 25%;
-}
 
 .col-50 {
   -ms-flex: 50%;
   /* IE10 */
   flex: 50%;
-}
-
-.col-75 {
-  -ms-flex: 75%;
-  /* IE10 */
-  flex: 75%;
-}
-
-.col-25,
-.col-50,
-.col-75 {
-  padding: 0 16px;
 }
 </style>

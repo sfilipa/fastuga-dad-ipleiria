@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 use Illuminate\Support\Facades\App;
 
@@ -14,7 +15,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\StoreUpdateCustomerRequest;
 use App\Http\Requests\UpdateUserRequest;
-use App\Http\Requests\UpdateUserPasswordRequest;
+use App\Http\Requests\UpdatePasswordRequest;
+use App\Http\Requests\UpdateUserPasswordTAESRequest;
 use App\Http\Requests\UpdateUserNameTAESRequest;
 use App\Http\Resources\CustomerResource;
 use App\Http\Resources\UserResource;
@@ -162,7 +164,21 @@ class UserController extends Controller
         }
     }
 
-    public function updateTAESPassword(UpdateUserPasswordRequest $request, string $email)
+    public function update_password(UpdatePasswordRequest $request, $user)
+    {
+        $user =  User::find($user);
+
+        if (!Hash::check($request->get('current_password'), $user->password))
+        {
+            throw ValidationException::withMessages(['current_password' => 'Current Password is incorrect']);
+        }
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+    }
+
+    public function updateTAESPassword(UpdateUserPasswordTAESRequest $request, string $email)
     {
             try {
 
