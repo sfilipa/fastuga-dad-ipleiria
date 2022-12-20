@@ -346,7 +346,7 @@ onUpdated(() => {
         <!-- Editiing Row Description -->
         <div
           v-if="editRow && product == editingProduct"
-          style="width: -moz-available"
+          style="width: 100%"
         >
           <textarea
             id="inputDescription"
@@ -439,7 +439,7 @@ onUpdated(() => {
         </div>
 
         <!-- Editiing Row Price -->
-        <div v-if="editRow && product == editingProduct" class="mb-3">
+        <div v-if="editRow && product == editingProduct" class="mb-3" style="width: 100%;">
           <div>
             <input
               type="number"
@@ -575,12 +575,10 @@ onUpdated(() => {
   padding: 20px;
   font-size: 30px;
   text-align: center;
-  /* width: 325px; */
   height: 82%;
   margin: 29px;
   border-radius: 2%;
   background-image: linear-gradient(to top left, #ff8300, #ffa71dd6);
-  /* background-color: #6f6161; */
   box-shadow: 0 10px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
@@ -610,7 +608,7 @@ input[type="text"] {
 }
 
 input[type="number"] {
-  width: 50%;
+  width: 60%;
   margin-left: auto;
   display: flex;
 }
