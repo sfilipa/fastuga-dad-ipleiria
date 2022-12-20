@@ -4,11 +4,13 @@
   import OrdersTable from "./OrdersTable.vue"
   import Paginate from "vuejs-paginate-next"
   import axios from 'axios'
+  import {useUserStore} from "@/stores/user";
 
   const REFUND_URL = 'https://dad-202223-payments-api.vercel.app' 
   const axiosLaravel = inject('axios')
   const router = useRouter()
   const toast = inject("toast")
+  const user = useUserStore()
   const componentName = "all_orders"
 
   const orders = ref([])
@@ -44,7 +46,9 @@
 
   const deleteOrder = (order) => {
     const orderObj = Object.assign({}, order)
-    axiosLaravel.put(`/orders/${orderObj.id}/cancel`, orderObj)
+    axiosLaravel.patch(`/orders/${orderObj.id}/C`, {
+      userId : user.userId
+    })
       .then((response)=>{
         console.log(response.data)
         if(orderObj.payment_type != null){

@@ -196,7 +196,7 @@ onUpdated(() => {
       : (addDialog.value = null);
   }
 
-  if(deleteConfirmationDialog.value == null || addItemsToMenuDialog.value == null){
+  if(deleteConfirmationDialog.value == null && addItemsToMenuDialog.value == null){
     addDialog.value = null;
   }
 });

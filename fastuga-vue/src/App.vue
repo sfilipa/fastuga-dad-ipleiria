@@ -188,7 +188,7 @@ socket.on("userDeleted", (users) => {
               </router-link>
             </li>
 
-            <li class="nav-item">
+            <li class="nav-item" v-if="userStore.user && userStore.user.type !== 'C'">
               <router-link class="nav-link fastuga-font" :class="{ active: $route.name === 'Orders' }" :to="{ name: 'Orders' }"
                 @click="clickMenuOption">
                 <i class="bi bi-list-stars"></i>
@@ -196,7 +196,7 @@ socket.on("userDeleted", (users) => {
               </router-link>
             </li>
 
-            <li class="nav-item">
+            <li class="nav-item" v-if="userStore.user && userStore.user.type === 'EC'">
               <router-link class="nav-link fastuga-font" :class="{ active: $route.name === 'ChefsDishes' }" :to="{ name: 'ChefsDishes' }"
                            @click="clickMenuOption">
                 <i class="bi bi-cup-hot"></i>
@@ -204,7 +204,7 @@ socket.on("userDeleted", (users) => {
               </router-link>
             </li>
 
-            <li class="nav-item">
+            <li class="nav-item" v-if="userStore.user && userStore.user.type !== 'C' && userStore.user.type !== 'EC'">
               <router-link class="nav-link fastuga-font" :class="{ active: $route.name === 'OrdersEmployees' }" :to="{ name: 'OrdersEmployees' }"
                            @click="clickMenuOption">
                 <i class="bi bi-people"></i>
@@ -244,19 +244,21 @@ socket.on("userDeleted", (users) => {
             </li>
           </ul>
 
-          <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted fastuga-font">
-            <span>My Orders</span>
-            <router-link class="link-secondary" :to="{ name: 'NewOrder' }" aria-label="Make a new order"
-              @click="clickMenuOption">
-              <i class="bi bi-xs bi-plus-circle"></i>
-            </router-link>
-          </h6>
-          <ul class="nav flex-column mb-2">
-            <li class="nav-item" v-for="order in userStore.myCurrentOrders" :key="order.id">
-              <!--TODO é preciso atualizar isto no cliente quando a order muda de estado -->
-              Ticket Number: {{ order.ticket_number + " - " + (order.status == 'R' ? "Ready" : "Preparing")}}
-            </li>
-          </ul>
+          <div v-if="!userStore.user || userStore.user.type === 'C'">
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted fastuga-font">
+              <span>My Orders</span>
+              <router-link class="link-secondary" :to="{ name: 'NewOrder' }" aria-label="Make a new order"
+                @click="clickMenuOption">
+                <i class="bi bi-xs bi-plus-circle"></i>
+              </router-link>
+            </h6>
+            <ul class="nav flex-column mb-2">
+              <li class="nav-item" v-for="order in userStore.myCurrentOrders" :key="order.id">
+                <!--TODO é preciso atualizar isto no cliente quando a order muda de estado -->
+                Ticket Number: {{ order.ticket_number + " - " + (order.status == 'R' ? "Ready" : "Preparing")}}
+              </li>
+            </ul>
+          </div>
 
           <div class="d-block d-md-none">
             <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">

@@ -46,6 +46,7 @@ const changeOrderStatus = (order) => {
         LoadOrders(1)
       })
       .catch((error) => {
+        console.log(error)
         toast.error(error.response.data)
       })
   }else{
@@ -57,6 +58,7 @@ const changeOrderStatus = (order) => {
         LoadOrders(1)
       })
       .catch((error) => {
+        console.log(error)
         toast.error(error.response.data)
       })
   }
