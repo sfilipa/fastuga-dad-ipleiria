@@ -33,12 +33,22 @@ io.on("connection", (socket) => {
 		leaveRoom(socket, user);
 	});
 
+  // User Blocked
+  socket.on("userBlocked", function (user) {
+    userBlocked(socket, user);
+  });
+
 	// Sends message to all Users in the room except himself (User that is being updated)
 	socket.on("updateUser", function (user) {
-		socket.in("managers").except(user.id).emit("updateUser", user);
-		socket.in(user.id).emit("updateUser", user);
+		updateUser(socket, user);
 	});
 });
+
+function userBlocked(socket, user) {
+  // Sends message to all Users in the room except himself (User that is being updated)
+  socket.in("managers").emit("userBlocked", user);
+  socket.in(user.id).emit("userBlocked", user);
+}
 
 function joinRoom(socket, user) {
 	// Personal Room
@@ -47,19 +57,15 @@ function joinRoom(socket, user) {
 	if (user.type == "C") {
 		socket.join("clients");
 		socket.in("clients").except(user.id).emit("joinedRoom", user);
-    console.log(`Client: ${user.name} joined the room`);
 	} else if (user.type == "EC") {
 		socket.join("chefs");
 		socket.in("chefs").except(user.id).emit("joinedRoom", user);
-    console.log(`Chef: ${user.name} joined the room`);
 	} else if (user.type == "ED") {
 		socket.join("deliverers");
 		socket.in("deliverers").except(user.id).emit("joinedRoom", user);
-    console.log(`Deliverer: ${user.name} joined the room`);
 	} else if (user.type == "EM") {
 		socket.join("managers");
 		socket.in("managers").except(user.id).emit("joinedRoom", user);
-    console.log(`Manager: ${user.name} joined the room`);
 	}
 }
 
@@ -70,6 +76,12 @@ function leaveRoom(socket, user) {
 	socket.leave("chefs");
 	socket.leave("deliverers");
 	socket.leave("managers");
+}
+
+function updateUser(socket, user) {
+  // Sends message to all Users in the room except himself (User that is being updated)
+  socket.in("managers").except(user.id).emit("updateUser", user);
+  socket.in(user.id).emit("updateUser", user);
 }
 
 function sendBroadcastMessage(socket, message) {

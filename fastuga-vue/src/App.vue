@@ -7,6 +7,7 @@ import { useUserStore } from './stores/user.js'
 const router = useRouter()
 const axios = inject("axios")
 const toast = inject("toast")
+const socket = inject("socket")
 
 const userStore = useUserStore()
 
@@ -42,6 +43,16 @@ const fetchCustomerOrders = (userId) => {
 onMounted(() => {
   fetchCustomerOrders(userStore.userId)
 })
+
+
+// User Blocked
+socket.on("userBlocked", (user) => {
+  toast.warning(`${user.name}, email: ${user.email} as been blocked!`);
+});
+// User Unblocked
+socket.on("userUnblocked", (user) => {
+  toast.warning(`${user.name} as been unblocked!`);
+});
 
 </script>
 

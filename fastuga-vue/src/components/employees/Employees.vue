@@ -5,6 +5,8 @@ import EmployeesTable from "./EmployeesTable.vue";
 
 const axios = inject("axios");
 const router = useRouter();
+const socket = inject("socket");
+const toast = inject("toast");
 
 const employees = ref([]);
 const name = ref(undefined);
@@ -52,6 +54,8 @@ const blockEmployee = async (employee) => {
       },
     });
 
+    socket.emit("userBlocked", employeeObj);
+    toast.warning(`You have blocked ${employeeObj.name}!`);
     console.log(data);
   } catch (err) {
     if (err.response.status === 404) {

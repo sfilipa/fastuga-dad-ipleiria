@@ -12,7 +12,7 @@ const toast = inject("toast");
 
 // user logged in 
 socket.on("joinedRoom", (user) => {
-  toast.success(`${user.name} as joined the room`);
+  toast.info(`${user.name} as joined the room`);
 });
 </script>
 
