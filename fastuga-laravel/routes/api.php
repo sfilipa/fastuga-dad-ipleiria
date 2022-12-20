@@ -39,9 +39,10 @@ Route::apiResource("customers", CustomerController::class);
 // Order Routes
 
 Route::prefix('orders')->group(function () {
+    Route::get('/active', [OrderController::class, 'getNumberOfActiveOrders']);
     Route::get('/status', [OrderController::class, 'getOrdersStatus']);
     Route::get('/statusTAES', [OrderController::class, 'getOrderByStatusTAES']);
-    Route::get('/status/{status}/paginate', [OrderController::class, 'getOrderByStatusPaginate']);
+    Route::get('/delivery', [OrderController::class, 'getOrderForDelivery']);
     Route::get('/status/{status}', [OrderController::class, 'getOrderByStatus']);
     Route::get('/{order}/customer', [CustomerController::class, 'getCostumerOfOrder']);
     Route::get('/{order}/user', [UserController::class, 'getUserOfOrder']);
@@ -54,7 +55,8 @@ Route::prefix('orders')->group(function () {
     Route::get('/bymonth/total', [OrderController::class, 'getTotalOrdersByMonth']);//statistics - managers
     Route::get('/bymonth', [OrderController::class, 'getTotalOrdersMonths']);//statistics - managers
     Route::get('/customer/{user_id}', [OrderController::class, 'getAllCustomerOrders']);//statistics - customers
-    Route::get('/{order_id}/orderItems', [OrderController::class, 'getAllOrderProducts']);//statistics - customers
+    Route::get('/{order_id}/products', [OrderController::class, 'getAllOrderProducts']);//statistics - customers
+    Route::get('/{order_id}/orderItems', [OrderController::class, 'getItemsAndProducts']);
 });
 Route::post('ordersTAES',[OrderController::class, 'storeTAES']);
 Route::get('unassignedOrders', [OrderController::class, 'getUnassignedOrders']);
@@ -67,8 +69,8 @@ Route::prefix('order-items')->group(function () {
     Route::get('/{orderItems}/user', [UserController::class, 'getUserOfOrderItems']);
     Route::get('/{orderItems}/order', [OrderController::class, 'getOrderOfOrderItems']);
     Route::get('/{orderItems}/product', [ProductController::class, 'getProductOfOrderItems']);
-    Route::get('/hotdishes', [OrderItemsController::class, 'getHotDishesToPrepare']);
-    Route::patch('/{id}/{chefId}', [OrderItemsController::class, 'updateHotDish']);
+    Route::get('/hotdishes/{chefId}', [OrderItemsController::class, 'getHotDishesToPrepare']);
+    Route::patch('/{id}', [OrderItemsController::class, 'updateHotDish']);
 });
 Route::apiResource("order-items", OrderItemsController::class);
 

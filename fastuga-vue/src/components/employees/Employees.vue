@@ -2,10 +2,14 @@
 import { ref, computed, onMounted, inject, watch } from "vue";
 import { useRouter } from "vue-router";
 import EmployeesTable from "./EmployeesTable.vue";
+import { useUserStore } from "../../stores/user.js";
 
 const axios = inject("axios");
 const router = useRouter();
+const socket = inject("socket");
+const toast = inject("toast");
 
+const userStore = useUserStore();
 const employees = ref([]);
 const name = ref(undefined);
 const filterByType = ref("A");
@@ -52,7 +56,11 @@ const blockEmployee = async (employee) => {
       },
     });
 
-    console.log(data);
+    const users = new Object();
+    users.user = employeeObj;
+    users.manager = userStore.user.name;
+    socket.emit("userBlocked", users);
+    toast.warning(`You have blocked ${employeeObj.name}!`);
   } catch (err) {
     if (err.response.status === 404) {
       console.log("Resource could not be found!");
@@ -80,7 +88,12 @@ const unblockEmployee = async (employee) => {
         custom: employeeObj.custom,
       },
     });
-    console.log(data);
+
+    const users = new Object();
+    users.user = employeeObj;
+    users.manager = userStore.user.name;
+    socket.emit("userUnblocked", users);
+    toast.warning(`You have unblocked ${employeeObj.name}!`);
   } catch (err) {
     if (err.response.status === 404) {
       console.log("Resource could not be found!");

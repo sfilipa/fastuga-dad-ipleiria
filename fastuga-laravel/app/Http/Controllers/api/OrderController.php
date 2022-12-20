@@ -32,19 +32,15 @@ class OrderController extends Controller
         }
     }
 
-    public function getOrderByStatusPaginate(Request $request, String $status)
+    public function getOrderForDelivery(Request $request)
     {
-        $status = strtoupper($status);
-        if($status != 'P' and  $status != 'R' and $status != 'D' and $status != 'C'){
-            return response("Invalid order status", 404);
-        }
         $query = Order::query();
         $ticketNumber = $request->query('ticket');
         if($ticketNumber != null){
             $query->where('ticket_number',$ticketNumber);
         }
 
-        return $query->where('status', $status)->with("orderItems", "orderItems.product")->paginate(10);
+        return $query->whereIn('status', ['P', 'R'])->with("orderItems", "orderItems.product")->orderBy('id','asc')->paginate(10);
 
     }
 
@@ -289,13 +285,25 @@ class OrderController extends Controller
         return new OrderResource($order);
     }
 
-    public function updateOrderStatus(Order $order, $status)
+    public function updateOrderStatus(Request $request, Order $order, $status)
     {
+        $userId = $request['userId'];
+        $employee = User::find($userId);
+        if($employee == null){
+            return response("Couldn't find current logged user", 403);
+        }
+
+        if($employee->type != 'ED'){
+            return response("Current logged user isn't an delivery employee!", 403);
+        }
+
         if($status == 'R'){
             if(!$this->checkIfOrderIsReady($order)){
+                //TODO - confirmar se isto nao vai entrar em conflito com os items que ja estão do db:seed
                 return response("Selected order still has items to prepare!", 403);
             }
         }
+        $order->delivered_by = $userId;
         $order->status = $status;
         $order->save();
         return new OrderResource($order);
@@ -309,5 +317,15 @@ class OrderController extends Controller
             }
         }
         return true;
+    }
+
+    public function getItemsAndProducts($order_id)
+    {
+        return OrderItemsResource::collection(OrderItems::where('order_id', $order_id)->get());
+    }
+
+    public function getNumberOfActiveOrders()
+    {
+        return Order::whereIn('status', ['P','R'])->count();
     }
 }

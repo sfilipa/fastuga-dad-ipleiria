@@ -51,10 +51,26 @@ class OrderItemsController extends Controller
 
     }
 
-    public function getHotDishesToPrepare()
+    public function getHotDishesToPrepare($chefId)
     {
         $products = [];
-        $allHotOrderItems = OrderItemsResource::collection(OrderItems::whereIn('status', ['W','P'])->get());
+        $chef = User::find($chefId);
+        if($chef == null){
+            return response("Couldn't find current logged user", 403);
+        }
+
+        if($chef->type != 'EC'){
+            return response("Current logged user isn't a Chef!", 403);
+        }
+
+        $allHotOrderItems = OrderItemsResource::collection(
+            OrderItems::whereIn('status', ['W','P'])
+                ->where(function ($query) use ($chefId) {
+                    $query->where('preparation_by', null)
+                          ->orWhere('preparation_by', $chefId);
+                })
+                ->get()
+            );
         foreach ($allHotOrderItems as $item){
             $order = $item->order;
             if($order->status == 'P'){
@@ -64,15 +80,19 @@ class OrderItemsController extends Controller
         return $products;
     }
 
-    public function updateHotDish($id, $chefId)
+    public function updateHotDish(Request $request, $id)
     {
         $orderItem = OrderItems::find($id);
+        if($orderItem == null){
+            return response("Couldn't find the order item", 404);
+        }
         $status = $orderItem->status;
         if($status == 'R'){
             return response("Dish is already ready - invalid operation", 409);
         }
 
-        $chef = User::find($chefId);
+        $userId = $request['userId'];
+        $chef = User::find($userId);
         if($chef == null){
             return response("Couldn't find current logged user", 403);
         }
@@ -83,30 +103,17 @@ class OrderItemsController extends Controller
 
         if($status == 'W'){
             $orderItem->status = 'P';
-            $orderItem->preparation_by = $chefId;
-
+            $orderItem->preparation_by = $userId;
         }else{
+            //Backend validation so that only the same chef that changes from 'W' to 'P', can change from 'P' to 'R'
+            if($orderItem->preparation_by != $userId){
+                return response("This dish is being prepared by another chef!", 403);
+            }
             $orderItem->status = 'R';
         }
 
         $orderItem->save();
 
-        $order = $orderItem->order;
-        if($this->checkOrderIsReady($order)){
-            $order->status = 'R';
-            $order->save();
-        }
-
         return new OrderItemsResource($orderItem);
-    }
-
-    private function checkOrderIsReady(Order $order)
-    {
-        foreach ($order->orderItems as $item){
-            if($item->status == 'W' || $item->status == 'P'){
-                return false;
-            }
-        }
-        return true;
     }
 }

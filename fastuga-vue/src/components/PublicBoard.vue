@@ -226,7 +226,7 @@ onMounted(() => {
   margin: 29px;
   border-radius: 2%;
   box-shadow: 0 10px 16px 0 rgba(139, 136, 136, 0.2), 0 6px 20px 0 rgba(128, 128, 128, 0.19);
-  max-height: 400px;
+  max-height: 420px;
 }
 
 .grid-container {
