@@ -20,6 +20,7 @@ import Employees from "../components/employees/Employees.vue"
 import AddProduct from "../components/menu/AddProduct.vue"
 import AddEmployee from "../components/employees/AddEmployee.vue"
 import Statistics from "../components/statistics/Statistics.vue"
+import ChefsDishes from "../components/dishes/ChefsDishes.vue"
 import Customers from "../components/customers/Customers.vue"
 
 import { useUserStore } from "../stores/user.js"
@@ -80,6 +81,11 @@ const router = createRouter({
       path: '/orders',
       name: 'Orders',
       component: Orders,
+    },
+    {
+      path: '/chefsDishes',
+      name: 'ChefsDishes',
+      component: ChefsDishes,
     },
     {
       path: '/ordersEmployees',

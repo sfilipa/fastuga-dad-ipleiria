@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUpdateOrderItemsRequest;
 use App\Http\Resources\OrderItemsResource;
 use App\Models\OrderItems;
+use App\Models\Order;
 use App\Models\User;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -44,11 +45,68 @@ class OrderItemsController extends Controller
     {//flitrar por dishes
         $products_id = OrderItems::where('preparation_by', $user_id)->get('product_id');
 
-        $allProducts = Product::whereIn('id', $products_id)->paginate(10);
+        $allProducts = Product::whereIn('id', $products_id)->where('type', 'hot dish')->paginate(10);
 
         return  $allProducts;
 
     }
 
-    //TODO: update ao status do item de W -> P -> R e meter o preparation_by para o chef
+    public function getHotDishesToPrepare()
+    {
+        $products = [];
+        $allHotOrderItems = OrderItemsResource::collection(OrderItems::whereIn('status', ['W','P'])->get());
+        foreach ($allHotOrderItems as $item){
+            $order = $item->order;
+            if($order->status == 'P'){
+                $products[] = $item;
+            }
+        }
+        return $products;
+    }
+
+    public function updateHotDish($id, $chefId)
+    {
+        $orderItem = OrderItems::find($id);
+        $status = $orderItem->status;
+        if($status == 'R'){
+            return response("Dish is already ready - invalid operation", 409);
+        }
+
+        $chef = User::find($chefId);
+        if($chef == null){
+            return response("Couldn't find current logged user", 403);
+        }
+
+        if($chef->type != 'EC'){
+            return response("Current logged user isn't a Chef!", 403);
+        }
+
+        if($status == 'W'){
+            $orderItem->status = 'P';
+            $orderItem->preparation_by = $chefId;
+
+        }else{
+            $orderItem->status = 'R';
+        }
+
+        $orderItem->save();
+
+        $order = $orderItem->order;
+        if($this->checkOrderIsReady($order)){
+            $order->status = 'R';
+            $order->save();
+        }
+
+        return new OrderItemsResource($orderItem);
+    }
+
+    private function checkOrderIsReady(Order $order)
+    {
+        foreach ($order->orderItems as $item){
+            if($item->status == 'W' || $item->status == 'P'){
+                return false;
+            }
+        }
+        return true;
+    }
 }

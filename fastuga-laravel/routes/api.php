@@ -39,6 +39,7 @@ Route::apiResource("customers", CustomerController::class);
 Route::prefix('orders')->group(function () {
     Route::get('/status', [OrderController::class, 'getOrdersStatus']);
     Route::get('/statusTAES', [OrderController::class, 'getOrderByStatusTAES']);
+    Route::get('/status/{status}/paginate', [OrderController::class, 'getOrderByStatusPaginate']);
     Route::get('/status/{status}', [OrderController::class, 'getOrderByStatus']);
     Route::get('/{order}/customer', [CustomerController::class, 'getCostumerOfOrder']);
     Route::get('/{order}/user', [UserController::class, 'getUserOfOrder']);
@@ -64,6 +65,8 @@ Route::prefix('order-items')->group(function () {
     Route::get('/{orderItems}/user', [UserController::class, 'getUserOfOrderItems']);
     Route::get('/{orderItems}/order', [OrderController::class, 'getOrderOfOrderItems']);
     Route::get('/{orderItems}/product', [ProductController::class, 'getProductOfOrderItems']);
+    Route::get('/hotdishes', [OrderItemsController::class, 'getHotDishesToPrepare']);
+    Route::patch('/{id}/{chefId}', [OrderItemsController::class, 'updateHotDish']);
 });
 Route::apiResource("order-items", OrderItemsController::class);
 

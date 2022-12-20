@@ -10,12 +10,16 @@ const customers = ref([]);
 const searchByEmail = ref(null);
 const searchByNif = ref(null);
 
-const load = () => {
+const lastPage = ref(15)
+const currentPage = ref(1)
+const load = (pageNumber) => {
+  currentPage.value = pageNumber
+  let URL = "/customers?page=" + pageNumber;
   axios
-    .get(`/customers`)
+    .get(URL)
     .then((response) => {
+      lastPage.value = response.data.meta.last_page
       customers.value = response.data;
-      console.log(response.data);
     })
     .catch((error) => {
       console.log(error);
@@ -112,11 +116,10 @@ const search = () => {
 const deleteFromDatabase = async (customer) => {
   console.log("Delete");
   const obj = Object.assign({}, customer);
-  console.log(obj);
   try {
     const { data } = await axios({
       method: "delete",
-      url: `/users/${obj.id}`,
+      url: `/customers/${obj.id}`,
     });
     console.log(data);
   } catch (err) {
@@ -224,6 +227,13 @@ onMounted(() => {
     @unblock="unblock"
   >
   </CustomersTable>
+  <paginate
+    :page-count="lastPage"
+    :prev-text="'Previous'"
+    :next-text="'Next'"
+    :click-handler="load"
+  >
+  </paginate>
 </template>
 
 <style scoped>

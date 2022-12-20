@@ -45,7 +45,7 @@ class CustomerController extends Controller
 
     public function destroy(Customer $customer)
     {
-        $customer->softDeletes();
+        $customer->delete();
     }
 
     public function getCustomerByEmail($email) {

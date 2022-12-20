@@ -50,7 +50,7 @@ const socket = inject("socket")
 
   const save = () => {
       errors.value = null
-      axios.put('users/' + props.id, user.value)
+      /*axios.put('users/' + props.id, user.value)
         .then((response) => {
           user.value = response.data.data
 
@@ -71,7 +71,7 @@ const socket = inject("socket")
             } else {
               toast.error('User #' + props.id + ' was not updated due to unknown server error!')
             }
-        })
+        })*/
   }
 
   const cancel = () => {
