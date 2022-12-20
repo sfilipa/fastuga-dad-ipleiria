@@ -56,7 +56,6 @@ const blockEmployee = async (employee) => {
 
     socket.emit("userBlocked", employeeObj);
     toast.warning(`You have blocked ${employeeObj.name}!`);
-    console.log(data);
   } catch (err) {
     if (err.response.status === 404) {
       console.log("Resource could not be found!");
@@ -84,7 +83,8 @@ const unblockEmployee = async (employee) => {
         custom: employeeObj.custom,
       },
     });
-    console.log(data);
+    socket.emit("userUnblocked", employeeObj);
+    toast.warning(`You have unblocked ${employeeObj.name}!`);
   } catch (err) {
     if (err.response.status === 404) {
       console.log("Resource could not be found!");

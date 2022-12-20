@@ -38,6 +38,11 @@ io.on("connection", (socket) => {
     userBlocked(socket, user);
   });
 
+  // User Unblocked
+  socket.on("userUnblocked", function (user) {
+	userUnblocked(socket, user);
+});
+
 	// Sends message to all Users in the room except himself (User that is being updated)
 	socket.on("updateUser", function (user) {
 		updateUser(socket, user);
@@ -45,9 +50,13 @@ io.on("connection", (socket) => {
 });
 
 function userBlocked(socket, user) {
-  // Sends message to all Users in the room except himself (User that is being updated)
   socket.in("managers").emit("userBlocked", user);
   socket.in(user.id).emit("userBlocked", user);
+}
+
+function userUnblocked(socket, user) {
+  socket.in("managers").emit("userUnblocked", user);
+  socket.in(user.id).emit("userUnblocked", user);
 }
 
 function joinRoom(socket, user) {

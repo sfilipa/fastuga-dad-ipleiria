@@ -51,7 +51,7 @@ socket.on("userBlocked", (user) => {
 });
 // User Unblocked
 socket.on("userUnblocked", (user) => {
-  toast.warning(`${user.name} as been unblocked!`);
+  toast.warning(`${user.name}, email: ${user.email} as been unblocked!`);
 });
 
 </script>
