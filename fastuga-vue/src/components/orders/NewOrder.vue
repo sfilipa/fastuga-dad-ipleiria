@@ -117,120 +117,129 @@ const confirmPayment = () => {
     return;
   }
 
-    const requestBody = {
-            'type': paymentType.value.toLowerCase(),
-            'reference': paymentReference.value,
-            'value': finalPrice.value
-    }
+  const requestBody = {
+    type: paymentType.value.toLowerCase(),
+    reference: paymentReference.value,
+    value: finalPrice.value,
+  };
 
-    axios.post(`${PAYMENT_URL}/api/payments`, requestBody)
+  axios
+    .post(`${PAYMENT_URL}/api/payments`, requestBody)
     .then(() => {
-        axiosLaravel.post('/orders', paymentBody)
-        .then((response)=>{
-            console.log(response.data.data)
-            ticketNumber.value = response.data.data.ticket_number
-            orderCompletedDialog.value.show()
+      axiosLaravel
+        .post("/orders", paymentBody)
+        .then((response) => {
+          console.log(response.data.data);
+          ticketNumber.value = response.data.data.ticket_number;
+          orderCompletedDialog.value.show();
         })
-        .catch((error)=>{
-            console.log(error)
-            toast.error('Order was not created due to ' + error.response.data.message)
-        })
+        .catch((error) => {
+          console.log(error);
+          toast.error(
+            "Order was not created due to " + error.response.data.message
+          );
+        });
     })
     .catch((error) => {
-        if (error.response.status == 422) {
-        toast.error('Order was not created due to validation errors - ' + error.response.data.message)
-        } else {
-        toast.error('Order was not created due to unknown server error!')
-        }
-    })
-}
+      if (error.response.status == 422) {
+        toast.error(
+          "Order was not created due to validation errors - " +
+            error.response.data.message
+        );
+      } else {
+        toast.error("Order was not created due to unknown server error!");
+      }
+    });
+};
 
 const paymentReferenceValidations = () => {
-    if(paymentType.value == 'VISA'){
-        let pattern = /^[1-9][0-9]{15}$/
-        if(!paymentReference.value.match(pattern)){
-            errors.value = {
-            visa: ["Invalid Visa Reference"]
-            }
-            toast.error('Order was not created due to validation errors!')
-            return -1
-        }
-    }else if(paymentType.value == 'MBWAY'){
-        let pattern = /^[1-9][0-9]{8}$/
-        if(!paymentReference.value.match(pattern)){
-            errors.value = {
-            mbway: ["Invalid Phone Number"]
-            }
-            toast.error('Order was not created due to validation errors!')
-            return -1
-        }
-    }else if(paymentType.value == 'PAYPAL'){
-        let pattern = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/ ///^([a-zA-Z0-9.+_])+@([a-zA-Z0-9.+_])+.([a-zA-Z])+$/
-        if(!paymentReference.value.match(pattern)){
-            errors.value = {
-            paypal: ["Invalid Email Format"]
-            }
-            toast.error('Order was not created due to validation errors!')
-            return -1
-        }
-    }else{
-        errors.value = {
-            default: ["Payment Type Not Supported"]
-        }
-        toast.error('Order was not created due to validation errors!')
-        return -1
+  if (paymentType.value == "VISA") {
+    let pattern = /^[1-9][0-9]{15}$/;
+    if (!paymentReference.value.match(pattern)) {
+      errors.value = {
+        visa: ["Invalid Visa Reference"],
+      };
+      toast.error("Order was not created due to validation errors!");
+      return -1;
     }
-}
+  } else if (paymentType.value == "MBWAY") {
+    let pattern = /^[1-9][0-9]{8}$/;
+    if (!paymentReference.value.match(pattern)) {
+      errors.value = {
+        mbway: ["Invalid Phone Number"],
+      };
+      toast.error("Order was not created due to validation errors!");
+      return -1;
+    }
+  } else if (paymentType.value == "PAYPAL") {
+    let pattern = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/; ///^([a-zA-Z0-9.+_])+@([a-zA-Z0-9.+_])+.([a-zA-Z])+$/
+    if (!paymentReference.value.match(pattern)) {
+      errors.value = {
+        paypal: ["Invalid Email Format"],
+      };
+      toast.error("Order was not created due to validation errors!");
+      return -1;
+    }
+  } else {
+    errors.value = {
+      default: ["Payment Type Not Supported"],
+    };
+    toast.error("Order was not created due to validation errors!");
+    return -1;
+  }
+};
 
 const getTimestamp = () => {
-    const date = new Date()
-    return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
-}
+  const date = new Date();
+  return `${date.getFullYear()}-${
+    date.getMonth() + 1
+  }-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+};
 
 const LoadCustomerInfo = () => {
-    axiosLaravel.get(`/customers/user/${user.userId}`)
-        .then((response) => {
-            customer.value = response.data.data
-            paymentReference.value = customer.value.default_payment_reference
-            paymentType.value = customer.value.default_payment_type
-            calculateAvailablePointsOptions()
-        })
-        .catch((error)=> {
-            console.log(error)
-        })
-}
+  axiosLaravel
+    .get(`/customers/user/${user.userId}`)
+    .then((response) => {
+      customer.value = response.data.data;
+      paymentReference.value = customer.value.default_payment_reference;
+      paymentType.value = customer.value.default_payment_type;
+      calculateAvailablePointsOptions();
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+};
 
 const calculateAvailablePointsOptions = () => {
-    let total = Math.trunc(customer.value.points);
-    //Desired transformation - Example 1: 23 -> 20, Example 2: 46 -> 40
-    while(total % 10 != 0){
-        total--
-    }
-    let arrayElement = 10;
-    while(arrayElement <= total){
-        pointsAvailableToUse.value.push(arrayElement)
-        arrayElement += 10
-    }
-}
+  let total = Math.trunc(customer.value.points);
+  //Desired transformation - Example 1: 23 -> 20, Example 2: 46 -> 40
+  while (total % 10 != 0) {
+    total--;
+  }
+  let arrayElement = 10;
+  while (arrayElement <= total) {
+    pointsAvailableToUse.value.push(arrayElement);
+    arrayElement += 10;
+  }
+};
 
 const calculatePointsGained = () => {
-    let total = Math.trunc(finalPrice.value);
-    while(total % 10 != 0){
-        total--
-    }
-    if(total == 0){
-        return 0
-    }
-    return total / 10
-}
+  let total = Math.trunc(finalPrice.value);
+  while (total % 10 != 0) {
+    total--;
+  }
+  if (total == 0) {
+    return 0;
+  }
+  return total / 10;
+};
 
-onMounted(()=>{
-    pointsAvailableToUse.value = [0]
-    if(store.items.length != 0 && user.userId != -1){
-        LoadCustomerInfo()
-    }
+onMounted(() => {
+  pointsAvailableToUse.value = [0];
+  if (store.items.length != 0 && user.userId != -1) {
+    LoadCustomerInfo();
+  }
 });
-
 
 const finalPrice = computed(() => {
   if (customer) {
@@ -250,7 +259,7 @@ const transformatePointsToEuros = (points) => {
 const dialogConfirm = () => {
   user.loadMyCurrentOrders();
   store.resetOrderItems();
-//   router.push('/publicBoard')
+  //   router.push('/publicBoard')
 };
 
 const groupItems = (orderItems) => {
@@ -366,34 +375,40 @@ const groupItems = (orderItems) => {
       <hr class="hr-center" />
 
       <div class="order-payment">
-        <h2 class="text-payment">Payment:</h2>
+        <h2 class="text-payment">Payment</h2>
         <hr />
         <div class="payment-choice">
-          <div
-            class="payment-item"
-            :class="{ 'payment-item-active': paymentType == 'VISA' }"
-            @click="changePaymentType('VISA')"
-          >
-            <div :class="[paymentType == 'VISA' ? 'dot-active' : 'dot']"></div>
-            <span>Visa</span>
-          </div>
-          <div
-            class="payment-item"
-            :class="{ 'payment-item-active': paymentType == 'MBWAY' }"
-            @click="changePaymentType('MBWAY')"
-          >
-            <div :class="[paymentType == 'MBWAY' ? 'dot-active' : 'dot']"></div>
-            <span>MB Way</span>
-          </div>
-          <div
-            class="payment-item"
-            :class="{ 'payment-item-active': paymentType == 'PAYPAL' }"
-            @click="changePaymentType('PAYPAL')"
-          >
+          <div class="align-payment-choices">
             <div
-              :class="[paymentType == 'PAYPAL' ? 'dot-active' : 'dot']"
-            ></div>
-            <span>Paypal</span>
+              class="payment-item"
+              :class="{ 'payment-item-active': paymentType == 'VISA' }"
+              @click="changePaymentType('VISA')"
+            >
+              <div
+                :class="[paymentType == 'VISA' ? 'dot-active' : 'dot']"
+              ></div>
+              <span>Visa</span>
+            </div>
+            <div
+              class="payment-item"
+              :class="{ 'payment-item-active': paymentType == 'MBWAY' }"
+              @click="changePaymentType('MBWAY')"
+            >
+              <div
+                :class="[paymentType == 'MBWAY' ? 'dot-active' : 'dot']"
+              ></div>
+              <span>MB Way</span>
+            </div>
+            <div
+              class="payment-item"
+              :class="{ 'payment-item-active': paymentType == 'PAYPAL' }"
+              @click="changePaymentType('PAYPAL')"
+            >
+              <div
+                :class="[paymentType == 'PAYPAL' ? 'dot-active' : 'dot']"
+              ></div>
+              <span>Paypal</span>
+            </div>
           </div>
         </div>
         <div v-if="paymentType == 'VISA'" class="payment-input">
@@ -560,6 +575,14 @@ const groupItems = (orderItems) => {
 </template>
 
 <style scoped>
+
+.align-payment-choices{
+  margin: auto;
+  flex-direction: row;
+  display: flex;
+  height: 3.5rem;
+}
+
 .confirm-payment:hover,
 .confirm-payment:active {
   background-color: #ff8300;
@@ -574,7 +597,8 @@ const groupItems = (orderItems) => {
   border-color: #ffa71dd6;
   color: white;
   font-weight: bolder;
-  margin: auto;
+  margin-left: auto;
+  margin-right: 10%;
   height: 4rem;
   width: 15rem;
 }
@@ -669,8 +693,8 @@ const groupItems = (orderItems) => {
 .payment-item {
   border: 3px solid #ffa71dd6;
   cursor: pointer;
-  width: 9rem;
-  margin-right: 2%;
+  width: 10rem;
+  margin-right: 4%;
   padding: 1.5%;
   border-color: #ffa71dd6;
   border-radius: 10px;
