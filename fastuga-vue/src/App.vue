@@ -44,6 +44,12 @@ onMounted(() => {
   fetchCustomerOrders(userStore.userId)
 })
 
+//==================================================
+// Web Sockets
+//==================================================
+
+// Listen for the 'message' event from the server and log the data
+// received from the server to the users.
 
 // User Blocked
 socket.on("userBlocked", (users) => {
@@ -65,6 +71,19 @@ socket.on("userUnblocked", (users) => {
     return
   }
   toast.warning(`${user.name} as been unblocked by ${manager}!`);
+});
+
+// User Deleted
+socket.on("userDeleted", (users) => {
+  const user = users.user;
+  const manager = users.manager;
+  if (user.id === userStore.user.id) {
+    toast.error(`Your account has been deleted by ${manager}!`);
+    router.push('/')
+    userStore.clearUser()
+    return
+  }
+  toast.warning(`${user.name} as been deleted by ${manager}!`);
 });
 
 </script>
