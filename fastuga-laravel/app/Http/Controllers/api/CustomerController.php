@@ -21,9 +21,29 @@ class CustomerController extends Controller
         return new CustomerResource(Customer::where('user_id', $user_id)->firstOrFail());
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return CustomerResource::collection(Customer::paginate(15))->whereNotNull('user')->all();
+        // dd(Customer::query()->join('users', 'customers.user_id', '=', 'users.id'));
+        $query = Customer::query()->join('users', 'customers.user_id', '=', 'users.id')->whereNull('users.deleted_at');
+        $name = $request->query('name');
+        if($name != null){
+            $query->where('users.name','LIKE','%'.$name.'%');
+        }
+
+        $email = $request->query('email');
+        if($email != null){
+            $query->where('users.email','LIKE','%'.$email.'%');
+        }
+
+        $nif = $request->query('nif');
+        if($nif != null){
+            $query->where('customers.nif',$nif);
+        }
+
+        return $query->orderBy('customers.id','DESC')->paginate(15);
+
+
+        // return CustomerResource::collection(Customer::paginate(15))->whereNotNull('user')->all();
     }
 
     public function store(StoreUpdateCustomerRequest $request)
