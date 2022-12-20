@@ -85,7 +85,7 @@ const showClick = (order) => {
         {{ order.ticket_number }}
       </td>
       <td v-if="order.name != undefined" style="text-align: center;" class="products">
-        <img :src='`${serverBaseUrl}/storage/products/${order.photo_url}`' />
+        <img class="picture" :src='`${serverBaseUrl}/storage/products/${order.photo_url}`' />
       </td>
       <td v-else>
         {{ order.date }}
@@ -144,4 +144,7 @@ const showClick = (order) => {
 .products{
   background-color: #f1f1f1;
 }
+img{
+   height: 100px;
+ }
 </style>
