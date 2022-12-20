@@ -46,12 +46,25 @@ onMounted(() => {
 
 
 // User Blocked
-socket.on("userBlocked", (user) => {
-  toast.warning(`${user.name}, email: ${user.email} as been blocked!`);
+socket.on("userBlocked", (users) => {
+  const user = users.user;
+  const manager = users.manager;
+  if (user.id === userStore.user.id) {
+    toast.warning(`You have been blocked by ${manager}!`);
+    return
+  }
+  toast.warning(`${user.name} as been blocked by ${manager}!`);
 });
+
 // User Unblocked
-socket.on("userUnblocked", (user) => {
-  toast.warning(`${user.name}, email: ${user.email} as been unblocked!`);
+socket.on("userUnblocked", (users) => {
+  const user = users.user;
+  const manager = users.manager;
+  if (user.id === userStore.user.id) {
+    toast.warning(`You have been unblocked by ${manager}!`);
+    return
+  }
+  toast.warning(`${user.name} as been unblocked by ${manager}!`);
 });
 
 </script>

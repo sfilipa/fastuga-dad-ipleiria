@@ -33,15 +33,15 @@ io.on("connection", (socket) => {
 		leaveRoom(socket, user);
 	});
 
-  // User Blocked
-  socket.on("userBlocked", function (user) {
-    userBlocked(socket, user);
-  });
+	// User Blocked
+	socket.on("userBlocked", function (users) {
+		userBlocked(socket, users);
+	});
 
-  // User Unblocked
-  socket.on("userUnblocked", function (user) {
-	userUnblocked(socket, user);
-});
+	// User Unblocked
+	socket.on("userUnblocked", function (users) {
+		userUnblocked(socket, users);
+	});
 
 	// Sends message to all Users in the room except himself (User that is being updated)
 	socket.on("updateUser", function (user) {
@@ -49,14 +49,14 @@ io.on("connection", (socket) => {
 	});
 });
 
-function userBlocked(socket, user) {
-  socket.in("managers").emit("userBlocked", user);
-  socket.in(user.id).emit("userBlocked", user);
+function userBlocked(socket, users) {
+	const user = users.user;
+	socket.in(user.id).in("managers").emit("userBlocked", users);
 }
 
-function userUnblocked(socket, user) {
-  socket.in("managers").emit("userUnblocked", user);
-  socket.in(user.id).emit("userUnblocked", user);
+function userUnblocked(socket, users) {
+	const user = users.user;
+	socket.in(user.id).in("managers").emit("userUnblocked", users);
 }
 
 function joinRoom(socket, user) {
@@ -88,9 +88,9 @@ function leaveRoom(socket, user) {
 }
 
 function updateUser(socket, user) {
-  // Sends message to all Users in the room except himself (User that is being updated)
-  socket.in("managers").except(user.id).emit("updateUser", user);
-  socket.in(user.id).emit("updateUser", user);
+	// Sends message to all Users in the room except himself (User that is being updated)
+	socket.in("managers").except(user.id).emit("updateUser", user);
+	socket.in(user.id).emit("updateUser", user);
 }
 
 function sendBroadcastMessage(socket, message) {
