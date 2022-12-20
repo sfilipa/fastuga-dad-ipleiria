@@ -42,12 +42,6 @@
       })
   }
 
-  const showOrder = (order) => {
-    console.log("Show")  
-    const orderObj = Object.assign({}, order)
-    console.log(orderObj)
-  }
-
   const deleteOrder = (order) => {
     const orderObj = Object.assign({}, order)
     axiosLaravel.put(`/orders/${orderObj.id}/cancel`, orderObj)
@@ -132,7 +126,6 @@
     <orders-table
         :orders="orders"
         :parent="componentName"
-        @show="showOrder"
         @delete="deleteOrder">
     </orders-table>
     <div v-if="orders.length != 0">
@@ -146,12 +139,5 @@
     </div>
   </div>
 
-<!--  <div>-->
-<!--    <div class="d-flex justify-content-center spinner-font">-->
-<!--      <div class="spinner-border" role="status">-->
-<!--        <span class="sr-only"></span>-->
-<!--      </div>-->
-<!--    </div>-->
-<!--  </div>-->
 </template>
 

@@ -31,14 +31,12 @@ const LoadOrders = (pageNumber) => {
     })
 }
 
-const getOrderReady = (order) => {
+const changeOrderStatus = (order) => {
   const orderObj = Object.assign({}, order)
   if(!checkOrderItemsAreReady(order)){
     toast.error(`Couldn't get order number ${orderObj.ticket_number} ready - there are still items to prepare!`)
     return
   }
-  console.log(orderObj)
-
   if(orderObj.status === 'P'){
     axiosLaravel.patch(`/orders/${orderObj.id}/R`, {
       userId: user.userId
@@ -49,7 +47,6 @@ const getOrderReady = (order) => {
       })
       .catch((error) => {
         toast.error(error.response.data)
-        console.log(error)
       })
   }else{
     axiosLaravel.patch(`/orders/${orderObj.id}/D`, {
@@ -61,14 +58,12 @@ const getOrderReady = (order) => {
       })
       .catch((error) => {
         toast.error(error.response.data)
-        console.log(error)
       })
   }
 }
 
 const checkOrderItemsAreReady = (order) => {
   for(const item of order.order_items){
-    console.log(item)
     if(item.status != 'R'){
         return false
       }
@@ -98,17 +93,11 @@ onMounted (() => {
       </div>
     </div>
   </div>
-<!--  <div v-if="noResults && ticketNumber !== 0">-->
-<!--    <p style="text-align: center"><b> There are no orders to deliver! </b></p>-->
-<!--  </div>-->
-<!--  <div v-else-if="ticketNumber === 0">-->
-<!--    <p style="text-align: center"><b> No order match the ticket number inserted. </b></p>-->
-<!--  </div>-->
   <div>
     <orders-table
         :orders="orders"
         :parent="componentName"
-        @show="getOrderReady">
+        @changeOrderStatus="changeOrderStatus">
     </orders-table>
     <div v-if="orders.length != 0">
       <paginate
