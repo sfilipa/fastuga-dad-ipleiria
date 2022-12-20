@@ -27,15 +27,11 @@ const load = (pageNumber) => {
 };
 
 const show = (customer) => {
-  console.log("Show");
-  const obj = Object.assign({}, customer);
-  console.log(obj);
+  Object.assign({}, customer);
 };
 
 const block = async (customer) => {
-  console.log("Blocked");
   const obj = Object.assign({}, customer);
-  console.log(obj);
   try {
     const { data } = await axios({
       method: "put",
@@ -50,7 +46,6 @@ const block = async (customer) => {
       },
     });
 
-    console.log(data);
   } catch (err) {
     if (err.response.status === 404) {
       console.log("Resource could not be found!");
@@ -62,9 +57,7 @@ const block = async (customer) => {
 };
 
 const unblock = async (customer) => {
-  console.log("Unblocked");
   const obj = Object.assign({}, customer);
-  console.log(obj);
   try {
     const { data } = await axios({
       method: "put",
@@ -78,7 +71,6 @@ const unblock = async (customer) => {
         custom: obj.custom,
       },
     });
-    console.log(data);
   } catch (err) {
     if (err.response.status === 404) {
       console.log("Resource could not be found!");
@@ -95,7 +87,6 @@ const search = () => {
       .get(`/customers/byEmail/${searchByEmail.value}`)
       .then((response) => {
         customers.value = response;
-        console.log(customers.value);
       })
       .catch((error) => {
         console.log(error);
@@ -105,7 +96,6 @@ const search = () => {
       .get(`/customers/byNif/${searchByNif.value}`)
       .then((response) => {
         customers.value = response;
-        console.log(customers.value);
       })
       .catch((error) => {
         console.log(error);
