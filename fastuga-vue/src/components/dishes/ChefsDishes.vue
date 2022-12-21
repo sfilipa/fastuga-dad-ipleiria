@@ -4,6 +4,7 @@ import axios from "axios";
 import { useUserStore } from "@/stores/user";
 const axiosLaravel = inject("axios");
 const toast = inject("toast");
+const socket = inject("socket");
 const serverBaseUrl = inject("serverBaseUrl");
 const products = ref(null);
 const user = useUserStore();
@@ -22,6 +23,9 @@ const LoadHotDishes = () => {
         console.log(error)
         toast.error(error.response.data)
       })
+      if(noResults.value != 0) {
+        socket.emit("newHotDishToPrepare")
+      }
 }
 
 const changeStatus = (productInOrder) => {
@@ -32,15 +36,24 @@ const changeStatus = (productInOrder) => {
       userId: user.userId,
     })
     .then((response) => {
-      console.log(response.data);
       if (response.data.data.status === "R") {
         toast.success(
           `Dish ${productInOrder.product_id.name} with number ${productInOrder.order_id.ticket_number}-${productInOrder.order_local_number} is now ready!`
         );
+        const order = new Object();
+        order.name = productInOrder.product_id.name;
+        order.chef = user.user;
+        console.log("order");
+        socket.emit("hotDishIsReady", order);
       } else {
         toast.success(
           `Dish ${productInOrder.product_id.name} with number ${productInOrder.order_id.ticket_number}-${productInOrder.order_local_number} is in preparation!`
         );
+        const order = new Object();
+        order.name = productInOrder.product_id.name;
+        order.chef = user.user;
+        console.log("order");
+        socket.emit("hotDishIsPreparing", order);
       }
       LoadHotDishes();
     })
@@ -51,6 +64,29 @@ const changeStatus = (productInOrder) => {
 };
 
 onMounted(() => {
+  LoadHotDishes();
+});
+
+//==================================================
+// Web Sockets
+//==================================================
+
+// Listen for the 'message' event from the server and log the data
+// received from the server to the users.
+
+// Order Placed
+socket.on("orderPlaced", () => {
+  LoadHotDishes();
+});
+
+// New Hot Dish to Prepare
+socket.on("newHotDishToPrepare", () => {
+  toast.info("New Hot Dish to Prepare!");
+});
+
+// Hot Dish is Preparing
+socket.on("hotDishIsPreparing", (order) => {
+  toast.info(`${order.name} is being prepared by ${order.chef.name}!`);
   LoadHotDishes();
 });
 </script>
