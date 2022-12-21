@@ -328,8 +328,9 @@ class OrderController extends Controller
                     //TODO - confirmar se isto nao vai entrar em conflito com os items que ja estão do db:seed
                     return response("Selected order still has items to prepare!", 403);
                 }
+            }else if($status == 'D'){
+                $order->delivered_by = $userId;
             }
-            $order->delivered_by = $userId;
         }
 
         $order->status = $status;
