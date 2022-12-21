@@ -40,7 +40,10 @@ class OrderController extends Controller
             $query->where('ticket_number',$ticketNumber);
         }
 
-        return $query->whereIn('status', ['P', 'R'])->with("orderItems", "orderItems.product")->orderBy('id','asc')->paginate(10);
+        return $query->whereIn('status', ['P', 'R'])
+                     ->with("orderItems", "orderItems.product")
+                     ->orderBy('status', 'desc')
+                     ->orderBy('id','asc')->paginate(10);
 
     }
 
@@ -89,7 +92,9 @@ class OrderController extends Controller
             $query->where('ticket_number',$ticketNumber);
         }
 
-        return $query->orderBy('id','DESC')->paginate(10);
+        return $query
+            ->with("orderItems", "orderItems.product")
+            ->orderBy('id','DESC')->paginate(10);
     }
 
     public function store(Request $request)
