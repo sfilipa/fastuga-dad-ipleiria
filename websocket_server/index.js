@@ -48,6 +48,11 @@ io.on("connection", (socket) => {
 		hotDishIsReady(socket, order);
 	});
 
+	// Order Cancelled
+	socket.on("orderCancelled", (order) => {
+		orderCancelled(socket, order);
+	});
+
 	// For Products
 	sendBroadcastMessage(socket, "newProduct");
 	sendBroadcastMessage(socket, "updateProduct");
@@ -89,12 +94,17 @@ function update(socket) {
 }
 
 function orderPlaced(socket, ticket	) {
-	socket.in("chefs").in("deliverers").emit("orderPlaced", ticket);
+	socket.in("managers").in("chefs").in("deliverers").emit("orderPlaced", ticket);
 }
 
 function orderReadyToDeliver(socket, obj) {
-	socket.in("deliverers").emit("orderReadyToDeliver", obj);
+	socket.in("managers").in("deliverers").emit("orderReadyToDeliver", obj);
 	socket.in(obj.customerUserID).emit("orderReadyToPickUp", obj);
+}
+
+function orderCancelled(socket, order) {
+	socket.in(order.customerUserID).in("managers").in("chefs").in("deliverers").emit("orderCancelled", order);
+	update(socket);
 }
 
 function hotDishIsPreparing(socket, order) {

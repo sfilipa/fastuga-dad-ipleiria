@@ -99,6 +99,16 @@ socket.on("userDeleted", (users) => {
   toast.error(`${user.name} as been deleted by ${manager}!`);
 });
 
+// Order Cancelled
+socket.on("orderCancelled", (order) => {
+  if (order.customerUserID === userStore.userId) {
+    toast.error(`Your order: Number ${order.ticket_number} has been cancelled!`);
+    fetchCustomerOrders(userStore.userId)
+    return
+  }
+  toast.error(`Order ${order.id} has been cancelled!`);
+});
+
 </script>
 
 <template>

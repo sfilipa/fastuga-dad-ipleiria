@@ -89,6 +89,10 @@ socket.on("hotDishIsPreparing", (order) => {
   toast.info(`${order.name} is being prepared by ${order.chef.name}!`);
   LoadHotDishes();
 });
+
+socket.on("update", () => {
+  LoadHotDishes();
+});
 </script>
 
 <template>
