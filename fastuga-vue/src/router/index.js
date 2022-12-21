@@ -22,6 +22,7 @@ import AddEmployee from "../components/employees/AddEmployee.vue"
 import Statistics from "../components/statistics/Statistics.vue"
 import ChefsDishes from "../components/dishes/ChefsDishes.vue"
 import Customers from "../components/customers/Customers.vue"
+import Unauthorized from "../components/global/Unauthorized.vue"
 
 import { useUserStore } from "../stores/user.js"
 
@@ -34,6 +35,11 @@ const router = createRouter({
       path: '/',
       name: 'Home',
       component: HomeView
+    },
+    {
+      path: '/unauthorized',
+      name: 'Unauthorized',
+      component: Unauthorized
     },
     {
       path: '/:pathMatch(.*)*',
@@ -212,7 +218,19 @@ router.beforeEach((to, from, next) => {
     next()
     return
   }
+
   const userStore = useUserStore()
+
+  if(to.name == 'Employees' || to.name=='Customers' || to.name=='AddProduct'){
+    if(!userStore.user || userStore.user.type != 'EM'){
+      next({
+        name: "Unauthorized"
+      })
+      return
+    }
+
+  }
+  
  /* if ((to.name == 'Login') || (to.name == 'Home')) {
     next()
     return

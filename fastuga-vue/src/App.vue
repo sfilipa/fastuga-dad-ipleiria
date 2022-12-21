@@ -234,7 +234,7 @@ socket.on("orderCancelled", (order) => {
               </router-link>
             </li>
 
-            <li class="nav-item">
+            <li class="nav-item" v-if="userStore.user && userStore.user.type === 'EM'">
               <router-link class="nav-link fastuga-font" :class="{ active: $route.name === 'Employees' }" :to="{ name: 'Employees' }"
                 @click="clickMenuOption">
                 <i class="bi bi-people"></i>
@@ -242,7 +242,7 @@ socket.on("orderCancelled", (order) => {
               </router-link>
             </li>
 
-            <li class="nav-item">
+            <li class="nav-item" v-if="userStore.user && userStore.user.type === 'EM'">
               <router-link class="nav-link fastuga-font" :class="{ active: $route.name === 'Customers' }" :to="{ name: 'Customers' }"
                 @click="clickMenuOption">
                 <i class="bi bi-people"></i>

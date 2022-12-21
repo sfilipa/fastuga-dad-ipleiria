@@ -178,10 +178,10 @@ class OrderController extends Controller
     }
 
     //Statistics - Customer
-    public function getAllCustomerOrders($user_id)
+    public function getAllCustomerOrders(User $user)
     {
-        $id = Customer::where('user_id', $user_id)->get('id');
-        return Order::where('customer_id', $id[0]->id)->with("orderItems", "orderItems.product")->paginate(10);
+        $id = Customer::where('user_id', $user->id)->pluck('id');
+        return Order::where('customer_id', $id[0])->with("orderItems", "orderItems.product")->paginate(10);
     }
 
     public function getCustomerCurrentOrders($user_id)
@@ -294,9 +294,9 @@ class OrderController extends Controller
     }
 
     //Statistics - Driver
-    public function getAllOrdersDelivered(int $user_id)
+    public function getAllOrdersDelivered($user)
     {
-        $orders = Order::where('delivered_by', $user_id)->paginate(10);
+        $orders = Order::where('delivered_by', $user)->with("orderItems", "orderItems.product")->paginate(10);
         return $orders;
     }
 

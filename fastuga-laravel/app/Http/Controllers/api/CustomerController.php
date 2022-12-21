@@ -13,6 +13,20 @@ use Illuminate\Http\Request;
 
 class CustomerController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth.manager', ['except' => [
+            'getCostumerOfOrder',
+            'getCustomerByUserID',
+            'store',
+            'show',
+            'show_me',
+            'store',
+            'update',
+            'destroy',
+        ]]);
+    }
+
     public function getCostumerOfOrder(Order $order) {
         return new CustomerResource(optional($order->customer));
     }
@@ -67,15 +81,6 @@ class CustomerController extends Controller
     {
         $customer = Customer::findOrFail($customer->id);
         $customer->delete();
-    }
-
-    public function getCustomerByEmail($email) {
-        $user = User::where('email', $email)->firstOrFail();
-        return new CustomerResource(Customer::where('user_id', $user->id)->firstOrFail());
-    }
-
-    public function getCustomerByNif($nif) {
-        return new CustomerResource(Customer::where('nif', $nif)->firstOrFail());
     }
 
 }
