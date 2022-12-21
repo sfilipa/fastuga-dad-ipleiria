@@ -66,22 +66,16 @@ onUpdated(() => {
       ? customerInfoDialog.value.show()
       : (deleteDialog.value = null);
   }
-
-  if (
-    deleteConfirmationDialog.value == null &&
-    customerInfoDialog.value == null
-  ) {
-    deleteDialog.value = null;
-  }
 });
 
 // Block and Unblock
 const blockClick = (customer) => {
-  console.log(customer);
+  deleteDialog.value = null
   emit("block", customer);
 };
 
 const unblockClick = (customer) => {
+  deleteDialog.value = null
   emit("unblock", customer);
 };
 </script>
