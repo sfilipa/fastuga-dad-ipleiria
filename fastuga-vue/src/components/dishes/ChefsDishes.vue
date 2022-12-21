@@ -1,118 +1,232 @@
 <script setup>
-import {onMounted, inject, ref} from "vue"
-import axios from 'axios'
-import {useUserStore} from "@/stores/user";
-const axiosLaravel = inject('axios')
-const toast = inject("toast")
-const serverBaseUrl = inject("serverBaseUrl")
-const products = ref([])
-const user = useUserStore()
-const noResults = ref(false)
+import { onMounted, inject, ref } from "vue";
+import axios from "axios";
+import { useUserStore } from "@/stores/user";
+const axiosLaravel = inject("axios");
+const toast = inject("toast");
+const socket = inject("socket");
+const serverBaseUrl = inject("serverBaseUrl");
+const products = ref(null);
+const user = useUserStore();
+const noResults = ref(false);
 
-const ticketNumberFilter = ref(null)
-const orderLocalNumberFilter = ref(null)
+const ticketNumberFilter = ref(null);
+const orderLocalNumberFilter = ref(null);
 
 const LoadHotDishes = () => {
   axiosLaravel.get(`/order-items/hotdishes/${user.userId}`)
       .then((response)=>{
         products.value = response.data
-        if(products.value.length === 0){
-          noResults.value = true
-        }else{
-          noResults.value = false
-        }
+        noResults.value = products.value.length === 0
       })
       .catch((error)=>{
+        console.log(error)
         toast.error(error.response.data)
       })
+      if(noResults.value != 0) {
+        socket.emit("newHotDishToPrepare")
+      }
 }
 
 const changeStatus = (productInOrder) => {
-  const productItemObject = Object.assign({}, productInOrder)
-  console.log(productItemObject)
-  axiosLaravel.patch(`/order-items/${productInOrder.id}`, {
-    userId : user.userId
-  })
-      .then((response) => {
-        console.log(response.data)
-        if(response.data.data.status === 'R'){
-          toast.success(`Dish ${productInOrder.product_id.name} with number ${productInOrder.order_id.ticket_number}-${productInOrder.order_local_number} is now ready!`)
-        }else{
-          toast.success(`Dish ${productInOrder.product_id.name} with number ${productInOrder.order_id.ticket_number}-${productInOrder.order_local_number} is in preparation!`)
-        }
-        LoadHotDishes()
-      })
-      .catch((error) => {
-        toast.error(error.response.data)
-        console.log(error)
-      })
-}
+  const productItemObject = Object.assign({}, productInOrder);
+  console.log(productItemObject);
+  axiosLaravel
+    .patch(`/order-items/${productInOrder.id}`, {
+      userId: user.userId,
+    })
+    .then((response) => {
+      if (response.data.data.status === "R") {
+        toast.success(
+          `Dish ${productInOrder.product_id.name} with number ${productInOrder.order_id.ticket_number}-${productInOrder.order_local_number} is now ready!`
+        );
+        const order = new Object();
+        order.name = productInOrder.product_id.name;
+        order.chef = user.user;
+        console.log("order");
+        socket.emit("hotDishIsReady", order);
+      } else {
+        toast.success(
+          `Dish ${productInOrder.product_id.name} with number ${productInOrder.order_id.ticket_number}-${productInOrder.order_local_number} is in preparation!`
+        );
+        const order = new Object();
+        order.name = productInOrder.product_id.name;
+        order.chef = user.user;
+        console.log("order");
+        socket.emit("hotDishIsPreparing", order);
+      }
+      LoadHotDishes();
+    })
+    .catch((error) => {
+      toast.error(error.response.data);
+      console.log(error);
+    });
+};
 
-onMounted(()=>{
-  LoadHotDishes()
-})
+onMounted(() => {
+  LoadHotDishes();
+});
+
+//==================================================
+// Web Sockets
+//==================================================
+
+// Listen for the 'message' event from the server and log the data
+// received from the server to the users.
+
+// Order Placed
+socket.on("orderPlaced", () => {
+  LoadHotDishes();
+});
+
+// New Hot Dish to Prepare
+socket.on("newHotDishToPrepare", () => {
+  toast.info("New Hot Dish to Prepare!");
+});
+
+// Hot Dish is Preparing
+socket.on("hotDishIsPreparing", (order) => {
+  toast.info(`${order.name} is being prepared by ${order.chef.name}!`);
+  LoadHotDishes();
+});
 </script>
 
 <template>
-  <div class="d-flex justify-content-between">
+  <div class="d-flex justify-content-between fastuga-font">
     <div class="mx-2">
-      <h3 class="mt-4"> Hot Dishes </h3>
+      <h3 class="mt-4">Hot Dishes</h3>
     </div>
   </div>
-  <hr>
+  <hr />
 
-  <div class="grid-container">
-    <div class="fastuga-font grid-item-filter">
-      <label>Ticket Number:</label>
-      <input v-model.lazy="ticketNumberFilter" type="number" min="0" max="99" name="ticketnumber" class="form-control"/>
-    </div>
-    <div class="fastuga-font grid-item-filter">
-      <label>Order Local Number:</label>
-      <input v-model.lazy="orderLocalNumberFilter" type="number" min="0" max="99" name="orderlocalnumber" class="form-control"/>
-    </div>
+  <div class="filters-container fastuga-font">
+    <label class="filters-label">Ticket Number:</label>
+    <input
+      placeholder="Ticket Number"
+      v-model="ticketNumberFilter"
+      type="number"
+      min="0"
+      max="99"
+      name="ticketnumber"
+      class="form-control"
+    />
+
+    <label class="filters-label">Order Local Number:</label>
+    <input
+      placeholder="Order Local Number"
+      v-model="orderLocalNumberFilter"
+      type="number"
+      min="0"
+      max="99"
+      name="orderlocalnumber"
+      class="form-control"
+    />
   </div>
 
-  <div class="grid-container">
-    <div v-if="products.length === 0">
-        <p style="text-align: center"><b>No hot dishes to show!</b></p>
+  <div class="grid-container fastuga-font">
+    <div v-if="products == null">
+      <div class="d-flex justify-content-center spinner-font">
+        <div class="spinner-border" role="status">
+          <span class="sr-only"></span>
+        </div>
+      </div>
     </div>
-    <div v-else class="grid-item hvr-grow" v-for="product in products.filter((p) => (ticketNumberFilter == null || ticketNumberFilter === '' ? true : p.order_id.ticket_number === ticketNumberFilter))
-                                                                     .filter((p) => (orderLocalNumberFilter == null || orderLocalNumberFilter === '' ? true : p.order_local_number === orderLocalNumberFilter))" :key="product.id">
-        <div class="product-header fastuga-colored-font">
-          <img class="product-image" :src="`${serverBaseUrl}/storage/products/${product.product_id.photo_url}`"/>
-          <div class="product-title-and-subtitle">
-            <div class="product-name"> {{ product.product_id.name }} </div>
-            <div class="product-subtitle">{{ "Dish Identifier:  " + product.order_id.ticket_number + " - " + product.order_local_number }}</div>
+    <div v-else-if="products.length === 0">
+      <p style="text-align: center"><b>No hot dishes to show!</b></p>
+    </div>
+    <div
+      v-else
+      class="grid-item hvr-grow"
+      v-for="product in products
+        .filter((p) =>
+          ticketNumberFilter == null || ticketNumberFilter === ''
+            ? true
+            : p.order_id.ticket_number === ticketNumberFilter
+        )
+        .filter((p) =>
+          orderLocalNumberFilter == null || orderLocalNumberFilter === ''
+            ? true
+            : p.order_local_number === orderLocalNumberFilter
+        )"
+      :key="product.id"
+      :class="[product.status == 'P' ? 'preparing-item' : 'waiting-item']"
+    >
+      <div class="product-header fastuga-colored-font">
+        <img
+          class="product-image"
+          :src="`${serverBaseUrl}/storage/products/${product.product_id.photo_url}`"
+        />
+        <div class="product-title-and-subtitle">
+          <div class="product-name">{{ product.product_id.name }}</div>
+        </div>
+      </div>
+      <div class="fastuga-colored-font">
+        <div class="dish-row">
+          <span class="dish-row-label">Dish Identifier (ticket - local): </span>
+          <span >
+            {{
+              product.order_id.ticket_number +
+              " - " +
+              product.order_local_number
+            }}
+          </span>
+
           </div>
-        </div>
-      <div class="product-body fastuga-colored-font">
-        <div class="product-description">{{ "Chef: " + (product.preparation_by == null ? "none" : product.preparation_by?.name) }}</div>
-      </div>
-        <hr class="fastuga-colored-font" />
-        <div class="product-footer fastuga-colored-font">
-            <button
-                class="btn btn-xs btn-light hvr-grow"
-                @click="changeStatus(product)"
-            >
-              <i class="bi-check-circle-fill"></i>
-            </button>
-          <div class="product-price">{{(product.status == 'W' ? "Waiting" : "Preparing")}}</div>
+        <div class="dish-row">
+          <span class="dish-row-label">Chef: </span>
+          <span >
+            {{
+              (product.preparation_by == null
+              ? "none"
+              : product.preparation_by?.name)
+            }}
+          </span>
         </div>
       </div>
-
+      <hr class="fastuga-colored-font" />
+      <div class="product-footer fastuga-colored-font">
+        <button
+          class="btn btn-xs btn-light hvr-grow"
+          @click="changeStatus(product)"
+          v-if="product.status === 'W' || product.preparation_by?.id === user.userId"
+        >
+          <i v-if="product.status == 'W'" class="bi bi-check-circle dish-claim"></i>
+          <i v-else class="bi bi-check-circle-fill dish-finish"></i>
+        </button>
+        <div class="product-price">
+          {{ product.status == "W" ? "Waiting" : "Preparing" }}
+        </div>
+      </div>
     </div>
+  </div>
 </template>
 
 <style scoped>
-@import url("https://fonts.googleapis.com/css2?family=Maven+Pro&display=swap");
-
 input[type="number"] {
-  width: 35%;
+  width: 100%;
 }
 
-.fastuga-font {
-  font-size: 15px;
-  font-family: "Maven Pro", sans-serif;
+.dish-finish{
+  color: #70e248;
+margin-right: 0px;
+}
+
+.dish-claim{
+  color: #ff8300;
+margin-right: 0px;
+}
+
+.dish-detail{
+  margin-left: auto;
+}
+
+.dish-row-label{
+  font-weight: bold;
+}
+
+.dish-row{
+  display: flex;
+  flex-direction: row;
 }
 
 .product-footer {
@@ -182,6 +296,25 @@ input[type="number"] {
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 }
 
+.filters-label {
+  margin-left: 2%;
+  width: 40%;
+}
+
+.filters-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.preparing-item {
+  background-image: linear-gradient(to top left, #70e248, #77ff49cc);
+}
+
+.waiting-item {
+  background-image: linear-gradient(to top left, #ff8300, #ffa71dd6);
+}
+
 .grid-item {
   padding: 20px;
   font-size: 30px;
@@ -189,11 +322,10 @@ input[type="number"] {
   height: 82%;
   margin: 29px;
   border-radius: 2%;
-  background-image: linear-gradient(to top left, #ff8300, #ffa71dd6);
   box-shadow: 0 10px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
-.grid-item-filter{
+.grid-item-filter {
   justify-content: center;
 }
 

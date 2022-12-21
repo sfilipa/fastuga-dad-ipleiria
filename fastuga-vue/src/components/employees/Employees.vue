@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, inject, watch } from "vue";
 import { useRouter } from "vue-router";
 import EmployeesTable from "./EmployeesTable.vue";
+import Paginate from "vuejs-paginate-next";
 import { useUserStore } from "../../stores/user.js";
 
 const axios = inject("axios");
@@ -9,39 +10,41 @@ const router = useRouter();
 const socket = inject("socket");
 const toast = inject("toast");
 
+
+const lastPage = ref(15);
+const currentPage = ref(1);
+
+
 const userStore = useUserStore();
 const employees = ref([]);
-const name = ref(undefined);
 const filterByType = ref("A");
-const filterByName = ref(null);
+const filterByName = ref("");
 
-const LoadEmployees = () => {
+const LoadEmployees = (pageNumber) => {
+
+  currentPage.value = pageNumber;
+  let URL = "/users/employees?page=" + pageNumber;
+
+  if (filterByName.value.length != 0) {
+    URL += `&name=${filterByName.value}`;
+  }
+  if (filterByType.value.length != 0 && filterByType.value != 'A') {
+    URL += `&type=${filterByType.value}`;
+  }
+
   axios
-    .get(`/users/employees`)
+    .get(URL)
     .then((response) => {
-      employees.value = response.data;
+      lastPage.value = response.data.last_page;
+      employees.value = response.data.data;
     })
     .catch((error) => {
       console.log(error);
     });
 };
 
-const showEmployee = (employee) => {
-  console.log("Show");
-  const employeeObj = Object.assign({}, employee);
-  console.log(employeeObj);
-};
-
-const editEmployee = (employee) => {
-  console.log("Edit");
-  const employeeObj = Object.assign({}, employee);
-  console.log(employeeObj);
-};
-
 const blockEmployee = async (employee) => {
-  console.log("Blocked");
   const employeeObj = Object.assign({}, employee);
-  console.log(employeeObj);
   try {
     const { data } = await axios({
       method: "put",
@@ -62,19 +65,17 @@ const blockEmployee = async (employee) => {
     socket.emit("userBlocked", users);
     toast.warning(`You have blocked ${employeeObj.name}!`);
   } catch (err) {
-    if (err.response.status === 404) {
+    if (err.response != null && err.response.status === 404) {
       console.log("Resource could not be found!");
     } else {
       console.log(err.message);
     }
   }
-  LoadEmployees();
+  LoadEmployees(1);
 };
 
 const unblockEmployee = async (employee) => {
-  console.log("Unblocked");
   const employeeObj = Object.assign({}, employee);
-  console.log(employeeObj);
   try {
     const { data } = await axios({
       method: "put",
@@ -95,57 +96,81 @@ const unblockEmployee = async (employee) => {
     socket.emit("userUnblocked", users);
     toast.warning(`You have unblocked ${employeeObj.name}!`);
   } catch (err) {
-    if (err.response.status === 404) {
+    if (err.response != null && err.response.status === 404) {
       console.log("Resource could not be found!");
     } else {
       console.log(err.message);
     }
   }
-  LoadEmployees();
+  LoadEmployees(1);
 };
 
 const deleteEmployee = async (employee) => {
-  console.log("Delete");
-  const employeeObj = Object.assign({}, employee);
-  console.log(employeeObj);
+  const obj = Object.assign({}, employee);
   try {
     const { data } = await axios({
       method: "delete",
-      url: `/users/${employeeObj.id}`,
+      url: `/users/${obj.id}`,
     });
-    console.log(data);
+    
+    const users = new Object();
+    users.user = obj;
+    users.manager = userStore.user.name;
+    socket.emit("userDeleted", users);
+    toast.warning(`You have deleted ${obj.name}!`);  
   } catch (err) {
-    if (err.response.status === 404) {
+    if (err.response != null && err.response.status === 404) {
       console.log("Resource could not be found!");
     } else {
       console.log(err.message);
     }
   }
-  LoadEmployees();
+  LoadEmployees(1);
 };
+
+const clear = ()=>{
+  filterByType.value = "A";
+  filterByName.value = "";
+  LoadEmployees(1);
+}
+
+// User Deleted
+socket.on("update", () => {
+  LoadEmployees(1);
+});
 
 const addEmployee = () => {
   router.push({ name: "AddEmployee" });
 };
 
 onMounted(() => {
-  LoadEmployees();
+  LoadEmployees(1);
 });
 </script>
 
 <template>
-  <div class="d-flex justify-content-between">
+  <div class="d-flex justify-content-between employees-header fastuga-font">
     <div class="mx-2">
       <h3 class="mt-4">Employees</h3>
     </div>
+    <div class="mx-2 mt-2 ">
+      <button
+        type="button"
+        class="btn btn-primary px-4 employees-add-button"
+        @click="addEmployee"
+      >
+        <i class="bi bi-xs bi-plus-circle"></i>&nbsp; Add Employee
+      </button>
+    </div>
   </div>
+
   <hr />
-  <div class="mb-3 d-flex justify-content-between flex-wrap">
+  <div class="mb-3 d-flex justify-content-between flex-wrap search-bar fastuga-font">
     <div class="mx-2 mt-2 flex-grow-1 filter-div">
       <label for="selectType" class="form-label"
-        >Filter by Employee Type:</label
+        >Filter by Type:</label
       >
-      <select class="form-select" id="selectType" v-model="filterByType">
+      <select class="form-select" id="selectType" v-model.lazy="filterByType" @change="LoadEmployees(1)">
         <option value="A">Any</option>
         <option value="EC">Chef</option>
         <option value="ED">Delivery</option>
@@ -158,23 +183,25 @@ onMounted(() => {
         <label for="searchbar" class="form-label">Search for Name:</label>
         <i class="glyphicon glyphicon-user"></i>
         <input
-          v-model="filterByName"
+          v-model.lazy="filterByName"
           type="search"
           class="form-control rounded"
           placeholder="Search by Name"
           aria-label="Search"
           aria-describedby="search-addon"
+          @change="LoadEmployees(1)"
         />
       </div>
     </div>
 
-    <div class="mx-2 mt-2">
-      <button
-        type="button"
-        class="btn btn-primary px-4 btn-addtask"
-        @click="addEmployee"
-      >
-        <i class="bi bi-xs bi-plus-circle"></i>&nbsp; Add Employee
+    <div class="mx-2 mt-2" style="align-self: flex-end;">
+      <button type="button" class="btn px-4 btn-search" @click="LoadEmployees(1)">
+        <i class="bi bi-xs bi-search"></i> Search
+      </button>
+    </div>
+    <div class="mx-2 mt-2" style="align-self: flex-end;">
+      <button type="button" class="btn px-4 btn-clear" @click="clear">
+        Clear
       </button>
     </div>
   </div>
@@ -182,16 +209,79 @@ onMounted(() => {
     :employees="employees"
     :filterByType="filterByType"
     :filterByName="filterByName"
-    @show="showEmployee"
-    @edit="editEmployee"
     @delete="deleteEmployee"
     @block="blockEmployee"
     @unblock="unblockEmployee"
   >
   </employees-table>
+  <div v-if="employees.length != 0 && lastPage > 1" style="display: flex">
+    <paginate
+      :page-count="lastPage"
+      :prev-text="'Previous'"
+      :next-text="'Next'"
+      :click-handler="LoadEmployees"
+      class="pagination"
+    >
+    </paginate>
+  </div>
 </template>
 
 <style scoped>
+
+.btn-clear:hover,
+.btn-clear:active {
+  background-color: #4d3838;
+  border-color: #4d3838;
+  color: white;
+}
+
+.btn-clear {
+  background-color: #5e4444;
+  border-color: #5e4444;
+  color: white;
+}
+
+.employees-add-button:hover,
+.employees-add-button:active {
+  background-color: #ff8300;
+  color: white !important;
+}
+
+.employees-add-button {
+  display: block;
+  margin-left: auto;
+  height: 3rem;
+  background-color: #ffa71dd6;
+  border-color: #ffa71dd6;
+  color: white;
+  font-weight: bolder;
+}
+
+.btn-search:hover,
+.btn-search:active {
+  background-color: #ff8300;
+  color: white !important;
+}
+
+.btn-search {
+  background-color: #ffa71dd6;
+  border-color: #ffa71dd6;
+  color: white;
+  font-weight: bolder;
+}
+
+.employees-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.search-bar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
 .filter-div {
   min-width: 12rem;
 }

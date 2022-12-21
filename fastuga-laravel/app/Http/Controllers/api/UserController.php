@@ -236,7 +236,20 @@ class UserController extends Controller
         return new UserResource($request->user());
     }
 
-    public function getAllEmployees() {
-        return User::whereIn('type', array('ec', 'ed', 'em'))->get();
+    public function getAllEmployees(Request $request) {
+        $query = User::query()->whereIn('type', array('ec', 'ed', 'em'))
+            ->whereNull('users.deleted_at');
+
+        $name = $request->query('name');
+        if($name != null){
+            $query->where('users.name','LIKE','%'.$name.'%');
+        }
+
+        $type = $request->query('type');
+        if($type != null && $type!='A'){
+            $query->where('users.type',$type);
+        }
+
+        return $query->orderBy('users.name','ASC')->paginate(15);
     }
 }

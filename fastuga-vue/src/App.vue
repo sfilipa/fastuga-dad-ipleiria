@@ -44,12 +44,30 @@ onMounted(() => {
   fetchCustomerOrders(userStore.userId)
 })
 
+//==================================================
+// Web Sockets
+//==================================================
+
+// Listen for the 'message' event from the server and log the data
+// received from the server to the users.
+
+// Order Ready to Pick Up
+socket.on("orderReadyToPickUp", (order) => {
+  if (order.customerUserID === userStore.userId) {
+    toast.info(`Your order: Number ${order.ticket_number} is ready to pick up!`);
+    fetchCustomerOrders(userStore.userId)
+  }
+});
+
+socket.on("update", () => {
+  fetchCustomerOrders(userStore.userId)
+});
 
 // User Blocked
 socket.on("userBlocked", (users) => {
   const user = users.user;
   const manager = users.manager;
-  if (user.id === userStore.user.id) {
+  if (user.user_id === userStore.user.id) {
     toast.warning(`You have been blocked by ${manager}!`);
     return
   }
@@ -60,11 +78,25 @@ socket.on("userBlocked", (users) => {
 socket.on("userUnblocked", (users) => {
   const user = users.user;
   const manager = users.manager;
-  if (user.id === userStore.user.id) {
+  if (user.user_id === userStore.user.id) {
     toast.warning(`You have been unblocked by ${manager}!`);
     return
   }
   toast.warning(`${user.name} as been unblocked by ${manager}!`);
+});
+
+// User Deleted
+socket.on("userDeleted", (users) => {
+  const user = users.user;
+  const manager = users.manager;
+  console.log(users);
+  if (user.user_id === userStore.user.id) {
+    toast.error(`Your account has been deleted by ${manager}!`);
+    router.push('/')
+    userStore.clearUser()
+    return
+  }
+  toast.error(`${user.name} as been deleted by ${manager}!`);
 });
 
 </script>
@@ -168,7 +200,7 @@ socket.on("userUnblocked", (users) => {
               </router-link>
             </li>
 
-            <li class="nav-item">
+            <li class="nav-item" v-if="userStore.user && userStore.user.type !== 'C'">
               <router-link class="nav-link fastuga-font" :class="{ active: $route.name === 'Orders' }" :to="{ name: 'Orders' }"
                 @click="clickMenuOption">
                 <i class="bi bi-list-stars"></i>
@@ -176,7 +208,7 @@ socket.on("userUnblocked", (users) => {
               </router-link>
             </li>
 
-            <li class="nav-item">
+            <li class="nav-item" v-if="userStore.user && userStore.user.type === 'EC'">
               <router-link class="nav-link fastuga-font" :class="{ active: $route.name === 'ChefsDishes' }" :to="{ name: 'ChefsDishes' }"
                            @click="clickMenuOption">
                 <i class="bi bi-cup-hot"></i>
@@ -184,7 +216,7 @@ socket.on("userUnblocked", (users) => {
               </router-link>
             </li>
 
-            <li class="nav-item">
+            <li class="nav-item" v-if="userStore.user && userStore.user.type !== 'C' && userStore.user.type !== 'EC'">
               <router-link class="nav-link fastuga-font" :class="{ active: $route.name === 'OrdersEmployees' }" :to="{ name: 'OrdersEmployees' }"
                            @click="clickMenuOption">
                 <i class="bi bi-people"></i>
@@ -224,19 +256,21 @@ socket.on("userUnblocked", (users) => {
             </li>
           </ul>
 
-          <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted fastuga-font">
-            <span>My Orders</span>
-            <router-link class="link-secondary" :to="{ name: 'NewOrder' }" aria-label="Make a new order"
-              @click="clickMenuOption">
-              <i class="bi bi-xs bi-plus-circle"></i>
-            </router-link>
-          </h6>
-          <ul class="nav flex-column mb-2">
-            <li class="nav-item" v-for="order in userStore.myCurrentOrders" :key="order.id">
-              <!--TODO é preciso atualizar isto no cliente quando a order muda de estado -->
-              Ticket Number: {{ order.ticket_number + " - " + (order.status == 'R' ? "Ready" : "Preparing")}}
-            </li>
-          </ul>
+          <div v-if="!userStore.user || userStore.user.type === 'C'">
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted fastuga-font">
+              <span>My Orders</span>
+              <router-link class="link-secondary" :to="{ name: 'NewOrder' }" aria-label="Make a new order"
+                @click="clickMenuOption">
+                <i class="bi bi-xs bi-plus-circle"></i>
+              </router-link>
+            </h6>
+            <ul class="nav flex-column mb-2">
+              <li class="nav-item" v-for="order in userStore.myCurrentOrders" :key="order.id">
+                <!--TODO é preciso atualizar isto no cliente quando a order muda de estado -->
+                Ticket Number: {{ order.ticket_number + " - " + (order.status == 'R' ? "Ready" : "Preparing")}}
+              </li>
+            </ul>
+          </div>
 
           <div class="d-block d-md-none">
             <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">

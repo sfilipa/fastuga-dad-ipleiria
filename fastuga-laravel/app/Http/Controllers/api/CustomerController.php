@@ -24,7 +24,10 @@ class CustomerController extends Controller
     public function index(Request $request)
     {
         // dd(Customer::query()->join('users', 'customers.user_id', '=', 'users.id'));
-        $query = Customer::query()->join('users', 'customers.user_id', '=', 'users.id')->whereNull('users.deleted_at');
+        $query = Customer::query()
+            ->join('users', 'customers.user_id', '=', 'users.id')
+            ->whereNull('users.deleted_at')
+            ->select('users.name', 'users.type' , 'users.blocked', 'users.custom', 'users.id', 'users.email', 'users.photo_url', 'customers.*');
         $name = $request->query('name');
         if($name != null){
             $query->where('users.name','LIKE','%'.$name.'%');
@@ -40,10 +43,7 @@ class CustomerController extends Controller
             $query->where('customers.nif',$nif);
         }
 
-        return $query->orderBy('customers.id','DESC')->paginate(15);
-
-
-        // return CustomerResource::collection(Customer::paginate(15))->whereNotNull('user')->all();
+        return $query->orderBy('customers.id','ASC')->paginate(15);
     }
 
     public function store(StoreUpdateCustomerRequest $request)
@@ -65,6 +65,7 @@ class CustomerController extends Controller
 
     public function destroy(Customer $customer)
     {
+        $customer = Customer::findOrFail($customer->id);
         $customer->delete();
     }
 

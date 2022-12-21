@@ -11,6 +11,7 @@ const axiosLaravel = inject("axios");
 const serverBaseUrl = inject("serverBaseUrl");
 const PAYMENT_URL = "https://dad-202223-payments-api.vercel.app";
 const store = useOrderItemsStore();
+const socket = inject("socket");
 
 //IMPORTANTE - SÓ DEIXAR FAZER COMPRAS A QUEM SEJA CUSTOMER/UTILIZADOR ANONIMO! (fazer middleware)
 
@@ -274,6 +275,8 @@ const transformatePointsToEuros = (points) => {
 const dialogConfirm = () => {
   user.loadMyCurrentOrders();
   store.resetOrderItems();
+  toast.success("Your Order is Preparing! Ticket Number: " + ticketNumber.value);
+  socket.emit("orderPlaced", ticketNumber.value);
   //   router.push('/publicBoard')
 };
 

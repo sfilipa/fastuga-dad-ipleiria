@@ -27,7 +27,6 @@ let customerInfo = ref(null);
 
 const showCustomerInfo = (customer) => {
   customerInfo.value = toRaw(customer);
-  console.log(toRaw(customer));
   if (customerInfoDialog.value !== null && deleteDialog.value !== null) {
     customerInfoDialog.value.show();
   }
@@ -43,11 +42,11 @@ const customerToDelete = ref(null);
 
 const deleteClick = (customer) => {
   customerToDelete.value = customer;
-  console.log(deleteConfirmationDialog.value);
   if (deleteConfirmationDialog.value !== null && deleteDialog.value !== null) {
     deleteConfirmationDialog.value.show();
   }
 };
+
 const dialogConfirmDelete = () => {
   emit("delete", customerToDelete.value);
   deleteDialog.value = null;
@@ -66,22 +65,16 @@ onUpdated(() => {
       ? customerInfoDialog.value.show()
       : (deleteDialog.value = null);
   }
-
-  if (
-    deleteConfirmationDialog.value == null ||
-    customerInfoDialog.value == null
-  ) {
-    deleteDialog.value = null;
-  }
 });
 
 // Block and Unblock
 const blockClick = (customer) => {
-  console.log(customer);
+  deleteDialog.value = null;
   emit("block", customer);
 };
 
 const unblockClick = (customer) => {
+  deleteDialog.value = null;
   emit("unblock", customer);
 };
 </script>
@@ -167,9 +160,11 @@ const unblockClick = (customer) => {
         <td>{{ customer.email }}</td>
 
         <td class="text-end">
-          <div class="d-flex justify-content-around customers-buttons fastuga-font">
+          <div
+            class="d-flex justify-content-around customers-buttons fastuga-font"
+          >
             <button
-              class="btn customers-button btn-info"
+              class="btn customers-button btn-info-css"
               @click="
                 showDeleteDialog(false);
                 showCustomerInfo(customer);
@@ -195,7 +190,7 @@ const unblockClick = (customer) => {
               <span>Unblock</span>
             </button>
             <button
-              class="btn customers-button btn-delete"
+              class="btn customers-button btn-delete-css"
               @click="
                 showDeleteDialog(true);
                 deleteClick(customer);
@@ -211,55 +206,46 @@ const unblockClick = (customer) => {
   </table>
 </template>
 
-<style scoped>
-.customers-button{
-  width: 30%;
-}
-
-.customers-buttons{
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-}
-
-.btn-delete:hover,
-.btn-delete:active {
-  border: 2.5px solid #c53b3b !important;
-  color: #c53b3b !important;
+<style>
+.btn-info-css:hover,
+.btn-info-css:active {
+  border: 2.5px solid #4d3838 !important;
+  color: #4d3838 !important;
   background-color: rgb(242, 241, 241) !important;
   display: flex;
   flex-direction: row;
   align-items: center;
 }
 
-.btn-delete {
-  border: 2.5px solid #ff5b5b;
-  color: #ff5b5b;
-  display: flex;
+.btn-info-css {
+  border: 2.5px solid #5e4444 !important;
+  color: #5e4444 !important;
+  background-color: white !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+}
+
+.btn-delete-css:hover,
+.btn-delete-css:active {
+  border: 2.5px solid #c53b3b !important;
+  color: #c53b3b !important;
+  background-color: rgb(242, 241, 241) !important;
+  display: flex ;
   flex-direction: row;
   align-items: center;
 }
 
-.btn-info:hover,
-.btn-info:active {
-  border: 2.5px solid #4d3838 !important;
-  color: #4d3838 !important;
-  background-color: rgb(242, 241, 241)  !important;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
+.btn-delete-css {
+  border: 2.5px solid #ff5b5b !important;
+  color: #ff5b5b !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
 }
 
-.btn-info {
-  border: 2.5px solid #5e4444;
-  color: #5e4444;
-  background-color: white;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-}
-
-.button-unblock:hover, .button-unblock:active{
+.button-unblock:hover,
+.button-unblock:active {
   background-color: #ff8300 !important;
   color: white !important;
   display: flex;
@@ -268,17 +254,18 @@ const unblockClick = (customer) => {
 }
 
 .button-unblock {
-  background-color: #ffa71dd6;
-  color: white;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
+  background-color: #ffa71dd6 !important;
+  color: white !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
 }
 
-.button-block:hover, .button-block:active {
+.button-block:hover,
+.button-block:active {
   border: 2.5px solid #ff8300 !important;
   color: #ff8300 !important;
-  background-color: rgb(242, 241, 241)  !important;
+  background-color: rgb(242, 241, 241) !important;
   height: fit-content;
   display: flex;
   flex-direction: row;
@@ -286,8 +273,20 @@ const unblockClick = (customer) => {
 }
 
 .button-block {
-  border: 2.5px solid #ffa71dd6;
-  color: #ffa71dd6;
+  border: 2.5px solid #ffa71dd6 !important;
+  color: #ffa71dd6 !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+}
+</style>
+
+<style scoped>
+.customers-button {
+  width: 30%;
+}
+
+.customers-buttons {
   display: flex;
   flex-direction: row;
   align-items: center;

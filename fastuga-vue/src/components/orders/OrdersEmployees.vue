@@ -1,5 +1,5 @@
 <script setup>
-import {inject, onMounted, ref} from "vue";
+import {inject, onMounted, ref, VueElement} from "vue";
 import OrdersTable from "./OrdersTable.vue"
 import {useUserStore} from "@/stores/user";
 import axios from "axios";
@@ -7,11 +7,13 @@ import axios from "axios";
 const axiosLaravel = inject('axios')
 const orders = ref([])
 const toast = inject("toast")
+const socket = inject("socket")
 const lastPage = ref(1)
 const componentName = "delivery_orders"
 const noResults = ref(false)
 const user = useUserStore()
 const ticketNumber = ref(0)
+let customer = ref([]);
 
 const LoadOrders = (pageNumber) => {
   let URL = "/orders/delivery?page="+pageNumber
@@ -42,10 +44,23 @@ const changeOrderStatus = (order) => {
       userId: user.userId
     })
       .then(() => {
-        toast.success(`Order number ${orderObj.ticket_number} is now ready to be delivered!`)
+        if (orderObj.customer_id != null) {
+          axiosLaravel.get(`/customers/${orderObj.customer_id}`)
+            .then(response => {
+              customer = response.data;
+              orderObj['customerUserID'] = customer.data.user_id.id;
+              toast.warning(`Order number ${orderObj.ticket_number} is now ready to be delivered!`)
+              socket.emit("orderReadyToDeliver", orderObj);
+              LoadOrders(1)
+            })
+          return
+        }
+        toast.warning(`Order number ${orderObj.ticket_number} is now ready to be delivered!`)
+        socket.emit("orderReadyToDeliver", orderObj);
         LoadOrders(1)
       })
       .catch((error) => {
+        console.log(error)
         toast.error(error.response.data)
       })
   }else{
@@ -53,10 +68,12 @@ const changeOrderStatus = (order) => {
       userId: user.userId
     })
       .then(() => {
+        socket.emit("orderDelivered", orderObj.ticket_number);
         toast.success(`Order number ${orderObj.ticket_number} was delivered!`)
         LoadOrders(1)
       })
       .catch((error) => {
+        console.log(error)
         toast.error(error.response.data)
       })
   }
@@ -74,6 +91,42 @@ const checkOrderItemsAreReady = (order) => {
 onMounted (() => {
   LoadOrders()
 })
+
+//==================================================
+// Web Sockets
+//==================================================
+
+// Listen for the 'message' event from the server and log the data
+// received from the server to the users.
+
+// Order Placed
+socket.on("orderPlaced", (ticket) => {
+  toast.info("New Order! Ticket Number: " + ticket);
+  LoadOrders(1);
+});
+
+// Order Ready to Deliver
+socket.on("orderReadyToDeliver", (ticket) => {
+  toast.warning("Order is ready to be delivered! Ticket Number: " + ticket);
+  LoadOrders(1);
+});
+
+// Order Delivered
+socket.on("orderDelivered", (ticket) => {
+  toast.success("Order was delivered! Ticket Number: " + ticket);
+  LoadOrders(1);
+});
+
+// Hot Dish is Preparing
+socket.on("hotDishIsPreparing", (order) => {
+  toast.info(`${order.name} is being prepared by ${order.chef.name}!`);
+  LoadOrders(1);
+});
+
+socket.on("hotDishIsReady", (order) => {
+  toast.success(`${order.name} is ready!`);
+  LoadOrders(1);
+});
 </script>
 
 <template>

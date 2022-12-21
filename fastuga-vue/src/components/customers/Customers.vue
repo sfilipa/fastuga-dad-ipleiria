@@ -1,15 +1,15 @@
 <script setup>
-import { ref, computed, onMounted, inject, watch, toRaw } from "vue";
-import { useRouter } from "vue-router";
+import { ref, onMounted, inject} from "vue";
 import CustomersTable from "./CustomersTable.vue";
 import Paginate from "vuejs-paginate-next";
+import { useUserStore } from "../../stores/user.js";
 
 const axios = inject("axios");
-const router = useRouter();
+const toast = inject("toast");
+const socket = inject("socket");
 
+const userStore = useUserStore();
 let customers = ref({});
-const searchByEmail = ref(null);
-const searchByNif = ref(null);
 
 const lastPage = ref(15);
 const currentPage = ref(1);
@@ -51,9 +51,9 @@ const show = (customer) => {
 };
 
 const block = async (customer) => {
-  console.log(customer)
+  console.log(customer);
   const obj = Object.assign({}, customer);
-  console.log(obj)
+  console.log(obj);
   try {
     const { data } = await axios({
       method: "put",
@@ -67,8 +67,14 @@ const block = async (customer) => {
         custom: obj.custom,
       },
     });
+
+    const users = new Object();
+    users.user = obj;
+    users.manager = userStore.user.name;
+    socket.emit("userBlocked", users);
+    toast.warning(`You have blocked ${obj.name}!`);
   } catch (err) {
-    if (err.response.status === 404) {
+    if (err.response != null && err.response.status === 404) {
       console.log("Resource could not be found!");
     } else {
       console.log(err.message);
@@ -79,10 +85,11 @@ const block = async (customer) => {
 
 const unblock = async (customer) => {
   const obj = Object.assign({}, customer);
+  console.log(obj);
   try {
     const { data } = await axios({
       method: "put",
-      url: `/users/blockUnblock/${obj.id}`,
+      url: `/users/blockUnblock/${obj.user_id}`,
       data: {
         name: obj.name,
         email: obj.email,
@@ -92,8 +99,14 @@ const unblock = async (customer) => {
         custom: obj.custom,
       },
     });
+
+    const users = new Object();
+    users.user = obj;
+    users.manager = userStore.user.name;
+    socket.emit("userUnblocked", users);
+    toast.warning(`You have unblocked ${obj.name}!`);
   } catch (err) {
-    if (err.response.status === 404) {
+	if (err.response != null && err.response.status === 404) {
       console.log("Resource could not be found!");
     } else {
       console.log(err.message);
@@ -110,9 +123,15 @@ const deleteFromDatabase = async (customer) => {
       method: "delete",
       url: `/customers/${obj.id}`,
     });
-    console.log(data);
+    
+    const users = new Object();
+    users.user = obj;
+    users.manager = userStore.user.name;
+    socket.emit("userDeleted", users);
+    toast.error(`You have deleted ${obj.name}!`);
+    return
   } catch (err) {
-    if (err.response.status === 404) {
+    if (err.response != null && err.response.status === 404) {
       console.log("Resource could not be found!");
     } else {
       console.log(err.message);
@@ -122,13 +141,18 @@ const deleteFromDatabase = async (customer) => {
 };
 
 function clear() {
-  filterByName.value = null;
-  filterByEmail.value = null;
-  filterByNif.value = null;
+  filterByName.value = "";
+  filterByEmail.value = "";
+  filterByNif.value = "";
   loadUsers(1);
 }
 
 onMounted(() => {
+  loadUsers(1);
+});
+
+// User Deleted
+socket.on("update", () => {
   loadUsers(1);
 });
 </script>
@@ -145,10 +169,8 @@ onMounted(() => {
   >
     <div class="mx-2 mt-2 flex-grow-1 filter-div">
       <div class="inner-addon left-addon">
-        <!-- <label for="searchbar" class="form-label">Search By Name:</label>
-        <i class="glyphicon glyphicon-user"></i> -->
         <input
-          v-model="filterByName"
+          v-model.lazy="filterByName"
           type="search"
           class="form-control rounded"
           placeholder="Search by Name"
@@ -161,10 +183,8 @@ onMounted(() => {
 
     <div class="mx-2 mt-2 flex-grow-1 filter-div">
       <div class="inner-addon left-addon">
-        <!-- <label for="searchbar" class="form-label">Search by Email:</label> -->
-        <!-- <i class="glyphicon glyphicon-user"></i> -->
         <input
-          v-model="filterByEmail"
+          v-model.lazy="filterByEmail"
           type="search"
           class="form-control rounded"
           placeholder="Search by Email"
@@ -177,10 +197,8 @@ onMounted(() => {
 
     <div class="mx-2 mt-2 flex-grow-1 filter-div">
       <div class="inner-addon left-addon">
-        <!-- <label for="searchbar" class="form-label">Search by NIF:</label>
-        <i class="glyphicon glyphicon-user"></i> -->
         <input
-          v-model="filterByNif"
+          v-model.lazy="filterByNif"
           type="search"
           class="form-control rounded"
           placeholder="Search by NIF"
@@ -196,11 +214,7 @@ onMounted(() => {
       </button>
     </div>
     <div class="mx-2 mt-2">
-      <button
-        type="button"
-        class="btn px-4 btn-clear"
-        @click="clear"
-      >
+      <button type="button" class="btn px-4 btn-clear" @click="clear">
         Clear
       </button>
     </div>
@@ -226,68 +240,51 @@ onMounted(() => {
 </template>
 
 <style>
-.pagination .page-item.active a:hover, .pagination .page-item.active a:active{
+.pagination .page-item.active a:hover,
+.pagination .page-item.active a:active {
   background-color: #ff8300 !important;
   color: white !important;
   cursor: pointer;
 }
 
-.pagination .page-item.active a{
+.pagination .page-item.active a {
   background-color: #ffa71dd6 !important;
   border-color: #ffa71dd6 !important;
   color: white !important;
   cursor: pointer !important;
 }
 
-.pagination .page-item a.page-link:focus{
+.pagination .page-item a.page-link:focus {
   box-shadow: 2px 2px #ffd07b !important;
 }
 
-.pagination .page-item a:hover{
+.pagination .page-item a:hover {
   color: #ff8300 !important;
   cursor: pointer;
-
 }
 
-.pagination .page-item a{
+.pagination .page-item a {
   color: #ffa71dd6 !important;
   cursor: pointer;
 }
 
-.pagination{
+.pagination {
   margin: auto;
 }
-
 </style>
 
 <style scoped>
-.btn-clear:hover, .btn-clear:active{
+.btn-clear:hover,
+.btn-clear:active {
   background-color: #4d3838;
   border-color: #4d3838;
   color: white;
 }
 
-.btn-clear{
+.btn-clear {
   background-color: #5e4444;
   border-color: #5e4444;
   color: white;
-}
-
-
-.customers-add-button:hover,
-.customers-add-button:active {
-  background-color: #ff8300;
-  color: white !important;
-}
-
-.customers-add-button {
-  display: block;
-  margin-left: auto;
-  height: 3rem;
-  background-color: #ffa71dd6;
-  border-color: #ffa71dd6;
-  color: white;
-  font-weight: bolder;
 }
 
 .customers-add-button-div {

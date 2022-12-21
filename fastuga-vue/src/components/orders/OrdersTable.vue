@@ -1,8 +1,10 @@
 <script setup>
 import { ref, inject } from 'vue'
+import {useUserStore} from "@/stores/user";
 
 const serverBaseUrl = inject("serverBaseUrl")
 const axiosLaravel = inject('axios')
+const user = useUserStore()
 const orderItems = ref([])
 let indexesAdded = []
 
@@ -17,27 +19,21 @@ const props = defineProps({
 const emit = defineEmits(['changeOrderStatus', 'delete'])
 
 const showItems = (order, indexRow) => {
-  axiosLaravel.get(`/orders/${order.id}/orderItems`)
-      .then((response) => {
-        orderItems.value = response.data.data
-        indexRow = indexRow + 1;
-        if (indexesAdded.includes(order.id)) {
-          props.orders.splice(indexRow, orderItems.value.length) //Delete order items from table
+  orderItems.value = order.order_items
+  indexRow = indexRow + 1;
+  if (indexesAdded.includes(order.id)) {
+    props.orders.splice(indexRow, orderItems.value.length) //Delete order items from table
 
-          let key = indexesAdded.indexOf(order.id)
-          indexesAdded.splice(key, 1)
+    let key = indexesAdded.indexOf(order.id)
+    indexesAdded.splice(key, 1)
 
-        } else {
-          indexesAdded.push(order.id)
-          orderItems.value.forEach((value, index) => {
-            props.orders.splice(indexRow, 0, value) //Insert order items into table
-            indexRow++
-          })
-        }
-      })
-      .catch((error) => {
-        console.log(error)
-      })
+  } else {
+    indexesAdded.push(order.id)
+    orderItems.value.forEach((value, index) => {
+      props.orders.splice(indexRow, 0, value) //Insert order items into table
+      indexRow++
+    })
+  }
 }
 
 const changeOrderClick = (order) => {
@@ -64,11 +60,11 @@ const deleteClick = (order) => {
     <tbody>
       <tr v-for="(order, index) in props.orders">
         <td v-if="order.ticket_number === undefined" class="products">
-          <img :src='`${serverBaseUrl}/storage/products/${order.product_id.photo_url}`' />
+          <img :src='`${serverBaseUrl}/storage/products/${order.product.photo_url}`' />
         </td>
         <td v-else> {{ order.id }} </td>
         <td v-if="order.ticket_number === undefined" class="products">
-          {{ order.product_id.name }}
+          {{ order.product.name }}
         </td>
         <td v-else> {{ order.ticket_number }} </td>
 
@@ -80,12 +76,12 @@ const deleteClick = (order) => {
         <td v-else-if="order.status == 'W'" :class="{ 'products' : order.ticket_number === undefined}">Waiting</td>
 
         <td v-if="order.ticket_number === undefined" class="products">
-          {{ order.product_id.type}}
+          {{ order.product.type}}
         </td>
         <td v-else>{{ order.date }}</td>
 
         <td v-if="order.ticket_number === undefined" class="products">
-          {{ order.product_id.price }}€
+          {{ order.product.price }}€
         </td>
         <td v-else>{{ order.total_price }}€</td>
         <td class="text-end" :class="{'products': order.ticket_number === undefined}">
@@ -98,7 +94,7 @@ const deleteClick = (order) => {
               <i class="bi bi-xs bi-search"></i>
             </button>
 
-            <div v-if="order.status == 'P' || order.status == 'R'">
+            <div v-if="props.parent ==='all_orders' && user.user?.type === 'EM' && (order.status === 'P' || order.status === 'R')">
               <button
                 class="btn btn-xs btn-light"
                 @click="deleteClick(order)"
@@ -108,7 +104,7 @@ const deleteClick = (order) => {
               </button>
             </div>
 
-            <div v-if="props.parent ==='delivery_orders'">
+            <div v-if="props.parent ==='delivery_orders' && user.user?.type === 'ED'">
               <button
                   class="btn btn-xs btn-light"
                   @click="changeOrderClick(order)"

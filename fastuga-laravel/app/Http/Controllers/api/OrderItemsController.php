@@ -82,11 +82,11 @@ class OrderItemsController extends Controller
 
     public function updateHotDish(Request $request, $id)
     {
-        $orderItem = OrderItems::find($id);
-        if($orderItem == null){
+        $orderItemFound = OrderItems::find($id);
+        if($orderItemFound == null){
             return response("Couldn't find the order item", 404);
         }
-        $status = $orderItem->status;
+        $status = $orderItemFound->status;
         if($status == 'R'){
             return response("Dish is already ready - invalid operation", 409);
         }
@@ -102,18 +102,18 @@ class OrderItemsController extends Controller
         }
 
         if($status == 'W'){
-            $orderItem->status = 'P';
-            $orderItem->preparation_by = $userId;
+            $orderItemFound->status = 'P';
+            $orderItemFound->preparation_by = $userId;
         }else{
             //Backend validation so that only the same chef that changes from 'W' to 'P', can change from 'P' to 'R'
-            if($orderItem->preparation_by != $userId){
+            if($orderItemFound->preparation_by != $userId){
                 return response("This dish is being prepared by another chef!", 403);
             }
-            $orderItem->status = 'R';
+            $orderItemFound->status = 'R';
         }
 
-        $orderItem->save();
+        $orderItemFound->save();
 
-        return new OrderItemsResource($orderItem);
+        return new OrderItemsResource($orderItemFound);
     }
 }
