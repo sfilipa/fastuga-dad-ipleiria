@@ -134,6 +134,7 @@ const LoadOrdersDriverDelivered = (pageNumber) => {
   axiosLaravel
       .get(URL)
       .then((response) => {
+        console.log(response)
         lastPage.value = response.data.last_page
         ordersDelivered.value = response.data.data
       })

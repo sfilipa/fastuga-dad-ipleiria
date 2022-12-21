@@ -37,15 +37,10 @@ const showOrder = (order, indexRow) => {
     })
   }
 };
-
-const showClick = (order) => {
-  emit("show", order);
-};
-
 </script>
 
 <template>
-  <table class="table" ref="table_ref">
+  <table class="table">
     <thead>
     <tr>
       <th>Ticket Number</th>

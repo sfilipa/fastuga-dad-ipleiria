@@ -21,15 +21,22 @@ class UserPolicy
 
     public function view(User $user, User $model)
     {
-        return $user->type == "A" || $user->id == $model->id;
+        return $user->type == "EM" || $user->id == $model->id;
     }
     public function update(User $user, User $model)
     {
-        return $user->type == "A" || $user->id == $model->id;
+        return $user->type == "EM" || $user->id == $model->id;
     }
     public function updatePassword(User $user, User $model)
     {
-    dd($model);
+        return $user->id == $model->id;
+    }
+    public function viewHistory(User $user, User $model)
+    {
+        return $user->id == $model->id;
+    }
+    public function updateProfile(User $user, User $model)
+    {
         return $user->id == $model->id;
     }
 }
