@@ -50,14 +50,12 @@
       userId : user.userId
     })
       .then((response)=>{
-        console.log(response.data)
         if(orderObj.payment_type != null){
           const requestBody = {
             'type': orderObj.payment_type.toLowerCase(),
             'reference': orderObj.payment_reference,
             'value': Number.parseInt(orderObj.total_paid)
           }
-          console.log(requestBody)
           axios.post(`${REFUND_URL}/api/refunds`, requestBody)
             .then((response) => {
                 console.log(response)
