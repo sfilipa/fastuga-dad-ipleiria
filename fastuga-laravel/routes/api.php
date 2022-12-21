@@ -7,8 +7,6 @@ use App\Http\Controllers\api\ProductController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\UserController;
 use App\Http\Controllers\api\AuthController;
-use App\Policies\UserPolicy;
-
 
 /*Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();*/
@@ -19,15 +17,20 @@ Route::middleware('auth:api')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('users/me', [UserController::class, 'show_me']);
 
+    Route::patch('users/{user}/password', [UserController::class, 'update_password'])/*->middleware('can:updatePassword, user2')*/;
+
     // Order Routes
     Route::prefix('orders')->group(function () {
         Route::patch('/{order}/{status}', [OrderController::class, 'updateOrderStatus'])
             ->middleware('can:update,order');
         Route::get('/current/customer/{user_id}', [OrderController::class, 'getCustomerCurrentOrders'])
             ->middleware('can:viewCustomerOrders, App\Models\Order');
-        Route::get('/{order_id}/orderItems', [OrderController::class, 'getItemsAndProducts']);
         Route::get('/delivery', [OrderController::class, 'getOrderForDelivery'])
             ->middleware('can:viewDeliveryOrders, App\Models\Order');
+        Route::get('/customer/{user}', [OrderController::class, 'getAllCustomerOrders'])
+            /*->middleware('can:viewHistory, App\Models\User')*/;//statistics - customers
+        Route::get('/delivered/{user}', [OrderController::class, 'getAllOrdersDelivered'])
+            /*->middleware('can:viewHistory, App\Models\User')*/;//statistics - driver
     });
 
     Route::prefix('order-items')->group(function () {
@@ -53,7 +56,6 @@ Route::middleware('auth:api')->group(function () {
 // User Routes
 Route::put('users/updatePasswordTAES/{email}', [UserController::class, 'updateTAESPassword']);
 Route::put('users/updateNameTAES/{email}', [UserController::class, 'updateTAESName']);
-Route::patch('users/{user}/password', [UserController::class, 'update_password'])/*->middleware('can:updatePassword, App\Models\User')*/;
 Route::apiResource("users", UserController::class);
 
 // Customer Routes
@@ -67,11 +69,9 @@ Route::prefix('orders')->group(function () {
     Route::get('/statusTAES', [OrderController::class, 'getOrderByStatusTAES']);
     Route::get('/{order}/customer', [CustomerController::class, 'getCostumerOfOrder']);
     Route::get('/{order}/user', [UserController::class, 'getUserOfOrder']);
-    Route::get('/delivered/{user_id}', [OrderController::class, 'getAllOrdersDelivered']);//statistics - driver
-    Route::get('/bymonth/total', [OrderController::class, 'getTotalOrdersByMonth']);//statistics - managers
-    Route::get('/bymonth', [OrderController::class, 'getTotalOrdersMonths']);//statistics - managers
-    Route::get('/customer/{user_id}', [OrderController::class, 'getAllCustomerOrders']);//statistics - customers
-    Route::get('/{order_id}/products', [OrderController::class, 'getAllOrderProducts']);//statistics - customers
+    Route::get('/totalOrders/bymonth', [OrderController::class, 'getTotalOrdersByMonth']);//statistics - managers
+    Route::get('/totalGained/bymonth', [OrderController::class, 'getTotalGainedByMonth']);//statistics - managers
+    Route::get('/{order_id}/orderItems', [OrderController::class, 'getItemsAndProducts']);
     Route::get('/active', [OrderController::class, 'getNumberOfActiveOrders']); //anyone can see this - even anonymous users
 });
 
@@ -95,9 +95,7 @@ Route::get('products/types', [ProductController::class, 'getProductsTypes']);
 
 //Statistics
 Route::get('/products/top', [ProductController::class, 'getBestProducts']);
-Route::get('/products/top/total', [ProductController::class, 'getTotalOrdersOfTopProducts']);
 Route::get('/products/worst', [ProductController::class, 'getWorstProducts']);
-Route::get('/products/worst/total', [ProductController::class, 'getTotalOrdersOfWorstProducts']);
 
 
 Route::get("products", [ProductController::class, 'index']);

@@ -21,14 +21,14 @@ class OrderPolicy
     public function update(User $user, Order $order): bool
     {
         $status = request()->status;
-        if($status == 'C' && $order->status == 'R'){
+        if($status == 'C'){
             if($user->type != 'EM'){
                 return false;
             }
             return true;
         }
 
-        if($user->type === 'ED'){
+        if($user->type == 'ED'){
             return true;
         }
 
@@ -42,6 +42,6 @@ class OrderPolicy
 
     public function viewDeliveryOrders(User $user): bool
     {
-        return $user->type == 'EM' || $user->type == 'ED';
+        return $user->type == 'ED';
     }
 }

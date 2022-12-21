@@ -1,15 +1,14 @@
 <script setup>
-import axios from 'axios'
 import {ref, computed, onMounted, inject, watch, reactive, toRef} from "vue";
-import BarChartTopProducts from './BarChartTopProducts.vue'
-import BarChartWorstProducts from './BarChartWorstProducts.vue'
 import HistoryTable from './HistoryTable.vue'
-import BarChartOrdersByMonth from './BarChartOrdersByMonth.vue'
+import BarChart from './BarChart.vue'
 import HistoryTableOrdersDelivered from './HistoryTableOrdersDelivered.vue'
 import HistoryTableDishPrepared from './HistoryTableDishPrepared.vue'
 import Paginate from "vuejs-paginate-next"
 
 import {useUserStore} from "../../stores/user.js"
+
+const axiosLaravel = inject('axios')
 
 let laravelData = ref()
 
@@ -21,8 +20,9 @@ const topProducts = ref([])
 const topProductsTotal = ref([])
 const worstProducts = ref([])
 const worstProductsTotal = ref([])
+const months = ref([])
 const ordersByMonth = ref([])
-const ordersByMonthTotal = ref([])
+const gainedByMonth = ref([])
 
 //Driver
 const ordersDelivered = ref([])
@@ -42,8 +42,7 @@ const currentPage = ref(1)
 //Statistic - customer
 const LoadOrders = (pageNumber) => {
   currentPage.value = pageNumber
-  let URL = `http://localhost:8081/api/orders/customer/${userStore.user.id}?page=${pageNumber}`;
-
+  let URL = `/orders/customer/${userStore.user.id}?page=${pageNumber}`;
   if (filterByPaymentType.value != "A") {
     URL += `&type=${filterByDate.value}`
   }
@@ -51,13 +50,11 @@ const LoadOrders = (pageNumber) => {
     URL += `&date=${filterByDate.value}`
   }
 
-  axios
+  axiosLaravel
       .get(URL)
       .then((response) => {
-
         lastPage.value = response.data.last_page
-        orders.value = response.data
-        console.log(orders.value)
+        orders.value = response.data.data
       })
       .catch((error) => {
         console.log(error)
@@ -69,23 +66,10 @@ const LoadOrders = (pageNumber) => {
 
 async function loadTopProducts() {
   try {
-    const response = await axios.get(`http://localhost:8081/api/products/top`)
-    topProducts.value = response.data
+    const response = await axiosLaravel.get(`/products/top`)
+    topProducts.value = Object.values(response.data)
+    topProductsTotal.value = Object.keys(response.data)
 
-    // console.log(topProducts.value[0]);
-  } catch (error) {
-
-    console.log(error)
-    throw error
-  }
-}
-
-async function loadTopProductsTotal() {
-  try {
-    const response = await axios.get(`http://localhost:8081/api/products/top/total`)
-    topProductsTotal.value = response.data
-
-    //console.log(topProductsTotal.value[0]);
   } catch (error) {
 
     console.log(error)
@@ -95,10 +79,10 @@ async function loadTopProductsTotal() {
 
 async function loadWorstProducts() {
   try {
-    const response = await axios.get(`http://localhost:8081/api/products/worst`)
-    worstProducts.value = response.data
+    const response = await axiosLaravel.get(`/products/worst`)
+    worstProducts.value = Object.values(response.data)
+    worstProductsTotal.value = Object.keys(response.data)
 
-    // console.log(worstProducts.value[0]);
   } catch (error) {
 
     console.log(error)
@@ -106,25 +90,13 @@ async function loadWorstProducts() {
   }
 }
 
-async function loadWorstProductsTotal() {
-  try {
-    const response = await axios.get(`http://localhost:8081/api/products/worst/total`)
-    worstProductsTotal.value = response.data
-
-    // console.log(worstProductsTotal.value[0]);
-  } catch (error) {
-
-    console.log(error)
-    throw error
-  }
-}
 
 async function loadOrdersByMonth() {
   try {
-    const response = await axios.get(`http://localhost:8081/api/orders/bymonth`)
-    ordersByMonth.value = response.data
+    const response = await axiosLaravel.get(`/orders/totalOrders/bymonth`)
+    ordersByMonth.value = Object.values(response.data)
+    months.value = Object.keys(response.data)
 
-    console.log(ordersByMonth.value)
   } catch (error) {
 
     console.log(error)
@@ -132,24 +104,25 @@ async function loadOrdersByMonth() {
   }
 }
 
-async function loadOrdersByMonthTotal() {
+async function loadTotalGainedByMonth() {
   try {
-    const response = await axios.get(`http://localhost:8081/api/orders/bymonth/total`)
-    ordersByMonthTotal.value = response.data
+    const response = await axiosLaravel.get(`/orders/totalGained/bymonth`)
+    gainedByMonth.value = Object.values(response.data)
+    months.value = Object.keys(response.data)
 
-    console.log(ordersByMonthTotal.value)
   } catch (error) {
 
     console.log(error)
     throw error
   }
 }
+
 
 //Statistics - Driver
 
 const LoadOrdersDriverDelivered = (pageNumber) => {
   currentPage.value = pageNumber
-  let URL = `http://localhost:8081/api/orders/delivered/${userStore.user.id}?page=${pageNumber}`;
+  let URL = `/orders/delivered/${userStore.user.id}?page=${pageNumber}`;
 
   if (filterByPaymentType.value != "A") {
     URL += `&type=${filterByDate.value}`
@@ -158,9 +131,10 @@ const LoadOrdersDriverDelivered = (pageNumber) => {
     URL += `&date=${filterByDate.value}`
   }
 
-  axios
+  axiosLaravel
       .get(URL)
       .then((response) => {
+        console.log(response)
         lastPage.value = response.data.last_page
         ordersDelivered.value = response.data.data
       })
@@ -173,7 +147,7 @@ const LoadOrdersDriverDelivered = (pageNumber) => {
 
 const LoadOrdersPrepared = (pageNumber) => {
   currentPage.value = pageNumber
-  let URL = `http://localhost:8081/api/order-items/prepared/${userStore.user.id}?page=${pageNumber}`;
+  let URL = `/order-items/prepared/${userStore.user.id}?page=${pageNumber}`;
 
   if (filterByDate.value != "") {
     URL += `&date=${filterByDate.value}`
@@ -182,10 +156,10 @@ const LoadOrdersPrepared = (pageNumber) => {
     URL += `&name=${filterByName.value}`
   }
 
-  axios
+  axiosLaravel
       .get(URL)
       .then((response) => {
-
+console.log(response)
         lastPage.value = response.data.last_page
         dishPrepared.value = response.data.data;
       })
@@ -214,18 +188,22 @@ const chartOrdersByMonth = reactive({
   barConfig: null
 })
 
+const chartTotalGainedByMonth = reactive({
+  doughnutConfig: null,
+  barConfig: null
+})
+
 const userStore = useUserStore()
 
 onMounted(async () => {
   if (userStore.user.type == 'EM') {
-    await loadTopProducts();
-    await loadTopProductsTotal();
+    await loadTopProducts()
 
-    await loadWorstProducts();
-    await loadWorstProductsTotal();
+    await loadWorstProducts()
 
-    await loadOrdersByMonth();
-    await loadOrdersByMonthTotal();
+    await loadOrdersByMonth()
+
+    await loadTotalGainedByMonth()
 
     chartTopProducts.barConfig = {
       data: {
@@ -269,10 +247,29 @@ onMounted(async () => {
 
     chartOrdersByMonth.barConfig = {
       data: {
-        labels: ordersByMonth.value,
+        labels: months.value,
         datasets: [{
           label: 'Total Orders',
-          data: ordersByMonthTotal.value,
+          data: ordersByMonth.value,
+          backgroundColor: '#27995a',
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true
+          }
+        }
+      }
+    }
+    chartTotalGainedByMonth.barConfig = {
+      data: {
+        labels: months.value,
+        datasets: [{
+          label: 'Total Gained',
+          data: gainedByMonth.value ,
           backgroundColor: '#27995a',
         }]
       },
@@ -304,7 +301,7 @@ onMounted(async () => {
     </div>
     <hr/>
 
-    <div v-if="orders.length == 0">
+    <div v-if="topProductsTotal.length == 0">
       <div class="d-flex justify-content-center spinner-font">
         <div class="spinner-border" role="status">
           <span class="sr-only"></span>
@@ -312,27 +309,36 @@ onMounted(async () => {
       </div>
     </div>
     <div v-else>
-      <div class="flex-container">
-        <div>
-          <h5 class="center">Top Products</h5>
-          <bar-chart-top-products v-if="chartTopProducts.barConfig"
-                                  :chart-options="chartTopProducts.barConfig.options"
-                                  :chart-data="chartTopProducts.barConfig.data"
-                                  :width="400" :height="345"/>
+      <div>
+        <h5 class="center">Best-selling Products</h5>
+        <bar-chart v-if="chartTopProducts.barConfig"
+                                :chart-options="chartTopProducts.barConfig.options"
+                                :chart-data="chartTopProducts.barConfig.data" :height="345"/>
 
-        </div>
-        <div>
-          <h5 class="center">Worst Products</h5>
-          <bar-chart-worst-products v-if="chartWorstProducts.barConfig"
-                                    :chart-options="chartWorstProducts.barConfig.options"
-                                    :chart-data="chartWorstProducts.barConfig.data" :width="400" :height="300"/>
-        </div>
-        <div>
-          <h5 class="center">Orders By Month</h5>
-          <bar-chart-orders-by-month v-if="chartOrdersByMonth.barConfig"
-                                     :chart-options="chartOrdersByMonth.barConfig.options"
-                                     :chart-data="chartOrdersByMonth.barConfig.data" :width="400" :height="275"/>
-        </div>
+      </div>
+      <br>
+      <br>
+      <div>
+        <h5 class="center">Least Sold Products</h5>
+        <bar-chart v-if="chartWorstProducts.barConfig"
+                                  :chart-options="chartWorstProducts.barConfig.options"
+                                  :chart-data="chartWorstProducts.barConfig.data" :height="300"/>
+      </div>
+      <br>
+      <br>
+      <div>
+        <h5 class="center">Total Orders By Month</h5>
+        <bar-chart v-if="chartOrdersByMonth.barConfig"
+                                   :chart-options="chartOrdersByMonth.barConfig.options"
+                                   :chart-data="chartOrdersByMonth.barConfig.data" :height="275"/>
+      </div>
+      <br>
+      <br>
+      <div>
+        <h5 class="center">Total Gained By Month (€)</h5>
+        <bar-chart v-if="chartTotalGainedByMonth.barConfig"
+                                   :chart-options="chartTotalGainedByMonth.barConfig.options"
+                                   :chart-data="chartTotalGainedByMonth.barConfig.data" :height="275"/>
       </div>
     </div>
   </div>
@@ -408,7 +414,7 @@ onMounted(async () => {
       </div>
     </div>
 
-    <div v-if="orders.length == 0">
+    <div v-if="ordersDelivered.length == 0">
       <div class="d-flex justify-content-center spinner-font">
         <div class="spinner-border" role="status">
           <span class="sr-only"></span>
@@ -453,7 +459,7 @@ onMounted(async () => {
         </div>
       </div>
     </div>
-    <div v-if="orders.length == 0">
+    <div v-if="dishPrepared.length == 0">
       <div class="d-flex justify-content-center spinner-font">
         <div class="spinner-border" role="status">
           <span class="sr-only"></span>
@@ -478,20 +484,6 @@ onMounted(async () => {
 <style scoped>
 .filter-div {
   min-width: 12rem;
-}
-
-.flex-container {
-  display: flex;
-  background-color: #f1f1f1;
-}
-
-.flex-container > div {
-  margin: 20px;
-  background-color: #f1f1f1;
-  color: black;
-  text-align: center;
-  line-height: 75px;
-  font-size: 30px;
 }
 
 .center {

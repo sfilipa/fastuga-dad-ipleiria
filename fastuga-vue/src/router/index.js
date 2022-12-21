@@ -42,6 +42,11 @@ const router = createRouter({
       component: Unauthorized
     },
     {
+      path: '/:pathMatch(.*)*',
+      name: 'NotFound',
+      component: () => import('../components/errors/NotFound.vue')
+    },
+    {
       path: '/redirect/:redirectTo',
       name: 'Redirect',
       component: RouteRedirector,

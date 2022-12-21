@@ -98,7 +98,6 @@ class UserController extends Controller
 
        $newUser = User::create($validatedData);
 
-            $newUser->save();
         return new UserResource($newUser);
     }
 
@@ -113,7 +112,7 @@ class UserController extends Controller
             $validatedData = $userRequest->validated();
             //$user->update($userRequest->validated());
 
-            if($userRequest->has('photo_url' && Str::length($userRequest["photo_url"]) > 21)){
+            if($userRequest->has('photo_url') && Str::length($userRequest["photo_url"]) > 21){
 
                 // Delete Existing Photo
                 if(Storage::disk('public')->exists('fotos/'.$user->photo_url)) {
@@ -181,9 +180,9 @@ class UserController extends Controller
         }
     }
 
-    public function update_password(UpdatePasswordRequest $request, $user)
+    public function update_password(UpdatePasswordRequest $request, User $user)
     {
-        $user =  User::find($user);
+       $this->authorize('updatePassword', $user);// substitui middleware - mudar dps
 
         if (!Hash::check($request->get('current_password'), $user->password))
         {
@@ -193,6 +192,7 @@ class UserController extends Controller
         $user->password = Hash::make($request->password);
         $user->save();
 
+        return new UserResource($user);
     }
 
     public function updateTAESPassword(UpdateUserPasswordTAESRequest $request, string $email)

@@ -216,7 +216,7 @@ socket.on("userDeleted", (users) => {
               </router-link>
             </li>
 
-            <li class="nav-item" v-if="userStore.user && userStore.user.type !== 'C' && userStore.user.type !== 'EC'">
+            <li class="nav-item" v-if="userStore.user && userStore.user.type === 'ED'">
               <router-link class="nav-link fastuga-font" :class="{ active: $route.name === 'OrdersEmployees' }" :to="{ name: 'OrdersEmployees' }"
                            @click="clickMenuOption">
                 <i class="bi bi-people"></i>

@@ -1,23 +1,18 @@
 <script setup>
 import { ref, computed, onMounted, inject } from "vue";
 import ConfirmationDialog from "../global/ConfirmationDialog.vue";
-
+import moment from 'moment'
 const toast = inject("toast")
 
 const serverBaseUrl = inject("serverBaseUrl")
 const props = defineProps({
 	dishPrepared: Array,
 	default: () => [],
-	name: String,
+  filterByName: String,
 	date: Date
 });
 
 const emit = defineEmits(["show"]);
-
-const getDate = (date)=>{
-	const formated = new Date(date)
-	return `${formated.getFullYear()}-${formated.getMonth()}-${formated.getDay()}`
-}
 
 const showClick = (order) => {
 	emit("show", order);
@@ -37,12 +32,12 @@ const showClick = (order) => {
 		</thead>
 		<tbody>
 			<tr v-for="dish in props.dishPrepared
-			.filter((dish) => (!props.name ? true : dish.name === props.name))
-			.filter((dish) => (!props.date ? true : dish.created_at === props.date))" :key="dish.id">
+			.filter((dish) => (props.filterByName === null ? true: dish.name.toLowerCase().includes(props.filterByName.toLowerCase())))
+			.filter((dish) => (!props.date ? true : moment(String(dish.created_at)).format('MM/DD/YYYY') === moment(String(props.date)).format('MM/DD/YYYY')))" :key="dish.id">
 				<td style="text-align: center;">
 					<img :src='`${serverBaseUrl}/storage/products/${dish.photo_url}`' />
 				</td>
-				<td>{{ getDate(dish.created_at) }}</td>
+				<td>{{ moment(String(dish.created_at)).format('MM/DD/YYYY hh:mm') }}</td>
 				<td>{{ dish.name }}</td>
 				<td>{{ dish.description }}</td>
 			</tr>
@@ -51,5 +46,7 @@ const showClick = (order) => {
 </template>
 
 <style>
-
+img {
+  height: 100px;
+}
 </style>
