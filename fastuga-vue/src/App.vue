@@ -51,6 +51,18 @@ onMounted(() => {
 // Listen for the 'message' event from the server and log the data
 // received from the server to the users.
 
+// Order Ready to Pick Up
+socket.on("orderReadyToPickUp", (order) => {
+  if (order.customerUserID === userStore.userId) {
+    toast.info(`Your order: Number ${order.ticket_number} is ready to pick up!`);
+    fetchCustomerOrders(userStore.userId)
+  }
+});
+
+socket.on("update", () => {
+  fetchCustomerOrders(userStore.userId)
+});
+
 // User Blocked
 socket.on("userBlocked", (users) => {
   const user = users.user;

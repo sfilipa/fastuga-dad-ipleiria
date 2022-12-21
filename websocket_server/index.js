@@ -18,6 +18,21 @@ io.on("connection", (socket) => {
 	// Client connected to web socket
 	console.log(`client ${socket.id} has connected`);
 
+	// Order Placed
+	socket.on("orderPlaced", function (ticket) {
+		orderPlaced(socket, ticket);
+	});
+
+	// Order Ready to Deliver
+	socket.on("orderReadyToDeliver", function (obj) {
+		orderReadyToDeliver(socket, obj);
+	});
+
+	// Order Delivered
+	socket.on("orderDelivered", function (obj) {
+		orderDelivered(socket, obj);
+	});
+
 	// For Products
 	sendBroadcastMessage(socket, "newProduct");
 	sendBroadcastMessage(socket, "updateProduct");
@@ -54,32 +69,47 @@ io.on("connection", (socket) => {
 	});
 });
 
+function update(socket) {
+	socket.broadcast.emit("update");
+}
+
+function orderPlaced(socket, ticket	) {
+	socket.in("deliverers").emit("orderPlaced", ticket);
+}
+
+function orderReadyToDeliver(socket, obj) {
+	socket.in("deliverers").emit("orderReadyToDeliver", obj);
+	socket.in(obj.customerUserID).emit("orderReadyToPickUp", obj);
+}
+
+function orderDelivered(socket, ticket) {
+	socket.in("deliverers").emit("orderDelivered", ticket);
+	update(socket);
+}
+
 function userDeleted(socket, users) {
 	const user = users.user;
 	socket.in(user.user_id).in("managers").emit("userDeleted", users);
-	socket.broadcast.emit("update");
+	update(socket);
 }
 
 function userBlocked(socket, users) {
 	const user = users.user;
 	socket.in(user.user_id).in("managers").emit("userBlocked", users);
-	socket.broadcast.emit("update");
+	update(socket);
 }
 
 function userUnblocked(socket, users) {
 	const user = users.user;
 	socket.in(user.user_id).in("managers").emit("userUnblocked", users);
-	socket.broadcast.emit("update");
+	update(socket);
 }
 
 function joinRoom(socket, user) {
 	// Personal Room
 	socket.join(user.id);
 	// Joins user to room
-	if (user.type == "C") {
-		socket.join("clients");
-		socket.in("clients").except(user.id).emit("joinedRoom", user);
-	} else if (user.type == "EC") {
+	if (user.type == "EC") {
 		socket.join("chefs");
 		socket.in("chefs").except(user.id).emit("joinedRoom", user);
 	} else if (user.type == "ED") {
