@@ -25,7 +25,6 @@ Route::middleware('auth:api')->group(function () {
             ->middleware('can:update,order');
         Route::get('/current/customer/{user_id}', [OrderController::class, 'getCustomerCurrentOrders'])
             ->middleware('can:viewCustomerOrders, App\Models\Order');
-        Route::get('/{order_id}/orderItems', [OrderController::class, 'getItemsAndProducts']);
         Route::get('/delivery', [OrderController::class, 'getOrderForDelivery'])
             ->middleware('can:viewDeliveryOrders, App\Models\Order');
     });
