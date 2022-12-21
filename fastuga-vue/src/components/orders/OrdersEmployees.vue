@@ -116,6 +116,17 @@ socket.on("orderDelivered", (ticket) => {
   toast.success("Order was delivered! Ticket Number: " + ticket);
   LoadOrders(1);
 });
+
+// Hot Dish is Preparing
+socket.on("hotDishIsPreparing", (order) => {
+  toast.info(`${order.name} is being prepared by ${order.chef.name}!`);
+  LoadOrders(1);
+});
+
+socket.on("hotDishIsReady", (order) => {
+  toast.success(`${order.name} is ready!`);
+  LoadOrders(1);
+});
 </script>
 
 <template>
