@@ -7,8 +7,6 @@ use App\Http\Controllers\api\ProductController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\UserController;
 use App\Http\Controllers\api\AuthController;
-use App\Policies\UserPolicy;
-
 
 /*Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();*/
@@ -18,6 +16,8 @@ Route::post('login', [AuthController::class, 'login']);
 Route::middleware('auth:api')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('users/me', [UserController::class, 'show_me']);
+
+    Route::patch('users/{user2}/password', [UserController::class, 'update_password'])/*->middleware('can:updatePassword, user2')*/;
 });
 
 // User Routes
@@ -26,7 +26,6 @@ Route::delete('users/{email}', [UserController::class, 'destroyWithEmail']);
 Route::put('users/blockUnblock/{user}', [UserController::class, 'blockUnblockUser']);
 Route::put('users/updatePasswordTAES/{email}', [UserController::class, 'updateTAESPassword']);
 Route::put('users/updateNameTAES/{email}', [UserController::class, 'updateTAESName']);
-Route::patch('users/{user}/password', [UserController::class, 'update_password'])/*->middleware('can:updatePassword, App\Models\User')*/;
 Route::apiResource("users", UserController::class);
 
 // Customer Routes
@@ -52,10 +51,9 @@ Route::prefix('orders')->group(function () {
     Route::get('/current/customer/{user_id}', [OrderController::class, 'getCustomerCurrentOrders']);
     Route::get('/order/orderItems/{order_id}', [OrderController::class, 'getAllOrderProducts']);
     Route::get('/delivered/{user_id}', [OrderController::class, 'getAllOrdersDelivered']);//statistics - driver
-    Route::get('/bymonth/total', [OrderController::class, 'getTotalOrdersByMonth']);//statistics - managers
-    Route::get('/bymonth', [OrderController::class, 'getTotalOrdersMonths']);//statistics - managers
+    Route::get('/totalOrders/bymonth', [OrderController::class, 'getTotalOrdersByMonth']);//statistics - managers
+    Route::get('/totalGained/bymonth', [OrderController::class, 'getTotalGainedByMonth']);//statistics - managers
     Route::get('/customer/{user_id}', [OrderController::class, 'getAllCustomerOrders']);//statistics - customers
-    Route::get('/{order_id}/products', [OrderController::class, 'getAllOrderProducts']);//statistics - customers
     Route::get('/{order_id}/orderItems', [OrderController::class, 'getItemsAndProducts']);
 });
 Route::post('ordersTAES',[OrderController::class, 'storeTAES']);
@@ -79,8 +77,6 @@ Route::get('products/types', [ProductController::class, 'getProductsTypes']);
 
 //Statistics
 Route::get('/products/top', [ProductController::class, 'getBestProducts']);
-Route::get('/products/top/total', [ProductController::class, 'getTotalOrdersOfTopProducts']);
 Route::get('/products/worst', [ProductController::class, 'getWorstProducts']);
-Route::get('/products/worst/total', [ProductController::class, 'getTotalOrdersOfWorstProducts']);
 
 Route::apiResource("products", ProductController::class);

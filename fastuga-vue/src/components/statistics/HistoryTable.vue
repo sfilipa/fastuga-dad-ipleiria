@@ -21,39 +21,21 @@ const props = defineProps({
 const emit = defineEmits(["show"]);
 
 const showOrder = (order, indexRow) => {
-  let indexOriginal = indexRow
+  orderItems.value = order.order_items
 
-  axios
-      .get(`http://localhost:8081/api/orders/${order.id}/products`)
-      .then((response) => {
-        //console.log(showDetails.value)
-        orderItems.value = response.data
+  indexRow = indexRow + 1;
+  if (indexesAdded.includes(order.id)) {
+    props.orders.splice(indexRow, orderItems.value.length)
 
-        indexRow = indexRow + 1;
-        console.log(order.id)
-        if (indexesAdded.includes(order.id)) {
-          props.orders.splice(indexRow, orderItems.value.length)
-
-          console.log('ARRAY ANTES '+indexesAdded)
-          let key = indexesAdded.indexOf(order.id)
-          indexesAdded.splice(key, 1)
-
-          console.log('ARRAY ANTES '+indexesAdded)
-          console.log('entrou no if')
-        } else {
-          indexesAdded.push(order.id)
-          orderItems.value.forEach((value, index) => {
-
-            console.log('entrou no else')
-            props.orders.splice(indexRow, 0, value)
-            indexRow++
-          })
-        }
-
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    let key = indexesAdded.indexOf(order.id)
+    indexesAdded.splice(key, 1)
+  } else {
+    indexesAdded.push(order.id)
+    orderItems.value.forEach((value, index) => {
+      props.orders.splice(indexRow, 0, value)
+      indexRow++
+    })
+  }
 };
 
 const showClick = (order) => {
@@ -79,46 +61,46 @@ const showClick = (order) => {
     <tr v-for="(order, index) in props.orders
 			.filter((order) => (props.filterByPaymentType === 'A' ? true : order.payment_type === props.filterByPaymentType))
 			.filter((order) => (!props.date ? true : order.date === props.date))" :key="order.id">
-      <td v-if="order.name != undefined" class="products">
+      <td v-if="order.ticket_number === undefined" class="products">
       </td>
       <td v-else>
         {{ order.ticket_number }}
       </td>
-      <td v-if="order.name != undefined" style="text-align: center;" class="products">
-        <img class="picture" :src='`${serverBaseUrl}/storage/products/${order.photo_url}`' />
+      <td v-if="order.date === undefined" style="text-align: center;" class="products">
+        <img class="picture" :src='`${serverBaseUrl}/storage/products/${order.product.photo_url}`'/>
       </td>
       <td v-else>
         {{ order.date }}
       </td>
-      <td v-if="order.name != undefined" class="products">
-        {{ order.name }}
+      <td v-if="order.payment_type === undefined" class="products">
+        {{ order.product.name }}
       </td>
       <td v-else>
         {{ order.payment_type }}
       </td>
-      <td v-if="order.name != undefined" class="products">
-        {{ order.type }}
+      <td v-if="order.payment_reference === undefined" class="products">
+        {{ order.product.type }}
       </td>
       <td v-else>
         {{ order.payment_reference }}
       </td>
-      <td v-if="order.name != undefined" class="products">
-        {{ order.price + ' €'}}
+      <td v-if="order.points_used_to_pay === undefined" class="products">
+        {{ order.product.price + ' €' }}
       </td>
       <td v-else>
-        {{ order.points_used_to_pay + ' points'}}
+        {{ order.points_used_to_pay + ' points' }}
       </td>
-      <td v-if="order.name != undefined" class="products">
-      </td>
-      <td v-else>
-        {{ order.total_paid + ' €'}}
-      </td>
-      <td v-if="order.name != undefined" class="products">
+      <td v-if="order.total_paid === undefined" class="products">
       </td>
       <td v-else>
-        {{ order.points_gained + ' points'}}
+        {{ order.total_paid + ' €' }}
       </td>
-      <td v-if="order.name != undefined" class="products">
+      <td v-if="order.points_gained === undefined" class="products">
+      </td>
+      <td v-else>
+        {{ order.points_gained + ' points' }}
+      </td>
+      <td v-if="order.points_gained === undefined" class="products">
 
       </td>
       <td v-else class="text-end">
@@ -141,10 +123,11 @@ const showClick = (order) => {
 </template>
 
 <style scoped>
-.products{
+.products {
   background-color: #f1f1f1;
 }
-img{
-   height: 100px;
- }
+
+img {
+  height: 100px;
+}
 </style>

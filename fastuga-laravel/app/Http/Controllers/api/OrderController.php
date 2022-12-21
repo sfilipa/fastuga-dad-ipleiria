@@ -176,7 +176,7 @@ class OrderController extends Controller
     public function getAllCustomerOrders($user_id)
     {
         $id = Customer::where('user_id', $user_id)->get('id');
-        return Order::where('customer_id', $id[0]->id)->get();
+        return Order::where('customer_id', $id[0]->id)->with("orderItems", "orderItems.product")->paginate(10);
     }
 
     public function getCustomerCurrentOrders($user_id)
@@ -188,16 +188,6 @@ class OrderController extends Controller
                     ->whereIn('status', $currentOrdersStatus)
                     ->get();
     }
-
-    public function getAllOrderProducts($order_id)
-    {
-        $products_id = OrderItems::where('order_id', $order_id)->get('product_id');
-
-        $allProducts = Product::whereIn('id', $products_id)->get();
-
-        return $allProducts;
-    }
-
     //Statistics - Manager - Orders
     public function getTotalOrdersByMonth()
     {
@@ -205,66 +195,97 @@ class OrderController extends Controller
         ->selectRaw('MONTH(date) as month, sum(id) as sum')
         ->pluck('month','sum');
 
-        $i=0;
         foreach($items as $key =>$item){
-            $total[$i] = $key;
-            $i++;
+         switch ($item){
+                        case 1:
+                            $item = 'Janeiro';
+                            break;
+                        case 2:
+                            $item = 'Fevereiro';
+                            break;
+                        case 3:
+                            $item = 'Março';
+                            break;
+                        case 4:
+                            $item = 'Abril';
+                            break;
+                        case 5:
+                            $item = 'Maio';
+                            break;
+                        case 6:
+                            $item = 'Junho';
+                            break;
+                        case 7:
+                            $item = 'Julho';
+                            break;
+                        case 8:
+                            $item = 'Agosto';
+                            break;
+                        case 9:
+                            $item = 'Setembro';
+                            break;
+                        case 10:
+                            $item = 'Outubro';
+                            break;
+                        case 11:
+                            $item = 'Novembro';
+                            break;
+                        default:
+                        $item = 'Dezembro';
+                    }
+            $total[$item] = $key;
         }
-
         return $total;
     }
 
-    public function getTotalOrdersMonths()
+    //Statistics - Manager - Orders - faturacao
+    public function getTotalGainedByMonth()
     {
-        $items = Order::orderBy('month', 'ASC')->groupBy('month')
-        ->selectRaw('MONTH(date) as month, sum(id) as sum')
+        $items = Order::orderBy('month', 'ASC')->where('status', '=', 'D')->groupBy('month')
+        ->selectRaw('MONTH(date) as month, sum(total_paid) as sum')
         ->pluck('month','sum');
 
-        $i=0;
         foreach($items as $key =>$item){
-            $months[$i] = $item;
-
-            switch ($months[$i]){
+            switch ($item){
                 case 1:
-                    $months[$i] = 'Janeiro';
+                    $item = 'Janeiro';
                     break;
                 case 2:
-                    $months[$i] = 'Fevereiro';
+                    $item = 'Fevereiro';
                     break;
                 case 3:
-                    $months[$i] = 'Março';
+                    $item = 'Março';
                     break;
                 case 4:
-                    $months[$i] = 'Abril';
+                    $item = 'Abril';
                     break;
                 case 5:
-                    $months[$i] = 'Maio';
-                    break;
+                     $item = 'Maio';
+                     break;
                 case 6:
-                    $months[$i] = 'Junho';
+                    $item = 'Junho';
                     break;
                 case 7:
-                    $months[$i] = 'Julho';
+                    $item = 'Julho';
                     break;
                 case 8:
-                    $months[$i] = 'Agosto';
-                    break;
+                    $item = 'Agosto';
+                   break;
                 case 9:
-                    $months[$i] = 'Setembro';
-                    break;
+                     $item = 'Setembro';
+                     break;
                 case 10:
-                    $months[$i] = 'Outubro';
+                    $item = 'Outubro';
                     break;
-                case 11:
-                    $months[$i] = 'Novembro';
+               case 11:
+                    $item = 'Novembro';
                     break;
-                default:
-                $months[$i] = 'Dezembro';
+               default:
+                $item = 'Dezembro';
             }
-            $i++;
+             $total[$item] = $key;
         }
-
-        return $months;
+        return $total;
     }
 
     //Statistics - Driver

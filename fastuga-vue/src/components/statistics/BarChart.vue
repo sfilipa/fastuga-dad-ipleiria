@@ -27,14 +27,6 @@ const props = defineProps({
         type: String,
         default: 'bar-chart'
     },
-    width: {
-        type: Number,
-        default: 400
-    },
-    height: {
-        type: Number,
-        default: 400
-    },
 
 })
 </script>

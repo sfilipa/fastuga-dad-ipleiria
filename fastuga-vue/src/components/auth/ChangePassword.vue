@@ -1,9 +1,9 @@
 <script setup>
 import {inject, ref} from 'vue'
-import axiosImported from "axios";
 import {useUserStore} from "@/stores/user";
 import {useRouter} from "vue-router";
 
+const axiosLaravel = inject('axios')
 const toast = inject('toast')
 const router = useRouter()
 const userStore = useUserStore()
@@ -20,8 +20,8 @@ const axios = inject("axios");
   const emit = defineEmits(['changedPassword'])
 
   const changePassword = async () => {
-    await axiosImported
-        .patch(`${serverBaseUrl}/api/users/${userStore.user.id}/password`, passwords.value)
+    await axiosLaravel
+        .patch(`/users/${userStore.userId}/password`, passwords.value)
         .then((response) => {
           console.log(response)
           toast.info("Password updated successfully");

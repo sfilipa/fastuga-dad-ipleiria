@@ -44,19 +44,19 @@ class ProductController extends Controller
     public function store(StoreProductRequest $request)
     {
         $validatedData = $request->validated();
-        
+
         if($request->has('photo_url')){
             $image_64 = $request["photo_url"];
-            $extension = explode('/', explode(':', substr($image_64, 0, strpos($image_64, ';')))[1])[1];   // .jpg .png, ... 
+            $extension = explode('/', explode(':', substr($image_64, 0, strpos($image_64, ';')))[1])[1];   // .jpg .png, ...
             //  image data to decode (eg: data:image/png;base64,imgData..)
-            $replace = substr($image_64, 0, strpos($image_64, ',')+1); // 
-            // find substring to replace      
-            $image = str_replace($replace, '', $image_64); 
-            $image = str_replace(' ', '+', $image); 
+            $replace = substr($image_64, 0, strpos($image_64, ',')+1); //
+            // find substring to replace
+            $image = str_replace($replace, '', $image_64);
+            $image = str_replace(' ', '+', $image);
             $imageName = Str::random(16).'.'.$extension;
 
             Storage::put('public/products/'.$imageName, base64_decode($image));
-            
+
             $validatedData["photo_url"] = $imageName;
         }
 
@@ -85,20 +85,20 @@ class ProductController extends Controller
 
             $image_64 = $request["photo_url"];
 
-            $extension = explode('/', explode(':', substr($image_64, 0, strpos($image_64, ';')))[1])[1];   // .jpg .png, ... 
+            $extension = explode('/', explode(':', substr($image_64, 0, strpos($image_64, ';')))[1])[1];   // .jpg .png, ...
             //  image data to decode (eg: data:image/png;base64,imgData..)
-            $replace = substr($image_64, 0, strpos($image_64, ',')+1); // 
-          
-            // find substring to replace      
-            $image = str_replace($replace, '', $image_64); 
-            $image = str_replace(' ', '+', $image); 
-    
+            $replace = substr($image_64, 0, strpos($image_64, ',')+1); //
+
+            // find substring to replace
+            $image = str_replace($replace, '', $image_64);
+            $image = str_replace(' ', '+', $image);
+
             $imageName = Str::random(16).'.'.$extension;
-            
+
             Storage::put('public/products/'.$imageName, base64_decode($image));
             $validatedData["photo_url"] = $imageName;
         }
-        
+
         $product->fill($validatedData);
         $product->save();
 
@@ -117,27 +117,11 @@ class ProductController extends Controller
         $items = OrderItems::orderBy('sum', 'DESC')->groupBy('product_id')
         ->selectRaw('sum(product_id) as sum, product_id')
         ->pluck('sum','product_id')->take(5);
-        
-        $i=0;
+
         foreach($items as $key =>$item){
-            $final[$i]= Product::where('id', $key)->value('name');  
-            $i++;
+            $final[$item]= Product::where('id', $key)->value('name');
         }
         return $final;
-    }
-
-    public function getTotalOrdersOfTopProducts()
-    {
-        $items = OrderItems::orderBy('sum', 'DESC')->groupBy('product_id')
-        ->selectRaw('sum(product_id) as sum, product_id')
-        ->pluck('sum','product_id')->take(5);
-        
-        $i=0;
-        foreach($items as $key =>$item){
-            $total[$i] = $item;
-            $i++;
-        }
-        return $total;
     }
 
     public function getWorstProducts()
@@ -146,29 +130,12 @@ class ProductController extends Controller
         ->selectRaw('sum(product_id) as sum, product_id')
         ->pluck('sum','product_id')->take(5);
 
-        
-        $i=0;
         foreach($items as $key =>$item){
-            $final[$i]= Product::where('id', $key)->value('name');  
-            if($final[$i] == null){
-                $final[$i] = 'Undefined';
+            $final[$item]= Product::where('id', $key)->value('name');
+            if($final[$item] == null){
+                $final[$item] = 'Undefined';
             }
-            $i++;
         }
         return $final;
-    }
-
-    public function getTotalOrdersOfWorstProducts()
-    {
-        $items = OrderItems::orderBy('sum', 'ASC')->groupBy('product_id')
-        ->selectRaw('sum(product_id) as sum, product_id')
-        ->pluck('sum','product_id')->take(5);
-        
-        $i=0;
-        foreach($items as $key =>$item){
-            $total[$i] = $item;
-            $i++;
-        }
-        return $total;
     }
 }

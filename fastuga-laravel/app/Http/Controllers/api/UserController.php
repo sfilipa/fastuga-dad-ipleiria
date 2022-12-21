@@ -164,9 +164,9 @@ class UserController extends Controller
         }
     }
 
-    public function update_password(UpdatePasswordRequest $request, $user)
+    public function update_password(UpdatePasswordRequest $request, User $user)
     {
-        $user =  User::find($user);
+       $this->authorize('updatePassword', $user);// substitui middleware - mudar dps
 
         if (!Hash::check($request->get('current_password'), $user->password))
         {
@@ -176,6 +176,7 @@ class UserController extends Controller
         $user->password = Hash::make($request->password);
         $user->save();
 
+        return new UserResource($user);
     }
 
     public function updateTAESPassword(UpdateUserPasswordTAESRequest $request, string $email)
