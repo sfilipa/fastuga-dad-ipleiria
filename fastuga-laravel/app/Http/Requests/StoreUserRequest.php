@@ -38,12 +38,12 @@ class StoreUserRequest extends FormRequest
     {
         return [
             'name.required' => 'Name field cannot be empty',
-            'name.min' => 'Name too short',
-            'email.required' => 'Email filed cannot be empty',
+            'name.min' => 'Name too short (at least 3 characters)',
+            'email.required' => 'Email field cannot be empty',
             'email.email' => 'Wrong email format',
             'email.unique' => 'Email already exists',
             'password.required' => 'Password field cannot be empty',
-            'password.min' => 'Password too short at least 8 characters'
+            'password.min' => 'Password too short (at least 8 characters)'
     ];
     }
 }

@@ -218,12 +218,12 @@ const unblockClick = (customer) => {
 }
 
 .btn-info-css {
-  border: 2.5px solid #5e4444;
-  color: #5e4444;
-  background-color: white;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
+  border: 2.5px solid #5e4444 !important;
+  color: #5e4444 !important;
+  background-color: white !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
 }
 
 .btn-delete-css:hover,
@@ -231,17 +231,17 @@ const unblockClick = (customer) => {
   border: 2.5px solid #c53b3b !important;
   color: #c53b3b !important;
   background-color: rgb(242, 241, 241) !important;
-  display: flex;
+  display: flex ;
   flex-direction: row;
   align-items: center;
 }
 
 .btn-delete-css {
-  border: 2.5px solid #ff5b5b;
-  color: #ff5b5b;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
+  border: 2.5px solid #ff5b5b !important;
+  color: #ff5b5b !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
 }
 
 .button-unblock:hover,
@@ -254,11 +254,11 @@ const unblockClick = (customer) => {
 }
 
 .button-unblock {
-  background-color: #ffa71dd6;
-  color: white;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
+  background-color: #ffa71dd6 !important;
+  color: white !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
 }
 
 .button-block:hover,
@@ -273,11 +273,11 @@ const unblockClick = (customer) => {
 }
 
 .button-block {
-  border: 2.5px solid #ffa71dd6;
-  color: #ffa71dd6;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
+  border: 2.5px solid #ffa71dd6 !important;
+  color: #ffa71dd6 !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
 }
 </style>
 

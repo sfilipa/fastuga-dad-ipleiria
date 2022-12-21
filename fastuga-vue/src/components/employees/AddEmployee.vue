@@ -1,28 +1,26 @@
 <script setup>
-import {ref, inject} from "vue";
+import { ref, inject } from "vue";
 import avatarNoneUrl from "@/assets/avatar-none.png";
-import axios from 'axios'
+import axios from "axios";
 
-import {useRouter} from 'vue-router'
+import { useRouter } from "vue-router";
 
-const router = useRouter()
-const toast = inject('toast')
+const router = useRouter();
+const toast = inject("toast");
 
-const cancel = () => {
-  router.push({name: "Employees"})
-}
+const newPhoto = ref(null);
+const emit = defineEmits(["addEmployee"]);
 
-const newPhoto = ref(null)
-const emit = defineEmits(['addEmployee'])
+const errors = ref(null);
 
-const errors = ref(null)
+const nameInput = ref("");
+const typeInput = ref("EC");
+const emailInput = ref("");
+const passwordInput = ref("");
+const blockedInput = ref(0);
+const photoInput = ref("");
 
-const nameInput = ref('')
-const typeInput = ref("EC")
-const emailInput = ref('')
-const passwordInput = ref('')
-const blockedInput = ref(0)
-const photoInput = ref('')
+const addEmployeeBool = ref(false);
 
 const updatePhoto = (e) => {
   if (!e.target.files.length) {
@@ -40,210 +38,237 @@ const updatePhoto = (e) => {
   reader.readAsDataURL(uploadedImage);
   reader.onload = (event) => {
     photoInput.value = event.target.result;
-    console.log(photoInput.value)
-  }
-}
+    console.log(photoInput.value);
+  };
+};
 
-  const addEmployee = async () => {
-    let formData = new FormData();
+const addEmployee = async () => {
+  addEmployeeBool.value = true;
+  let formData = new FormData();
 
-    formData.append('name', nameInput.value);
-    formData.append('type', typeInput.value);
-    formData.append('email', emailInput.value);
-    formData.append('password', passwordInput.value);
-    formData.append('blocked', blockedInput.value);
-    formData.append('photo_url', photoInput.value);
+  formData.append("name", nameInput.value);
+  formData.append("type", typeInput.value);
+  formData.append("email", emailInput.value);
+  formData.append("password", passwordInput.value);
+  formData.append("blocked", blockedInput.value);
+  formData.append("photo_url", photoInput.value);
 
-    await axios.post(`http://localhost:8081/api/users`, formData)
-        .then((response) => {
-          console.log(response)
-          toast.info("Employee '" + response.data.data.name + "' was created")
-          emit('addEmployee')
-          router.push({name: "Employees"})
-        })
-        .catch((error) => {
-          console.log(error)
-          errors.value = error.response.data.errors;
-        });
-  }
-
-  /*const userValidations = () => {
-    if (nameInput.value == '') {
-      errors.value = {
-        name: ["Name field cannot be empty!"]
-      }
-      return -1
-    }
-    if (emailInput.value == '') {
-      errors.value = {
-        email: ["Email field cannot be empty!"]
-      }
-      return -1
-    }
-    var pattern = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
-    if (!emailInput.value.match(pattern)) {
-      errors.value = {
-        email: ["Invalid Email Format!"]
-      }
-      return -1
-    }
-    if (passwordInput.value == '') {
-      errors.value = {
-        password: ["Password field cannot be empty!"]
-      }
-      return -1
-    }
-    if (!passwordInput.value.match('[0-9a-zA-Z]{8}')) {
-      errors.value = {
-        password: ["Invalid Password Format!"]
-      }
-      return -1
-    }
-  }*/
-
+  await axios
+    .post(`http://localhost:8081/api/users`, formData)
+    .then((response) => {
+      console.log(response);
+      toast.info("Employee '" + response.data.data.name + "' was created");
+      emit("addEmployee");
+      router.push({ name: "Employees" });
+    })
+    .catch((error) => {
+      console.log(error);
+      errors.value = error.response.data.errors;
+      addEmployeeBool.value = false;
+    });
+};
 </script>
 
 <template>
-  <form class="row g-3 needs-validation" novalidate @submit.prevent="addEmployee">
-    <h3 class="mt-4">Add New Employee</h3>
-    <hr>
-
-    <div class="d-flex flex-wrap justify-content-between">
-      <div class="w-75 pe-4">
-        <div class="row">
-          <div class="col-50">
-            <label>Name:</label>
-            <input type="text" class="form-control" id="inputName" placeholder="Enter Name" required
-                   v-model="nameInput">
-            <field-error-message :errors="errors" fieldName="name"></field-error-message>
-          </div>
-          <div class="col-50">
-            <label>Email:</label>
-            <input type="text" class="form-control" id="inputEmail" placeholder="Enter Email" required
-                   v-model="emailInput">
-            <field-error-message :errors="errors" fieldName="email"></field-error-message>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-50">
-            <label>Password:</label>
-            <input type="password" class="form-control" id="inputPassword" placeholder="Enter Password" required
-                   v-model="passwordInput">
-            <field-error-message :errors="errors" fieldName="password"></field-error-message>
-          </div>
-          <div class="col-50">
-            <label>Employee Type:</label>
-            <select class="form-select" id="selectType" v-model="typeInput">
-              <option value="EC">Chef</option>
-              <option value="ED">Delivery</option>
-              <option value="EM">Manager</option>
-            </select>
-          </div>
-
-        </div>
-      </div>
-      <div class="w-25">
-        <div class="mb-3">
-          <b class="form-label">Photo:</b>
-
-          <div class="form-control text-center">
-
-            <div v-if="newPhoto != null" class="mb-2">
-              <img :src="newPhoto" class="w-100"/>
-            </div>
-            <div v-else>
-              <img :src="avatarNoneUrl" class="w-100"/>
-            </div>
-            <input type="file" class="form-control" id="photo_url" name="photo_url"
-                   accept="image/png, image/jpeg, image/jpg" @change="updatePhoto">
-          </div>
-        </div>
-      </div>
+  <form
+    class="row g-3 needs-validation"
+    novalidate
+    @submit.prevent="addEmployee"
+  >
+    <div class="add-employee-title">
+      <h3 class="mt-4">Add a New Employee</h3>
+      <hr />
     </div>
-    <div class="mb-3 d-flex justify-content-end">
-      <button type="button" class="btn btn-success px-5" @click="addEmployee">Save</button>
-      <button type="button" class="btn btn-light px-5" @click="cancel">Cancel</button>
+    <div class="employee-add-container">
+      <div class="employee-add-field">
+        <label class="employee-add-label">Name:</label>
+        <input
+          type="text"
+          class="form-control"
+          id="inputName"
+          placeholder="Enter Name"
+          required
+          v-model="nameInput"
+          @focus="errors != null && errors.name != null ? errors.name = null : null"
+        />
+      </div>
+      <field-error-message
+        :errors="errors"
+        fieldName="name"
+        class="employee-add-field add-employee-error"
+      ></field-error-message>
+
+      <div class="employee-add-field">
+        <label class="employee-add-label">Email:</label>
+        <input
+          type="text"
+          class="form-control"
+          id="inputEmail"
+          placeholder="Enter Email"
+          required
+          v-model="emailInput"
+          @focus="errors != null && errors.email != null ? errors.email = null : null"
+        />
+      </div>
+      <field-error-message
+        :errors="errors"
+        fieldName="email"
+        class="employee-add-field add-employee-error"
+      ></field-error-message>
+
+      <div class="employee-add-field">
+        <label class="employee-add-label">Password:</label>
+        <input
+          type="password"
+          class="form-control"
+          id="inputPassword"
+          placeholder="Enter Password"
+          required
+          v-model="passwordInput"
+          @focus="errors != null && errors.password != null ? errors.password = null : null"
+        />
+      </div>
+      <field-error-message
+        :errors="errors"
+        fieldName="password"
+        class="employee-add-field add-employee-error"
+      ></field-error-message>
+
+      <div class="employee-add-field">
+        <label class="employee-add-label">Employee Type:</label>
+        <select class="form-select" id="selectType" v-model="typeInput" @focus="errors != null && errors.type != null ? errors.type = null : null">
+          <option value="EC">Chef</option>
+          <option value="ED">Delivery</option>
+          <option value="EM">Manager</option>
+        </select>
+      </div>
+      <field-error-message
+        :errors="errors"
+        fieldName="type"
+        class="employee-add-field add-employee-error"
+      ></field-error-message>
+
+      <div class="employee-add-field">
+        <label class="employee-add-label">Photo: </label>
+        <input
+          type="file"
+          id="photo_url"
+          name="photo_url"
+          accept="image/png, image/jpeg, image/jpg"
+          @change="updatePhoto"
+          class="form-control"
+          @focus="
+            errors != null && errors.photo_url != null
+              ? (errors.photo_url = null)
+              : null
+          "
+        />
+        <field-error-message
+          :errors="errors"
+          fieldName="photo_url"
+          class="employee-add-field add-employee-error"
+        ></field-error-message>
+      </div>
+
+      <div class="mb-3 d-flex justify-content-end employee-add-buttons">
+        <div class="employee-add-buttons-div">
+          <router-link
+            class="link-secondary fastuga-font"
+            :to="{ name: 'Employees' }"
+            aria-label="Cancel"
+          >
+            <button type="button" class="btn employee-cancel-button px-5">
+              Cancel
+            </button>
+          </router-link>
+
+          <button
+            type="button"
+            class="btn employee-add-button px-5"
+            @click="addEmployee"
+            :disabled="addEmployeeBool"
+          >
+            <span> Add </span>
+          </button>
+        </div>
+      </div>
     </div>
   </form>
-
 </template>
 
 <style scoped>
-@media (max-width: 800px) {
-  .row {
-    flex-direction: column-reverse;
-  }
-
-  .col-25 {
-    margin-bottom: 20px;
-  }
+.add-employee-error {
+  margin-left: 30%;
+  position: relative;
+  top: -15px;
+  margin-bottom: 0px !important;
 }
 
-input[type=text] {
-  width: 100%;
-  margin-bottom: 20px;
-  padding: 12px;
+.employee-cancel-button:hover,
+.employee-cancel-button:active {
+  background-color: #4d3838 !important;
+  color: white !important;
 }
 
-input[type=password] {
-  width: 100%;
-  margin-bottom: 20px;
-  padding: 12px;
+.employee-cancel-button {
+  height: 3rem;
+  margin-right: 60px;
+  background-color: #5e4444;
+  color: white;
+  display: inline-block;
 }
 
-.btn-success:hover {
-  background-color: #0b450f;
+.employee-add-button:hover,
+.employee-add-button:first-child:active {
+  background-color: #ff8300;
+  color: white;
 }
 
-select {
-  width: 100%;
-  margin-bottom: 20px;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 3px;
+.employee-add-button {
+  height: 3rem;
+  background-color: #ffa71dd6;
+  border-color: #ffa71dd6;
+  color: white;
+  font-weight: bolder;
+  width: 146px;
 }
 
-body {
-  font-family: Arial;
-  font-size: 17px;
-  padding: 8px;
+.employee-add-buttons-div {
+  margin: auto;
 }
 
-* {
-  box-sizing: border-box;
-}
-
-.row {
-  display: -ms-flexbox;
-  /* IE10 */
+.employee-add-buttons {
   display: flex;
-  -ms-flex-wrap: wrap;
-  /* IE10 */
-  flex-wrap: wrap;
-  margin: 0 -16px;
+  flex-direction: row;
+  align-items: center;
 }
 
-.col-25 {
-  -ms-flex: 25%;
-  /* IE10 */
-  flex: 25%;
+.employee-add-label {
+  width: 20%;
 }
 
-.col-50 {
-  -ms-flex: 50%;
-  /* IE10 */
-  flex: 50%;
+.employee-add-field {
+  display: flex;
+  flex-direction: row;
+  width: 80%;
+  align-items: center;
+  margin-bottom: 2%;
 }
 
-.col-75 {
-  -ms-flex: 75%;
-  /* IE10 */
-  flex: 75%;
+.employee-add-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 5%;
 }
 
-.col-25,
-.col-50,
-.col-75 {
-  padding: 0 16px;
+hr {
+  background: #362222;
+  height: 6px;
+  opacity: initial;
+}
+
+.add-employee-title {
+  text-align: center;
 }
 </style>

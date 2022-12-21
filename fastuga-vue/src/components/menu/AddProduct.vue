@@ -154,7 +154,20 @@ onMounted(() => {
         />
       </div>
       <field-error-message class="add-product-field add-product-error" :errors="errors" fieldName="photo_url"></field-error-message>
-      <div class="add-product-field add-product-button-field">
+      
+    </div>
+    <div class="mb-3 d-flex justify-content-end product-add-buttons">
+      <div class="product-add-buttons-div">
+        <router-link
+          class="link-secondary fastuga-font "
+          :to="{ name: 'Menu' }"
+          aria-label="Cancel"
+        >
+          <button type="button" class="btn product-cancel-button px-5">
+            Cancel
+          </button>
+        </router-link>
+        
         <button
           type="submit"
           class="btn add-product"
@@ -164,11 +177,36 @@ onMounted(() => {
           <span aria-hidden="true"> Add Product </span>
         </button>
       </div>
-    </div>
+      </div>
   </div>
 </template>
 
 <style scoped>
+
+.product-cancel-button:hover, .product-cancel-button:active{
+  background-color: #4d3838 !important;
+  color: white !important;
+}
+
+.product-cancel-button{
+  height: 3rem;
+  margin-right: 60px;
+  background-color: #5e4444;
+  color: white;
+  display: inline-block;
+}
+
+.product-add-buttons-div {
+  margin: auto;
+}
+
+.product-add-buttons {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+
 .add-product-error{
   margin-left: 30%;
   position: relative;
@@ -183,7 +221,7 @@ hr {
 }
 
 .add-product:hover,
-.btn:first-child:active {
+.add-product:first-child:active {
   background-color: #ff8300;
   color: white;
 }
@@ -195,7 +233,7 @@ hr {
   border-color: #ffa71dd6;
   color: white;
   font-weight: bolder;
-  width: 30%;
+  width: 146px;
 }
 
 .add-product-button-field {
