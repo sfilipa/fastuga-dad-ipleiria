@@ -1,19 +1,15 @@
 <script setup>
-import { ref, computed, onMounted, inject, watch, toRaw } from "vue";
-import { useRouter } from "vue-router";
+import { ref, onMounted, inject} from "vue";
 import CustomersTable from "./CustomersTable.vue";
 import Paginate from "vuejs-paginate-next";
 import { useUserStore } from "../../stores/user.js";
 
 const axios = inject("axios");
 const toast = inject("toast");
-const router = useRouter();
 const socket = inject("socket");
 
 const userStore = useUserStore();
 let customers = ref({});
-const searchByEmail = ref(null);
-const searchByNif = ref(null);
 
 const lastPage = ref(15);
 const currentPage = ref(1);
@@ -71,7 +67,6 @@ const block = async (customer) => {
         custom: obj.custom,
       },
     });
-	console.log(data)
 
     const users = new Object();
     users.user = obj;
@@ -136,7 +131,7 @@ const deleteFromDatabase = async (customer) => {
     toast.error(`You have deleted ${obj.name}!`);
     return
   } catch (err) {
-    if (err.response.status === 404) {
+    if (err.response != null && err.response.status === 404) {
       console.log("Resource could not be found!");
     } else {
       console.log(err.message);
@@ -175,7 +170,7 @@ socket.on("update", () => {
     <div class="mx-2 mt-2 flex-grow-1 filter-div">
       <div class="inner-addon left-addon">
         <input
-          v-model="filterByName"
+          v-model.lazy="filterByName"
           type="search"
           class="form-control rounded"
           placeholder="Search by Name"
@@ -189,7 +184,7 @@ socket.on("update", () => {
     <div class="mx-2 mt-2 flex-grow-1 filter-div">
       <div class="inner-addon left-addon">
         <input
-          v-model="filterByEmail"
+          v-model.lazy="filterByEmail"
           type="search"
           class="form-control rounded"
           placeholder="Search by Email"
@@ -203,7 +198,7 @@ socket.on("update", () => {
     <div class="mx-2 mt-2 flex-grow-1 filter-div">
       <div class="inner-addon left-addon">
         <input
-          v-model="filterByNif"
+          v-model.lazy="filterByNif"
           type="search"
           class="form-control rounded"
           placeholder="Search by NIF"
@@ -290,22 +285,6 @@ socket.on("update", () => {
   background-color: #5e4444;
   border-color: #5e4444;
   color: white;
-}
-
-.customers-add-button:hover,
-.customers-add-button:active {
-  background-color: #ff8300;
-  color: white !important;
-}
-
-.customers-add-button {
-  display: block;
-  margin-left: auto;
-  height: 3rem;
-  background-color: #ffa71dd6;
-  border-color: #ffa71dd6;
-  color: white;
-  font-weight: bolder;
 }
 
 .customers-add-button-div {
