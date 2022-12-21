@@ -77,6 +77,7 @@ const unblockClick = (customer) => {
   deleteDialog.value = null;
   emit("unblock", customer);
 };
+
 </script>
 
 <template>

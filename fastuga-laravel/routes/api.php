@@ -37,11 +37,20 @@ Route::middleware('auth:api')->group(function () {
             ->middleware('can:update,App\Models\OrderItems');
     });
 
+    // Customer Routes
+    Route::middleware('manager:api')->group(function () {
+        Route::apiResource("customers", CustomerController::class);
+        Route::get('users/employees', [UserController::class, 'getAllEmployees']);
+        Route::put('users/blockUnblock/{user}', [UserController::class, 'blockUnblockUser']);
+        Route::apiResource("users", UserController::class);
+        Route::post("products", [ProductController::class, 'store']);
+        Route::put("products/{product}", [ProductController::class, 'update']);
+        Route::delete("products/{product}", [ProductController::class, 'destroy']);
+    });
+
 });
 
 // User Routes
-Route::get('users/employees', [UserController::class, 'getAllEmployees']);//->middleware('can:view, App\Models\User'); - so o manager consegue ver os employees assim
-Route::put('users/blockUnblock/{user}', [UserController::class, 'blockUnblockUser']);
 Route::put('users/updatePasswordTAES/{email}', [UserController::class, 'updateTAESPassword']);
 Route::put('users/updateNameTAES/{email}', [UserController::class, 'updateTAESName']);
 Route::patch('users/{user}/password', [UserController::class, 'update_password'])/*->middleware('can:updatePassword, App\Models\User')*/;
@@ -50,12 +59,8 @@ Route::apiResource("users", UserController::class);
 // Customer Routes
 Route::get('customers/{customer}/user', [UserController::class, 'getUserOfCustomer']);
 Route::get('customers/user/{user_id}', [CustomerController::class, 'getCustomerByUserID']);
-Route::get('customers/byEmail/{email}', [CustomerController::class, 'getCustomerByEmail']);
-Route::get('customers/byNif/{nif}', [CustomerController::class, 'getCustomerByNif']);
-Route::apiResource("customers", CustomerController::class);
 
 // Order Routes
-
 Route::prefix('orders')->group(function () {
     Route::get('/status/{status}', [OrderController::class, 'getOrderByStatus']); //tentei meter no middleware lá em cima mas como na public board um user anonimo tbm pode ver, nunca dá bem
     Route::get('/status', [OrderController::class, 'getOrdersStatus']);
@@ -76,7 +81,6 @@ Route::get('unassignedOrders', [OrderController::class, 'getUnassignedOrders']);
 Route::apiResource("orders", OrderController::class);
 
 // OrderItems Routes
-
 Route::get('/order-items/prepared/{user_id}', [OrderItemsController::class, 'getAllChefOrdersPrepared']);
 Route::prefix('order-items')->group(function () {
     Route::get('/{orderItems}/user', [UserController::class, 'getUserOfOrderItems']);
@@ -95,4 +99,5 @@ Route::get('/products/top/total', [ProductController::class, 'getTotalOrdersOfTo
 Route::get('/products/worst', [ProductController::class, 'getWorstProducts']);
 Route::get('/products/worst/total', [ProductController::class, 'getTotalOrdersOfWorstProducts']);
 
-Route::apiResource("products", ProductController::class);
+
+Route::get("products", [ProductController::class, 'index']);

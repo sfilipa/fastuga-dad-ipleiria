@@ -1,6 +1,9 @@
 <script setup>
 import { ref, computed, onMounted, inject } from "vue";
 import ConfirmationDialog from "../global/ConfirmationDialog.vue";
+import { useUserStore } from "../../stores/user.js";
+
+const userStore = useUserStore();
 
 const serverBaseUrl = inject("serverBaseUrl");
 const toast = inject("toast");
@@ -72,6 +75,9 @@ const unblockEmployeeClick = (employee) => {
               : employee.name
                   .toLowerCase()
                   .includes(props.filterByName.toLowerCase())
+          )
+          .filter((employee) =>
+            employee.id != userStore.user.id
           )"
         :key="employee.id"
       >

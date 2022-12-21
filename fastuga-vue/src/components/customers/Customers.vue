@@ -1,15 +1,17 @@
 <script setup>
-import { ref, onMounted, inject} from "vue";
+import { ref, onMounted, onBeforeMount, inject } from "vue";
 import CustomersTable from "./CustomersTable.vue";
 import Paginate from "vuejs-paginate-next";
 import { useUserStore } from "../../stores/user.js";
+import { useRouter } from "vue-router";
 
 const axios = inject("axios");
 const toast = inject("toast");
 const socket = inject("socket");
+const router = useRouter();
 
 const userStore = useUserStore();
-let customers = ref({});
+let customers = ref(null);
 
 const lastPage = ref(15);
 const currentPage = ref(1);
@@ -42,7 +44,11 @@ const loadUsers = (pageNumber) => {
       lastPage.value = response.data.last_page;
     })
     .catch((error) => {
-      console.log(error);
+      if (error.response != null && error.response.status == 401) {
+        router.push("/unauthorized");
+      } else {
+        console.log(error);
+      }
     });
 };
 
@@ -80,7 +86,7 @@ const block = async (customer) => {
       console.log(err.message);
     }
   }
-  loadUsers(1);
+  loadUsers(currentPage.value);
 };
 
 const unblock = async (customer) => {
@@ -106,13 +112,13 @@ const unblock = async (customer) => {
     socket.emit("userUnblocked", users);
     toast.warning(`You have unblocked ${obj.name}!`);
   } catch (err) {
-	if (err.response != null && err.response.status === 404) {
+    if (err.response != null && err.response.status === 404) {
       console.log("Resource could not be found!");
     } else {
       console.log(err.message);
     }
   }
-  loadUsers(1);
+  loadUsers(currentPage.value);
 };
 
 const deleteFromDatabase = async (customer) => {
@@ -123,13 +129,13 @@ const deleteFromDatabase = async (customer) => {
       method: "delete",
       url: `/customers/${obj.id}`,
     });
-    
+
     const users = new Object();
     users.user = obj;
     users.manager = userStore.user.name;
     socket.emit("userDeleted", users);
     toast.error(`You have deleted ${obj.name}!`);
-    return
+    return;
   } catch (err) {
     if (err.response != null && err.response.status === 404) {
       console.log("Resource could not be found!");
@@ -137,7 +143,7 @@ const deleteFromDatabase = async (customer) => {
       console.log(err.message);
     }
   }
-  loadUsers(1);
+  loadUsers(currentPage.value);
 };
 
 function clear() {
@@ -158,84 +164,93 @@ socket.on("update", () => {
 </script>
 
 <template>
-  <div class="d-flex justify-content-between customers-header fastuga-font">
-    <div class="mx-2">
-      <h3 class="mt-4">Customers</h3>
+  <div v-if="customers == null">
+    <div class="d-flex justify-content-center spinner-font">
+      <div class="spinner-border" role="status">
+        <span class="sr-only"></span>
+      </div>
     </div>
   </div>
-  <hr />
-  <div
-    class="mb-3 d-flex justify-content-between flex-wrap search-bar fastuga-font"
-  >
-    <div class="mx-2 mt-2 flex-grow-1 filter-div">
-      <div class="inner-addon left-addon">
-        <input
-          v-model.lazy="filterByName"
-          type="search"
-          class="form-control rounded"
-          placeholder="Search by Name"
-          aria-label="Search"
-          aria-describedby="search-addon"
-          @change="loadUsers(1)"
-        />
+  <div v-else>
+    <div class="d-flex justify-content-between customers-header fastuga-font">
+      <div class="mx-2">
+        <h3 class="mt-4">Customers</h3>
       </div>
     </div>
-
-    <div class="mx-2 mt-2 flex-grow-1 filter-div">
-      <div class="inner-addon left-addon">
-        <input
-          v-model.lazy="filterByEmail"
-          type="search"
-          class="form-control rounded"
-          placeholder="Search by Email"
-          aria-label="Search"
-          aria-describedby="search-addon"
-          @change="loadUsers(1)"
-        />
-      </div>
-    </div>
-
-    <div class="mx-2 mt-2 flex-grow-1 filter-div">
-      <div class="inner-addon left-addon">
-        <input
-          v-model.lazy="filterByNif"
-          type="search"
-          class="form-control rounded"
-          placeholder="Search by NIF"
-          aria-label="Search"
-          aria-describedby="search-addon"
-          @change="loadUsers(1)"
-        />
-      </div>
-    </div>
-    <div class="mx-2 mt-2">
-      <button type="button" class="btn px-4 btn-search" @click="loadUsers(1)">
-        <i class="bi bi-xs bi-search"></i> Search
-      </button>
-    </div>
-    <div class="mx-2 mt-2">
-      <button type="button" class="btn px-4 btn-clear" @click="clear">
-        Clear
-      </button>
-    </div>
-  </div>
-  <CustomersTable
-    :customers="customers"
-    @show="show"
-    @delete="deleteFromDatabase"
-    @block="block"
-    @unblock="unblock"
-  >
-  </CustomersTable>
-  <div v-if="customers.length != 0 && lastPage > 1" style="display: flex">
-    <paginate
-      :page-count="lastPage"
-      :prev-text="'Previous'"
-      :next-text="'Next'"
-      :click-handler="loadUsers"
-      class="pagination"
+    <hr />
+    <div
+      class="mb-3 d-flex justify-content-between flex-wrap search-bar fastuga-font"
     >
-    </paginate>
+      <div class="mx-2 mt-2 flex-grow-1 filter-div">
+        <div class="inner-addon left-addon">
+          <input
+            v-model.lazy="filterByName"
+            type="search"
+            class="form-control rounded"
+            placeholder="Search by Name"
+            aria-label="Search"
+            aria-describedby="search-addon"
+            @change="loadUsers(1)"
+          />
+        </div>
+      </div>
+
+      <div class="mx-2 mt-2 flex-grow-1 filter-div">
+        <div class="inner-addon left-addon">
+          <input
+            v-model.lazy="filterByEmail"
+            type="search"
+            class="form-control rounded"
+            placeholder="Search by Email"
+            aria-label="Search"
+            aria-describedby="search-addon"
+            @change="loadUsers(1)"
+          />
+        </div>
+      </div>
+
+      <div class="mx-2 mt-2 flex-grow-1 filter-div">
+        <div class="inner-addon left-addon">
+          <input
+            v-model.lazy="filterByNif"
+            type="search"
+            class="form-control rounded"
+            placeholder="Search by NIF"
+            aria-label="Search"
+            aria-describedby="search-addon"
+            @change="loadUsers(1)"
+          />
+        </div>
+      </div>
+      <div class="mx-2 mt-2">
+        <button type="button" class="btn px-4 btn-search" @click="loadUsers(1)">
+          <i class="bi bi-xs bi-search"></i> Search
+        </button>
+      </div>
+      <div class="mx-2 mt-2">
+        <button type="button" class="btn px-4 btn-clear" @click="clear">
+          Clear
+        </button>
+      </div>
+    </div>
+    <CustomersTable
+      :customers="customers"
+      @show="show"
+      @delete="deleteFromDatabase"
+      @block="block"
+      @unblock="unblock"
+    >
+    </CustomersTable>
+    <div v-if="customers.length != 0 && lastPage > 1" style="display: flex">
+      <paginate
+        :page-count="lastPage"
+        :prev-text="'Previous'"
+        :next-text="'Next'"
+        :click-handler="loadUsers"
+        class="pagination"
+      >
+      </paginate>
+    </div>
   </div>
 </template>
 

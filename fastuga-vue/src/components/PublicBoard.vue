@@ -75,6 +75,59 @@ onMounted(() => {
   </div>
 
   <div v-if="userStore.user != null && userStore.user.type == 'EM'" style="margin-bottom: 5%">
+    <h4 style="text-align: center">Orders Preparing</h4>
+    <div
+      v-if="ordersReady == null"
+      class="d-flex justify-content-center spinner-font"
+    >
+      <div class="spinner-border" role="status">
+        <span class="sr-only"></span>
+      </div>
+    </div>
+    <div
+      v-else
+      v-for="order in ordersPreparing"
+      class="order-ready"
+      :groupedItems="order.order_items"
+    >
+      <hr />
+      <div class="middle">
+        <p>
+          <i class="bi bi-ticket-perforated ticket-bi"></i>
+          Ticket Number - {{ order.ticket_number }}
+        </p>
+        <hr class="underline" />
+      </div>
+      <ul>
+        <li v-for="orderItem in groupItems(order.order_items)">
+          <div>
+            {{ orderItem.count }} x {{ orderItem.name
+            }}<span style="float: right">{{ orderItem.price }}€</span>
+          </div>
+        </li>
+        <li>
+          <div>
+            Points used:
+            <span style="float: right">{{ order.points_used_to_pay }} pts</span>
+          </div>
+          <hr style="margin: revert" />
+        </li>
+
+        <li>
+          <div>
+            Total Paid:
+            <span style="float: right">{{ order.total_paid }}€</span>
+          </div>
+        </li>
+        <li>
+          <div>
+            Points Gained:
+            <span style="float: right">{{ order.points_gained }} pts</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+
     <h4 style="text-align: center">Orders Ready</h4>
     <div
       v-if="ordersReady == null"

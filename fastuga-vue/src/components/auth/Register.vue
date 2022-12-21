@@ -118,7 +118,7 @@ const customerValidations = () => {
     return -1
   }
   var pattern = /^[1-9][0-9]{8}$/
-  if (!nifInput.value.match(patterm)) {
+  if (!nifInput.value.match(pattern)) {
     errors.value = {
       nif: ["Invalid NIF Format"]
     }

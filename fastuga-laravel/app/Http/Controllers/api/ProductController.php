@@ -19,6 +19,20 @@ use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth.manager', ['except' => [
+            'getProductOfOrderItems',
+            'getProductsTypes',
+            'index',
+            'show',
+            'getBestProducts',
+            'getTotalOrdersOfTopProducts',
+            'getWorstProducts',
+            'getTotalOrdersOfWorstProducts',
+        ]]);
+    }
+
     public function getProductOfOrderItems(OrderItems $orderItems)
     {
         return new ProductResource($orderItems->product);

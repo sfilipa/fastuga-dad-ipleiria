@@ -32,6 +32,23 @@ use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth.manager', ['except' => [
+            'getUserOfOrderItems',
+            'getUserOfCustomer',
+            'getUserOfOrder',
+            'show',
+            'show_me',
+            'store',
+            'update',
+            'updateTAESPassword',
+            'updateTAESName',
+            'destroy',
+            'destroyWithEmail'
+        ]]);
+    }
+
     public function getUserOfOrderItems(OrderItems $orderItems) {
         return new UserResource($orderItems->user);
     }

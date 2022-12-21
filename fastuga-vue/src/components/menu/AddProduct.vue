@@ -1,7 +1,7 @@
 <script setup>
-import { ref, onMounted, inject} from "vue";
+import { onBeforeMount, ref, onMounted, inject} from "vue";
 import { useRouter } from "vue-router";
-import axiosImported from "axios";
+import { useUserStore } from "../../stores/user";
 
 const axios = inject("axios");
 const toast = inject("toast");
@@ -20,6 +20,8 @@ const addProductBool = ref(false);
 const errors = ref(null);
 
 const productTypes = ref([]);
+
+const userStore = useUserStore()
 
 // Web Sockets
 const socket = inject("socket");
@@ -62,7 +64,7 @@ const addProduct = async () => {
     photo_url: photoInput.value,
   };
 
-  await axiosImported
+  await axios
     .post(`${serverBaseUrl}/api/products`, product)
     .then((response) => {
       router.push("/menu");
