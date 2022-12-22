@@ -128,9 +128,9 @@ class ProductController extends Controller
     //Manager Statistics - maybe change later
     public function getBestProducts()
     {
-        $items = OrderItems::orderBy('sum', 'DESC')->groupBy('product_id')
-        ->selectRaw('sum(product_id) as sum, product_id')
-        ->pluck('sum','product_id')->take(5);
+        $items = OrderItems::orderBy('count', 'DESC')->groupBy('product_id')
+        ->selectRaw('count(product_id) as count, product_id')
+        ->pluck('count','product_id')->take(5);
 
         foreach($items as $key =>$item){
             $final[$item]= Product::where('id', $key)->value('name');
@@ -140,15 +140,12 @@ class ProductController extends Controller
 
     public function getWorstProducts()
     {
-        $items = OrderItems::orderBy('sum', 'ASC')->groupBy('product_id')
-        ->selectRaw('sum(product_id) as sum, product_id')
-        ->pluck('sum','product_id')->take(5);
+        $items = OrderItems::orderBy('count', 'ASC')->groupBy('product_id')
+        ->selectRaw('count(product_id) as count, product_id')
+        ->pluck('count','product_id')->take(5);
 
         foreach($items as $key =>$item){
             $final[$item]= Product::where('id', $key)->value('name');
-            if($final[$item] == null){
-                $final[$item] = 'Undefined';
-            }
         }
         return $final;
     }

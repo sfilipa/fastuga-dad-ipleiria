@@ -27,10 +27,9 @@ Route::middleware('auth:api')->group(function () {
             ->middleware('can:viewCustomerOrders, App\Models\Order');
         Route::get('/delivery', [OrderController::class, 'getOrderForDelivery'])
             ->middleware('can:viewDeliveryOrders, App\Models\Order');
-        Route::get('/customer/{user}', [OrderController::class, 'getAllCustomerOrders'])
-            /*->middleware('can:viewHistory, App\Models\User')*/;//statistics - customers
-        Route::get('/delivered/{user}', [OrderController::class, 'getAllOrdersDelivered'])
-            /*->middleware('can:viewHistory, App\Models\User')*/;//statistics - driver
+        Route::get('/customer/{user}', [OrderController::class, 'getAllCustomerOrders']);//statistics - customers
+        Route::get('/delivered/{user}', [OrderController::class, 'getAllOrdersDelivered']);//statistics - driver
+        Route::get('{user}/totaldelivered/bymonth', [OrderController::class, 'getTotalOrdersDelivered']);
     });
 
     Route::prefix('order-items')->group(function () {
@@ -38,6 +37,7 @@ Route::middleware('auth:api')->group(function () {
             ->middleware('can:viewHotDishes, App\Models\OrderItems');
         Route::patch('/{id}', [OrderItemsController::class, 'updateHotDish'])
             ->middleware('can:update,App\Models\OrderItems');
+        Route::get('prepared/{user}', [OrderItemsController::class, 'getAllChefOrdersPrepared']);
     });
 
     // Customer Routes
@@ -62,6 +62,7 @@ Route::get('customers/{customer}/user', [UserController::class, 'getUserOfCustom
 Route::get('customers/user/{user_id}', [CustomerController::class, 'getCustomerByUserID']);
 
 // Order Routes
+
 Route::prefix('orders')->group(function () {
     Route::get('/status/{status}', [OrderController::class, 'getOrderByStatus']); //tentei meter no middleware lá em cima mas como na public board um user anonimo tbm pode ver, nunca dá bem
     Route::get('/status', [OrderController::class, 'getOrdersStatus']);
@@ -70,6 +71,7 @@ Route::prefix('orders')->group(function () {
     Route::get('/{order}/user', [UserController::class, 'getUserOfOrder']);
     Route::get('/{order_id}/orderItems', [OrderController::class, 'getItemsAndProducts']);
     Route::get('/active', [OrderController::class, 'getNumberOfActiveOrders']); //anyone can see this - even anonymous users
+
 });
 
 
@@ -78,7 +80,6 @@ Route::get('unassignedOrders', [OrderController::class, 'getUnassignedOrders']);
 Route::apiResource("orders", OrderController::class);
 
 // OrderItems Routes
-Route::get('/order-items/prepared/{user_id}', [OrderItemsController::class, 'getAllChefOrdersPrepared']);
 Route::prefix('order-items')->group(function () {
     Route::get('/{orderItems}/user', [UserController::class, 'getUserOfOrderItems']);
     Route::get('/{orderItems}/order', [OrderController::class, 'getOrderOfOrderItems']);
@@ -93,9 +94,9 @@ Route::get('products/types', [ProductController::class, 'getProductsTypes']);
 
 Route::get("products", [ProductController::class, 'index']);
 
-
 //Statistics
 Route::get('orders/totalOrders/bymonth', [OrderController::class, 'getTotalOrdersByMonth']);//statistics - managers
 Route::get('orders/totalGained/bymonth', [OrderController::class, 'getTotalGainedByMonth']);//statistics - managers
+
 Route::get('/products/top', [ProductController::class, 'getBestProducts']);
 Route::get('/products/worst', [ProductController::class, 'getWorstProducts']);
