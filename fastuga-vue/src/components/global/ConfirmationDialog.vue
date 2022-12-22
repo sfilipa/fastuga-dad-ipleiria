@@ -88,6 +88,7 @@ defineExpose({ show, hide });
             type="button"
             class="btn cancel-button"
             data-bs-dismiss="modal"
+            @click="hide"
           >
             {{ cancelBtn }}
           </button>

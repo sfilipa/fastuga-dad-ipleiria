@@ -87,6 +87,7 @@ const unblockClick = (customer) => {
       confirmationBtn="Delete Customer"
       :msg="`Do you really want to delete: ${customerToDeleteDescription}`"
       @confirmed="dialogConfirmDelete"
+      @hide="deleteDialog=null"
     >
     </ConfirmationDialog>
   </div>
@@ -98,6 +99,7 @@ const unblockClick = (customer) => {
       :msg="``"
       :title="`Customer Information`"
       @confirmed="closeInfo"
+      @hide="deleteDialog=null"
     >
       <div class="confirmation-container fastuga-font">
         <div class="confirmation-row">

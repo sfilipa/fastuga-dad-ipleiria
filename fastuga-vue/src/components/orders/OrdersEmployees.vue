@@ -146,7 +146,7 @@ socket.on("update", () => {
         <label class="form-label">Search for Ticket Number:</label>
       </div>
       <div class="grid-item">
-        <input v-model.lazy="ticketNumber" @change="LoadOrders(1)" type="number" min="0" max="99" name="ticketnumber" class="form-control"/>
+        <input aria-label="Search by Ticket Number" v-model.lazy="ticketNumber" @change="LoadOrders(1)" type="number" min="0" max="99" name="ticketnumber" class="form-control"/>
       </div>
     </div>
   </div>
