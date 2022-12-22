@@ -58,38 +58,24 @@ Route::middleware('auth:api')->group(function () {
 
 // User Routes
 Route::apiResource("users", UserController::class);
-Route::put('users/updatePasswordTAES/{email}', [UserController::class, 'updateTAESPassword']);
-Route::put('users/updateNameTAES/{email}', [UserController::class, 'updateTAESName']);
+Route::put('users/updatePasswordTAES/{email}', [UserController::class, 'updateTAESPassword']); //Route used in TAES
+Route::put('users/updateNameTAES/{email}', [UserController::class, 'updateTAESName']); //Route used in TAES
 
 // Customer Routes
 Route::get('customers/{customer}/user', [UserController::class, 'getUserOfCustomer']);
 Route::get('customers/user/{user_id}', [CustomerController::class, 'getCustomerByUserID']);
 
 // Order Routes
-
 Route::prefix('orders')->group(function () {
-    Route::get('/status/{status}', [OrderController::class, 'getOrderByStatus']); //tentei meter no middleware lá em cima mas como na public board um user anonimo tbm pode ver, nunca dá bem
-    Route::get('/status', [OrderController::class, 'getOrdersStatus']);
-    Route::get('/statusTAES', [OrderController::class, 'getOrderByStatusTAES']);
-    Route::get('/{order}/customer', [CustomerController::class, 'getCostumerOfOrder']);
-    Route::get('/{order}/user', [UserController::class, 'getUserOfOrder']);
-    Route::get('/{order_id}/orderItems', [OrderController::class, 'getItemsAndProducts']);
-    Route::get('/active', [OrderController::class, 'getNumberOfActiveOrders']); //anyone can see this - even anonymous users
-
+    Route::get('/status/{status}', [OrderController::class, 'getOrderByStatus']);
+    Route::get('/statusTAES', [OrderController::class, 'getOrderByStatusTAES']); //Route used in TAES
+    Route::get('/active', [OrderController::class, 'getNumberOfActiveOrders']);
 });
 
-
-Route::post('ordersTAES',[OrderController::class, 'storeTAES']);
+Route::post('ordersTAES',[OrderController::class, 'storeTAES']); //Route used in TAES
 Route::get('unassignedOrders', [OrderController::class, 'getUnassignedOrders']);
 Route::apiResource("orders", OrderController::class);
 
-// OrderItems Routes
-Route::prefix('order-items')->group(function () {
-    Route::get('/{orderItems}/user', [UserController::class, 'getUserOfOrderItems']);
-    Route::get('/{orderItems}/order', [OrderController::class, 'getOrderOfOrderItems']);
-    Route::get('/{orderItems}/product', [ProductController::class, 'getProductOfOrderItems']);
-
-});
 Route::apiResource("order-items", OrderItemsController::class);
 
 // Product Routes

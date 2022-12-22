@@ -18,10 +18,6 @@ use Carbon\Carbon;
 
 class OrderController extends Controller
 {
-    public function getOrdersStatus()
-    {
-        return Order::groupBy('status')->pluck('status');
-    }
 
     public function getOrderByStatus(String $status)
     {
@@ -68,11 +64,6 @@ class OrderController extends Controller
         // return json_decode($order->custom)->address;
     }
 
-    public function getOrderOfOrderItems(OrderItems $orderItems)
-    {
-        return new OrderResource($orderItems->order);
-    }
-
     public function index(Request $request)
     {
         $query = Order::query();
@@ -101,7 +92,6 @@ class OrderController extends Controller
         DB::beginTransaction();
         try{
             $orderRequest = new StoreUpdateOrderRequest($request->all());
-            //só deixar fazer pedidos ou user == null ou user == customer
             $newTicketNumber = Order::orderBy('id', 'DESC')->first()->ticket_number;
             $newTicketNumber++;
             if($newTicketNumber > 99){
@@ -418,11 +408,6 @@ class OrderController extends Controller
             }
         }
         return true;
-    }
-
-    public function getItemsAndProducts($order_id)
-    {
-        return OrderItemsResource::collection(OrderItems::where('order_id', $order_id)->get());
     }
 
     public function getNumberOfActiveOrders()
