@@ -144,12 +144,6 @@ const addEmployee = () => {
   router.push({ name: "AddEmployee" });
 };
 
-onBeforeMount(() => {
-  if(!userStore.user || userStore.user.type!='EM'){
-    router.push('/unauthorized')
-  }
-});
-
 onMounted(() => {
   LoadEmployees(1);
 });

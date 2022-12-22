@@ -182,16 +182,6 @@ socket.on("userDeleted", (users) => {
                 Public Board
               </router-link>
             </li>
-            <!-- <li class="nav-item">
-              <router-link
-                class="nav-link"
-                :class="{ active: $route.name === 'CurrentTasks' }"
-                :to="{ name: 'CurrentTasks' }"
-              >
-                <i class="bi bi-list-stars"></i>
-                Menu
-              </router-link>
-            </li> -->
             <li class="nav-item">
               <router-link class="nav-link fastuga-font" :class="{ active: $route.name === 'Menu' }" :to="{ name: 'Menu' }"
                 @click="clickMenuOption">
@@ -237,14 +227,6 @@ socket.on("userDeleted", (users) => {
                 @click="clickMenuOption">
                 <i class="bi bi-people"></i>
                 Customers
-              </router-link>
-            </li>
-
-            <li class="nav-item">
-              <router-link class="nav-link fastuga-font" :class="{ active: $route.name === 'Tasks' }" :to="{ name: 'Tasks' }"
-                @click="clickMenuOption">
-                <i class="bi bi-bell"></i>
-                Notifications
               </router-link>
             </li>
             <li class="nav-item" v-show="userStore.user">

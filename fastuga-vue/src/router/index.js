@@ -1,32 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
-
-import PublicBoard from "../components/PublicBoard.vue"
-import Login from "../components/auth/Login.vue"
-import Register from "../components/auth/Register.vue"
-import ChangePassword from "../components/auth/ChangePassword.vue"
-import Tasks from "../components/tasks/Tasks.vue"
-import Orders from "../components/orders/Orders.vue"
-import OrdersEmployees from "../components/orders/OrdersEmployees.vue"
-import NewOrder from "../components/orders/NewOrder.vue"
-import Projects from "../components/projects/Projects.vue"
-import Users from "../components/users/Users.vue"
-import User from "../components/users/User.vue"
-import ProjectTasks from "../components/projects/ProjectTasks.vue"
-import Task from "../components/tasks/Task.vue"
-import Project from "../components/projects/Project.vue"
-import Menu from "../components/menu/Menu.vue"
-import Employees from "../components/employees/Employees.vue"
-import AddProduct from "../components/menu/AddProduct.vue"
-import AddEmployee from "../components/employees/AddEmployee.vue"
-import Statistics from "../components/statistics/Statistics.vue"
-import ChefsDishes from "../components/dishes/ChefsDishes.vue"
-import Customers from "../components/customers/Customers.vue"
-import Unauthorized from "../components/global/Unauthorized.vue"
 
 import { useUserStore } from "../stores/user.js"
 
-import RouteRedirector from "../components/global/RouteRedirector.vue"
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -34,12 +9,12 @@ const router = createRouter({
     {
       path: '/',
       name: 'Home',
-      component: HomeView
+      component: () => import('../views/HomeView.vue')
     },
     {
       path: '/unauthorized',
       name: 'Unauthorized',
-      component: Unauthorized
+      component: () => import('../components/global/Unauthorized.vue')
     },
     {
       path: '/:pathMatch(.*)*',
@@ -49,145 +24,87 @@ const router = createRouter({
     {
       path: '/redirect/:redirectTo',
       name: 'Redirect',
-      component: RouteRedirector,
+      component: () => import('../components/global/RouteRedirector.vue'),
       props: route => ({ redirectTo: route.params.redirectTo })
     },
     {
       path: '/login',
       name: 'Login',
-      component: Login
+      component: () => import('../components/auth/Login.vue')
     },
     {
       path: '/register',
       name: 'Register',
-      component: Register
+      component: () => import('../components/auth/Register.vue')
     },
     {
       path: '/password',
       name: 'ChangePassword',
-      component: ChangePassword
+      component: () => import('../components/auth/ChangePassword.vue')
     },
     {
       path: '/publicboard',
       name: 'PublicBoard',
-      component: PublicBoard
+      component: () => import('../components/PublicBoard.vue')
     },
     {
       path: '/menu',
       name: 'Menu',
-      component: Menu,
+      component: () => import('../components/menu/Menu.vue'),
       props: { menuTitle: 'Menu' }
     },
     {
       path: '/menu/add',
       name: 'AddProduct',
-      component: AddProduct,
+      component: () => import('../components/menu/AddProduct.vue'),
     }, 
     {
       path: '/employees/add',
       name: 'AddEmployee',
-      component: AddEmployee,
+      component: () => import('../components/employees/AddEmployee.vue'),
     },
     {
       path: '/orders',
       name: 'Orders',
-      component: Orders,
+      component: () => import('../components/orders/Orders.vue'),
     },
     {
       path: '/chefsDishes',
       name: 'ChefsDishes',
-      component: ChefsDishes,
+      component: () => import('../components/dishes/ChefsDishes.vue'),
     },
     {
       path: '/ordersEmployees',
       name: 'OrdersEmployees',
-      component: OrdersEmployees,
+      component: () => import('../components/orders/OrdersEmployees.vue'),
     },
     {
       path: '/employees',
       name: 'Employees',
-      component: Employees,
-    },
-    // {
-    //   path: '/notifications',
-    //   name: 'Notifications',
-    //   component: Notifications,
-    //   props: { menuTitle: 'Notifications' }
-    // },
-    {
-      path: '/tasks',
-      name: 'Tasks',
-      component: Tasks,
-    },
-    {
-      path: '/tasks/current',
-      name: 'CurrentTasks',
-      component: Tasks,
-      props: { onlyCurrentTasks: true, tasksTitle: 'Current Tasks' }
-    },
-    {
-      path: '/projects',
-      name: 'Projects',
-      component: Projects,
-    },
-    {
-      path: '/projects/new',
-      name: 'NewProject',
-      component: Project,
-      props: { id: -1 }
-    },
-    {
-      path: '/projects/:id',
-      name: 'Project',
-      component: Project,
-      props: route => ({ id: parseInt(route.params.id) })
+      component: () => import('../components/employees/Employees.vue'),
     },
     {
       path: '/orders/new',
       name: 'NewOrder',
-      component: NewOrder
+      component: () => import('../components/orders/NewOrder.vue')
     },
     {
       path: '/users',
       name: 'Users',
-      component: Users,
+      component: () => import('../components/users/Users.vue'),
     },
     {
       path: '/users/:id',
       name: 'User',
-      component: User,
+      component: () => import('../components/users/User.vue'),
       //props: true
       // Replaced with the following line to ensure that id is a number
       props: route => ({ id: parseInt(route.params.id) })
     },
     {
-      path: '/projects/:id/tasks',
-      name: 'ProjectTasks',
-      component: ProjectTasks,
-      props: route => ({ id: parseInt(route.params.id) })
-    },
-    {
-      path: '/projects/:id/tasks/new',
-      name: 'NewTaskOfProject',
-      component: Task,
-      props: route => ({ id: -1, fixedProject: parseInt(route.params.id) })
-    },
-    {
-      path: '/tasks/new',
-      name: 'NewTask',
-      component: Task,
-      props: { id: -1 }
-    },
-    {
-      path: '/tasks/:id',
-      name: 'Task',
-      component: Task,
-      props: route => ({ id: parseInt(route.params.id) })
-    },
-    {
       path: '/statistics',
       name: 'Statistics',
-      component: Statistics
+      component: () => import('../components/statistics/Statistics.vue')
     },
     {
       path: '/about',
@@ -201,13 +118,12 @@ const router = createRouter({
     {
       path: '/customers',
       name: 'Customers',
-      component: Customers,
+      component: () => import('../components/customers/Customers.vue'),
     },
   ]
 })
 let handlingFirstRoute = true
 
-//esta função serve para definir que tabs do menu cada user pode ver ficha 7 ponto 8 exemplo reports so os managers podem ver
 //2 ifs iniciais servem para ver se o user esta loggado ou nao, se nao tiver, so pode ver o login e a home page
 router.beforeEach((to, from, next) => {
   if (handlingFirstRoute) {
@@ -228,7 +144,15 @@ router.beforeEach((to, from, next) => {
       })
       return
     }
+  }
 
+  if(to.name == 'Statistics'){
+    if(!userStore.user){
+      next({
+        name: "Unauthorized"
+      })
+      return
+    }
   }
   
  /* if ((to.name == 'Login') || (to.name == 'Home')) {
