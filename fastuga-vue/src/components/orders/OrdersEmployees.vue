@@ -5,7 +5,7 @@ import {useUserStore} from "@/stores/user";
 import axios from "axios";
 
 const axiosLaravel = inject('axios')
-const orders = ref([])
+const orders = ref(null)
 const toast = inject("toast")
 const socket = inject("socket")
 const lastPage = ref(1)
@@ -150,7 +150,17 @@ socket.on("update", () => {
       </div>
     </div>
   </div>
-  <div>
+  <div v-if="orders == null">
+    <div class="d-flex justify-content-center spinner-font">
+      <div class="spinner-border" role="status">
+        <span class="sr-only"></span>
+      </div>
+    </div>
+  </div>
+  <div v-else-if="orders.length === 0">
+    <p style="text-align: center"><b>No orders to show!</b></p>
+  </div>
+  <div v-else>
     <orders-table
         :orders="orders"
         :parent="componentName"
