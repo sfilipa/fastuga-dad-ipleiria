@@ -73,15 +73,17 @@
 
         toast.error("Order was successfully cancelled!")
 
-        // Get User_id from Customer
-        axiosLaravel.get(`/customers/${orderObj.customer_id}`)
-          .then(response => {
-            customer = response.data;
-            orderObj['customerUserID'] = customer.data.user_id.id;
-            socket.emit("orderCancelled", orderObj)
-            LoadOrders(1)
-            return;
+        if (orderObj.customer_id != null) {
+          // Get User_id from Customer
+          axiosLaravel.get(`/customers/${orderObj.customer_id}`)
+            .then(response => {
+              customer = response.data;
+              orderObj['customerUserID'] = customer.data.user_id.id;
+              socket.emit("orderCancelled", orderObj)
+              LoadOrders(1)
+              return;
           })
+        }
         socket.emit("orderCancelled", orderObj)
         LoadOrders(1)
       })
