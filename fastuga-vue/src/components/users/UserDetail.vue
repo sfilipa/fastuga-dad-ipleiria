@@ -229,10 +229,10 @@ const updatePhoto = (e) => {
         <div class="profile-field">
           <label class="profile-label">Name:</label>
           <!-- Editing Row Name -->
-          <div v-if="editRow">
+          <div v-if="editRow" class="div-detail">
             <input
                 type="text"
-                class="form-control"
+                class="form-control div-detail"
                 id="inputName"
                 placeholder="Enter Name"
                 required
@@ -243,7 +243,7 @@ const updatePhoto = (e) => {
                 fieldName="name"
             ></field-error-message>
           </div>
-          <div v-else>
+          <div v-else class="div-detail">
             <span> {{ userStore.user.name }}</span>
           </div>
         </div>
@@ -251,10 +251,10 @@ const updatePhoto = (e) => {
         <div class="profile-field">
           <label class="profile-label">Email:</label>
           <!-- Editing Row Email -->
-          <div v-if="editRow">
+          <div v-if="editRow" class="div-detail">
             <input
                 type="text"
-                class="form-control"
+                class="form-control div-detail"
                 id="inputEmail"
                 placeholder="Enter Email"
                 required
@@ -265,7 +265,7 @@ const updatePhoto = (e) => {
                 fieldName="email"
             ></field-error-message>
           </div>
-          <div v-else>
+          <div v-else class="div-detail">
             <span>{{ userStore.user.email }}</span>
           </div>
         </div>
@@ -274,10 +274,10 @@ const updatePhoto = (e) => {
           <div class="profile-field">
             <label class="profile-label">Phone Number:</label>
             <!-- Editing Row Phone -->
-            <div v-if="editRow">
+            <div v-if="editRow" class="div-detail">
               <input
                   type="text"
-                  class="form-control"
+                  class="form-control div-detail"
                   id="inputName"
                   placeholder="Enter Phone"
                   required
@@ -285,7 +285,7 @@ const updatePhoto = (e) => {
                   @focus="errors != null && errors.phone != null ? errors.phone = null : null">
               <field-error-message :errors="errors" fieldName="phone"></field-error-message>
             </div>
-            <div v-else>
+            <div v-else class="div-detail">
               <span>{{ userStore.customer.phone }}</span>
             </div>
           </div>
@@ -293,10 +293,10 @@ const updatePhoto = (e) => {
           <div class="profile-field">
             <label class="profile-label">NIF:</label>
             <!-- Editing Row Nif -->
-            <div v-if="editRow">
+            <div v-if="editRow" class="div-detail">
               <input
                   type="text"
-                  class="form-control"
+                  class="form-control div-detail"
                   id="inputEmail"
                   placeholder="Enter NIF"
                   required
@@ -304,7 +304,7 @@ const updatePhoto = (e) => {
                   @focus="errors != null && errors.nif != null ? errors.nif = null : null">
               <field-error-message :errors="errors" fieldName="nif"></field-error-message>
             </div>
-            <div v-else>
+            <div v-else class="div-detail">
               <span> {{ userStore.customer.nif }}</span>
             </div>
           </div>
@@ -313,15 +313,15 @@ const updatePhoto = (e) => {
           <div class="profile-field">
             <label class="profile-label">Default Payment Type:</label>
             <!-- Editing Row Default Payment Type -->
-            <div v-if="editRow">
-              <select class="form-select" id="selectType" v-model="default_payment_typeInput"
+            <div v-if="editRow" class="div-detail">
+              <select class="form-select div-detail" id="selectType" v-model="default_payment_typeInput"
                       @focus="errors != null && errors.payment_type != null ? errors.payment_type = null : null">
                 <option value="visa">Visa</option>
                 <option value="mbway">MBWay</option>
                 <option value="paypal">PayPal</option>
               </select>
             </div>
-            <div v-else>
+            <div v-else class="div-detail">
               <span>{{ userStore.customer.default_payment_type }}</span>
             </div>
             <field-error-message
@@ -333,28 +333,28 @@ const updatePhoto = (e) => {
           <div class="profile-field">
             <label class="profile-label">Default Payment Reference:</label>
             <!-- Editing Row Default Payment Type -->
-            <div v-if="editRow">
-              <div v-if="default_payment_typeInput == 'visa'" style="width: inherit">
-                <input type="text" class="form-control" id="inputVisaReference"
+            <div v-if="editRow" class="div-detail">
+              <div v-if="default_payment_typeInput == 'visa'" class="div-detail">
+                <input type="text" class="form-control div-detail" id="inputVisaReference"
                        placeholder="Enter Visa Card ID Payment Reference" required
                        v-model="default_payment_referenceInput"
                        @focus="errors != null && errors.payment_reference != null ? errors.payment_reference = null : null">
               </div>
-              <div v-else-if="default_payment_typeInput == 'mbway'" style="width: inherit">
-                <input type="text" class="form-control" id="inputNumberReference"
+              <div v-else-if="default_payment_typeInput == 'mbway'" class="div-detail">
+                <input type="text" class="form-control div-detail" id="inputNumberReference"
                        placeholder="Enter Phone Number Payment Reference" required
                        v-model="default_payment_referenceInput"
                        @focus="errors != null && errors.payment_reference != null ? errors.payment_reference = null : null">
               </div>
-              <div v-else style="width: inherit">
-                <input type="text" class="form-control" id="inputEmailReference"
+              <div v-else class="div-detail">
+                <input type="text" class="form-control div-detail" id="inputEmailReference"
                        placeholder="Enter Email Payment Reference"
                        required v-model="default_payment_referenceInput"
                        @focus="errors != null && errors.payment_reference != null ? errors.payment_reference = null : null"
                 />
               </div>
             </div>
-            <div v-else>
+            <div v-else class="div-detail">
               <span> {{ userStore.customer.default_payment_reference }}</span>
             </div>
           </div>
@@ -365,7 +365,7 @@ const updatePhoto = (e) => {
           ></field-error-message>
           <div class="profile-field">
             <label class="profile-label">Points:</label>
-            <div class="mb-2">
+            <div class="mb-2 div-detail">
               <span>{{ userStore.customer.points }}</span>
             </div>
           </div>
@@ -419,6 +419,10 @@ const updatePhoto = (e) => {
 
 <style scoped>
 
+.div-detail{
+  width: inherit;
+}
+
 .div-customer-details {
   width: 100%;
 }
@@ -462,7 +466,8 @@ const updatePhoto = (e) => {
 }
 
 .profile-label {
-  width: 40%;
+  width:100%;
+  font-weight: bold;
 }
 
 .profile-field {
