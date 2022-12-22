@@ -14,7 +14,7 @@ const router = createRouter({
     {
       path: '/unauthorized',
       name: 'Unauthorized',
-      component: () => import('../components/global/Unauthorized.vue')
+      component: () => import('../components/errors/Unauthorized.vue')
     },
     {
       path: '/:pathMatch(.*)*',

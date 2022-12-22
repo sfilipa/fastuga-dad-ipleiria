@@ -199,10 +199,16 @@ const dialogConfirmAdd = () => {
   console.log(notes.value);
   const cleanNotes = notes.value.filter((obj) => {
     return obj.text.length != 0;
-  })
-  notes.value = cleanNotes
+  });
+  notes.value = cleanNotes;
 
-  emit("add", productToAddOrder.value, quantityToAddOrder.value, notes.value, totalQuantityNotes());
+  emit(
+    "add",
+    productToAddOrder.value,
+    quantityToAddOrder.value,
+    notes.value,
+    totalQuantityNotes()
+  );
   quantityToAddOrder.value = 1;
   productToAddOrder.value = null;
 };
@@ -256,6 +262,7 @@ onUpdated(() => {
       confirmationBtn="Add Item(s)"
       :msg="``"
       @confirmed="dialogConfirmAdd"
+      @hide="addDialog=null"
     >
       <div class="confirmation-middle">
         <div class="confirmation-row">
@@ -265,6 +272,7 @@ onUpdated(() => {
             class="form-control confirmation-dialog-input"
             type="number"
             min="1"
+            @change="resetNotes()"
           />
         </div>
         <div
@@ -273,23 +281,30 @@ onUpdated(() => {
           class="confirmation-row"
         >
           <span>{{ note.qtd }}</span>
-          <button
-            @click="note.qtd = note.qtd + 1"
-            :disabled="quantityToAddOrder - totalQuantityNotes() == 0"
-          >
-            <i class="bi bi-caret-up"></i>
-          </button>
-          <button @click="note.qtd = note.qtd - 1" :disabled="note.qtd == 1">
-            <i class="bi bi-caret-down"></i>
-          </button>
-
+          <div class="note-buttons">
+            <button
+              @click="note.qtd = note.qtd + 1"
+              :disabled="quantityToAddOrder - totalQuantityNotes() == 0"
+              class="btn note-button-layout"
+            >
+              <i class="bi bi-caret-up note-button"></i>
+            </button>
+            <button
+              @click="note.qtd = note.qtd - 1"
+              :disabled="note.qtd == 1"
+              class="btn note-button-layout"
+            >
+              <i class="bi bi-caret-down note-button"></i>
+            </button>
+          </div>
           <!-- <input v-model="note.qtd" type="number" min="1" :max="quantityToAddOrder-totalQuantityNotes()"/> -->
           <input
             v-model="note.text"
             type="text"
-            placeholder="enter note here"
+            placeholder="Enter note here"
+            class="form-control"
           />
-          <button @click="removeNote(note)"><i class="bi bi-x"></i></button>
+          <button @click="removeNote(note)" class="btn"><i class="bi bi-x"></i></button>
         </div>
         <button
           class="btn add-notes"
@@ -552,6 +567,27 @@ onUpdated(() => {
 <style scoped>
 @import url("https://fonts.googleapis.com/css2?family=Maven+Pro&display=swap");
 
+.note-button-layout{
+  height: 1rem;
+  border: 0;
+}
+
+.note-button{
+  font-size: 1rem !important;
+  margin: auto !important;
+  position: relative !important;
+  top: -0.7rem !important;
+  height: 1rem;
+}
+
+.note-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: inherit;
+  margin-top: 3%;
+}
+
 .error-field-align {
   text-align: initial;
 }
@@ -567,6 +603,9 @@ onUpdated(() => {
 .add-notes {
   cursor: pointer;
   margin-top: 2%;
+  color: #725151;
+  text-decoration: underline;
+  border: 0;
 }
 
 .confirmation-row {
@@ -704,6 +743,7 @@ textarea {
 
 input[type="text"] {
   width: 100%;
+  margin-left: 20%;
 }
 
 input[type="number"] {

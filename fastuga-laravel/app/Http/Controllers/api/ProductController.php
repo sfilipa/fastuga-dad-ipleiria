@@ -27,9 +27,7 @@ class ProductController extends Controller
             'index',
             'show',
             'getBestProducts',
-            'getTotalOrdersOfTopProducts',
             'getWorstProducts',
-            'getTotalOrdersOfWorstProducts',
         ]]);
     }
 
@@ -128,6 +126,7 @@ class ProductController extends Controller
     //Manager Statistics - maybe change later
     public function getBestProducts()
     {
+        $this->authorize('statisticsManager', 'App\Models\User');// middleware
         $items = OrderItems::orderBy('count', 'DESC')->groupBy('product_id')
         ->selectRaw('count(product_id) as count, product_id')
         ->pluck('count','product_id')->take(5);
@@ -140,6 +139,8 @@ class ProductController extends Controller
 
     public function getWorstProducts()
     {
+        $this->authorize('statisticsManager', 'App\Models\User');// middleware
+
         $items = OrderItems::orderBy('count', 'ASC')->groupBy('product_id')
         ->selectRaw('count(product_id) as count, product_id')
         ->pluck('count','product_id')->take(5);

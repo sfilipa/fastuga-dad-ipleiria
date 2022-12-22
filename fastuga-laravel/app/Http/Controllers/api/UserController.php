@@ -42,11 +42,17 @@ class UserController extends Controller
             'show_me',
             'store',
             'update',
+            'update_password',
             'updateTAESPassword',
             'updateTAESName',
             'destroy',
             'destroyWithEmail'
         ]]);
+
+        $this->middleware('auth:api')
+                ->only([
+                    'update',
+                ]);
     }
 
     public function getUserOfOrderItems(OrderItems $orderItems) {
@@ -68,7 +74,7 @@ class UserController extends Controller
 
     public function show(User $user)
     {
-       /* $this->view('view', $user);// middleware*/
+        $this->view('view', $user);// middleware
         return new UserResource($user);
     }
 
@@ -104,7 +110,7 @@ class UserController extends Controller
 
     public function update(UpdateUserRequest $userRequest, User $user)
     {
-      /* $this->authorize('update', $user);// middleware*/
+       $this->authorize('update', $user);// middleware
 
         $customerRequest = new StoreUpdateCustomerRequest($userRequest->all());
         DB::beginTransaction();

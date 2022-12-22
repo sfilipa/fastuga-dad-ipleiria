@@ -1,9 +1,43 @@
 <template>
-	<div>
-		<h1>Not Found</h1>
-		<p>
-			Oops, we couldn't find the page you were looking for.
-			<router-link to="/"> Go back to the homepage </router-link>
-		</p>
-	</div>
+  <div class="about about-body fastuga-font">
+    <h1><b>Not Found :(</b></h1>
+    <br />
+	<p class="fastuga-font home-font">
+      Oops, we couldn't find the page you were looking for.</p>
+    <p class="fastuga-font home-font">
+      Check our
+      <router-link :to="{ name: 'Menu' }"
+        >Menu <i class="bi bi-cup-straw"></i
+      ></router-link>
+      or the
+      <router-link :to="{ name: 'PublicBoard' }"
+        >PublicBoard <i class="bi bi-card-checklist"></i></router-link
+      >!
+    </p>
+    <img src="@/assets/notFound.jpg" class="home-view" />
+  </div>
 </template>
+
+<style scoped>
+
+.home-view{
+    width: 42%;
+    margin-top: 5%;
+  }
+
+  
+  a{
+    color: #725151;
+  }
+
+  .home-font{
+    font-size: 20px;
+  }
+
+  .about-body{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 2%;
+  }
+  </style>

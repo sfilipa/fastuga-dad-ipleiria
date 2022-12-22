@@ -2,8 +2,8 @@
 import {ref, watch, computed, inject, onMounted} from "vue";
 import avatarNoneUrl from '@/assets/avatar-none.png'
 import {useUserStore} from "../../stores/user.js"
-import axios from "axios";
 
+const axiosLaravel = inject('axios')
 const userStore = useUserStore()
 
 const customer = ref(null)
@@ -16,7 +16,14 @@ const emit = defineEmits(["save", "cancel"]);
 
 const editRow = ref(false);
 
-const errors = ref(null)
+const errors = ref({
+  name: null,
+  email: null,
+  nif: null,
+  phone: null,
+  payment_type: null,
+  payment_reference: null,
+});
 const nameInput = ref(userStore.user.name)
 const emailInput = ref(userStore.user.email)
 const photoInput = ref(userStore.user.photo_url)
@@ -26,6 +33,10 @@ const nifInput = ref(0)
 const default_payment_typeInput = ref(null)
 const default_payment_referenceInput = ref(null)
 
+const userV = ref(0)
+const customerV = ref(0)
+const paymentV = ref(0)
+
 const loadCustomer = () => {
   if (userStore.user.type = 'C') {
     phoneInput.value = userStore.customer.phone
@@ -34,11 +45,22 @@ const loadCustomer = () => {
     default_payment_referenceInput.value = userStore.customer.default_payment_reference
   }
 }
+const profileBool = ref(false);
 const newPhoto = ref(null)
 
 const save = async () => {
-  if (updateUserValidations() == -1) {
-    return
+  profileBool.value = true;
+  userV.value = userValidations();
+
+  if (userStore.user.type == 'C') {
+    customerV.value = customerValidations();
+    paymentV.value = paymentReferenceValidations();
+  }
+
+  if (userV.value == -1 || customerV.value == -1 || paymentV.value == -1) {
+    profileBool.value = false;
+    console.log(errors)
+    return;
   }
 
   let formData = new FormData();
@@ -50,13 +72,9 @@ const save = async () => {
   formData.append('photo_url', photoInput.value);
   formData.append('_method', 'PUT');
   if (userStore.user.type == 'C') {
+    const customerV = customerValidations();
+    const paymentV = paymentReferenceValidations();
 
-    if (updateCustomerValidations() == -1) {
-      return
-    }
-    if (paymentReferenceValidations() == -1) {
-      return
-    }
     formData.append('phone', phoneInput.value);
     formData.append('nif', nifInput.value);
     formData.append('default_payment_type', default_payment_typeInput.value);
@@ -64,14 +82,16 @@ const save = async () => {
     formData.append('user_id', userStore.user.id);
     formData.append('points', userStore.customer.points);
   }
-  await axios.post(`${serverBaseUrl}/api/users/${userStore.user.id}`,
+  await axiosLaravel.post(`/users/${userStore.user.id}`,
       formData)
       .then((response) => {
+        profileBool.value = false;
         userStore.loadUser()
         editRow.value = false;
         toast.success("Profile updated")
       })
       .catch((error) => {
+        registerBool.value = false;
         console.log(error)
         if (error.response.data.message) {
           toast.error('Edit Profile Failed! - ' + error.response.data.message)
@@ -81,109 +101,87 @@ const save = async () => {
       });
 }
 
-const updateUserValidations = () => {
-  if (nameInput.value == '') {
-    errors.value = {
-      name: ["Name field cannot be empty!"]
-    }
-    return -1
+const userValidations = () => {
+  let invalid = 0;
+
+  // Name
+  if (nameInput.value == "") {
+    errors.value.name = ["Name field cannot be empty!"];
+    invalid = -1;
   }
-  if (emailInput.value == '') {
-    errors.value = {
-      email: ["Email field cannot be empty!"]
-    }
-    return -1
+
+  // Email
+  var pattern = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+  if (emailInput.value == "") {
+    errors.value.email = ["Email field cannot be empty!"];
+    invalid = -1;
+  } else if (!emailInput.value.match(pattern)) {
+    errors.value.email = ["Invalid Email Format!"];
+    invalid = -1;
   }
-  var pattern = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
-  if (!emailInput.value.match(pattern)) {
-    errors.value = {
-      email: ["Invalid Email Format!"]
-    }
-    return -1
-  }
-  return 0
-}
+
+  return invalid;
+};
 
 
-const updateCustomerValidations = () => {
-  if (phoneInput.value == '') {
-    errors.value = {
-      phone: ["Phone field cannot be empty!"]
-    }
-    return -1
+const customerValidations = () => {
+  let invalid = 0;
+  if (nifInput.value == "") {
+    errors.value.nif = ["NIF field cannot be empty!"];
+    invalid = -1;
   }
-  var pattern = /^[1-9][0-9]{8}$/
-  if (!phoneInput.value.match(pattern)) {
-    errors.value = {
-      phone: ["Invalid Phone Format"]
-    }
-    return -1
-  }
-  if (nifInput.value == '') {
-    errors.value = {
-      nif: ["NIF field cannot be empty!"]
-    }
-    return -1
-  }
-  var pattern = /^[1-9][0-9]{8}$/
+  var pattern = /^[1-9][0-9]{8}$/;
   if (!nifInput.value.match(pattern)) {
-    errors.value = {
-      nif: ["Invalid NIF Format"]
-    }
-    return -1
+    errors.value.nif = ["Invalid NIF Format"];
+    invalid = -1;
   }
-}
+  if (phoneInput.value == "") {
+    errors.value.phone = ["Phone field cannot be empty!"];
+    invalid = -1;
+  }
+  var pattern = /^[1-9][0-9]{8}$/;
+  if (!phoneInput.value.match(pattern)) {
+    errors.value.phone = ["Invalid Phone Format"];
+    invalid = -1;
+  }
+  return invalid;
+};
 
 const paymentReferenceValidations = () => {
-  if (default_payment_typeInput.value == 'visa') {
-    if (!default_payment_referenceInput.value.match('[1-9][0-9]{15}')) {
-      errors.value = {
-        visa: ["Invalid Visa Reference"]
-      }
-      return -1
+  let invalid = 0;
+  if (default_payment_typeInput.value == "visa") {
+    if (default_payment_referenceInput.value == "") {
+      errors.value.payment_reference = ["Default Payment Reference field cannot be empty!"];
+      invalid = -1;
+    } else if (!default_payment_referenceInput.value.match("[1-9][0-9]{15}")) {
+      errors.value.payment_reference = ["Invalid Visa Reference"];
+      invalid = -1;
     }
-    if (default_payment_referenceInput.value == '') {
-      errors.value = {
-        visa: ["Default Payment Reference field cannot be empty!"]
-      }
-      return -1
+  } else if (default_payment_typeInput.value == "mbway") {
+    var pattern = /^[1-9][0-9]{8}$/;
+    if (default_payment_referenceInput.value == "") {
+      errors.value.payment_reference = ["Default Payment Reference field cannot be empty!"];
+      invalid = -1;
+    } else if (!default_payment_referenceInput.value.match(pattern)) {
+      errors.value.payment_reference = ["Invalid Phone Number"];
+      invalid = -1;
     }
-  } else if (default_payment_typeInput.value == 'mbway') {
-    var pattern = /^[1-9][0-9]{8}$/
-    if (!default_payment_referenceInput.value.match(pattern)) {
-      errors.value = {
-        mbway: ["Invalid Phone Number"]
-      }
-      return -1
-    }
-    if (default_payment_referenceInput.value == '') {
-      errors.value = {
-        mbway: ["Default Payment Reference field cannot be empty!"]
-      }
-      return -1
-    }
-  } else if (default_payment_typeInput.value == 'paypal') {
-    var pattern = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
-    if (!default_payment_referenceInput.value.match(pattern)) {
-      errors.value = {
-        paypal: ["Invalid Phone Format"]
-      }
-      if (default_payment_referenceInput.value == '') {
-        errors.value = {
-          paypal: ["Default Payment Reference field cannot be empty!"]
-        }
-        return -1
-      }
-      return -1
+  } else if (default_payment_typeInput.value == "paypal") {
+    var pattern = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    if (default_payment_referenceInput.value == "") {
+      errors.value.payment_reference = ["Default Payment Reference field cannot be empty!"];
+      invalid = -1;
+    } else if (!default_payment_referenceInput.value.match(pattern)) {
+      errors.value.payment_reference = ["Invalid Phone Format"];
+      invalid = -1;
     }
   } else {
-    errors.value = {
-      default: ["Payment Type Not Supported"]
-    }
-    toast.error('Order was not created due to validation errors!')
-    return -1
+    errors.value.payment_type = ["Payment Type Not Supported"];
+    invalid = -1;
+    toast.error("Order was not created due to validation errors!");
   }
-}
+  return invalid
+};
 
 const cancel = () => {
   editRow.value = false;
@@ -220,150 +218,200 @@ const updatePhoto = (e) => {
 
 <template>
   <form class="row g-3 needs-validation" novalidate @submit.prevent="save">
-    <h3 class="mt-5 mb-3">{{ userStore.user.name }}</h3>
+    <div class="mx-2 fastuga-font">
+      <h3 class="mt-4">{{ userStore.user.name }}</h3>
+    </div>
     <hr/>
 
-    <div class="d-flex flex-wrap justify-content-between">
+    <div class="w-75 pe-4">
 
-      <div class="w-75 pe-4">
-        <div class="row">
-          <div class="col-50">
-            <b>Name:</b>
-            <!-- Editing Row Name -->
-            <div v-if="editRow" class="mb-2">
-              <input type="text" class="form-control" id="inputName" placeholder="Enter Name" required
-                     v-model="nameInput">
-              <field-error-message :errors="errors" fieldName="name"></field-error-message>
-            </div>
-            <div v-else>
-              <p> {{ userStore.user.name }}</p>
-            </div>
-          </div>
-
-          <div class="col-50">
-            <b>Email:</b>
-            <!-- Editing Row Email -->
-            <div v-if="editRow" class="mb-2">
-              <input type="text" class="form-control" id="inputEmail" placeholder="Enter Email" required
-                     v-model="emailInput">
-              <field-error-message :errors="errors" fieldName="email"></field-error-message>
-            </div>
-            <div v-else>
-              <p>{{ userStore.user.email }}</p>
-            </div>
-          </div>
-        </div>
-
-        <div v-if="userStore.user.type == 'C'">
-          <div class="row">
-            <div class="col-50">
-              <b>Phone:</b>
-              <!-- Editing Row Phone -->
-              <div v-if="editRow" class="mb-2">
-                <input type="text" class="form-control" id="inputName" placeholder="Enter Phone" required
-                       v-model="phoneInput">
-                <field-error-message :errors="errors" fieldName="phone"></field-error-message>
-              </div>
-              <div v-else>
-                <p>{{ userStore.customer.phone }}</p>
-              </div>
-            </div>
-
-            <div class="col-50">
-              <b>NIF:</b>
-              <!-- Editing Row Nif -->
-              <div v-if="editRow" class="mb-2">
-                <input type="text" class="form-control" id="inputEmail" placeholder="Enter NIF" required
-                       v-model="nifInput">
-                <field-error-message :errors="errors" fieldName="nif"></field-error-message>
-              </div>
-              <div v-else>
-                <p> {{ userStore.customer.nif }}</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="col-50">
-              <b>Default Payment Type:</b>
-              <!-- Editing Row Default Payment Type -->
-              <div v-if="editRow" class="mb-2">
-                <select class="form-select" id="selectType" v-model="default_payment_typeInput">
-                  <option value="visa">Visa</option>
-                  <option value="mbway">MBWay</option>
-                  <option value="paypal">PayPal</option>
-                </select>
-              </div>
-              <div v-else>
-                <p>{{ userStore.customer.default_payment_type }}</p>
-              </div>
-            </div>
-            <div class="col-50">
-              <b>Default Payment Reference:</b>
-              <!-- Editing Row Default Payment Type -->
-              <div v-if="editRow" class="mb-2">
-                <div v-if="default_payment_typeInput == 'visa'">
-                  <input type="text" class="form-control" id="inputVisaReference"
-                         placeholder="Enter Visa Card ID Payment Reference" required
-                         v-model="default_payment_referenceInput">
-                  <field-error-message :errors="errors" fieldName="visa"></field-error-message>
-                </div>
-                <div v-else-if="default_payment_typeInput == 'mbway'">
-                  <input type="text" class="form-control" id="inputNumberReference"
-                         placeholder="Enter Phone Number Payment Reference" required
-                         v-model="default_payment_referenceInput">
-                  <field-error-message :errors="errors" fieldName="mbway"></field-error-message>
-                </div>
-                <div v-else>
-                  <input type="text" class="form-control" id="inputEmailReference"
-                         placeholder="Enter Email Payment Reference"
-                         required v-model="default_payment_referenceInput">
-                  <field-error-message :errors="errors" fieldName="paypal"></field-error-message>
-                </div>
-              </div>
-              <div v-else>
-                <p> {{ userStore.customer.default_payment_reference }}</p>
-              </div>
-            </div>
-            <h5>Points:</h5>
-            <p>{{ userStore.customer.points }}</p>
-          </div>
-        </div>
-      </div>
-      <div class="w-25">
-        <div class="mb-3">
-          <b class="form-label">Photo:</b>
-
-          <div v-if="editRow" class="mb-2">
-            <div class="form-control text-center">
-
-              <div v-if="newPhoto != null" class="mb-2">
-                <img :src="newPhoto" class="w-100"/>
-              </div>
-              <div v-else>
-                <img :src="userStore.userPhotoUrl" class="w-100"/>
-              </div>
-              <input type="file" class="form-control" id="photo_url" name="photo_url"
-                     accept="image/png, image/jpeg, image/jpg" @change="updatePhoto">
-            </div>
+      <div class="profile-body">
+        <div class="profile-field">
+          <label class="profile-label">Name:</label>
+          <!-- Editing Row Name -->
+          <div v-if="editRow">
+            <input
+                type="text"
+                class="form-control"
+                id="inputName"
+                placeholder="Enter Name"
+                required
+                v-model="nameInput"
+                @focus="errors != null && errors.name != null ? errors.name = null : null">
+            <field-error-message
+                :errors="errors"
+                fieldName="name"
+            ></field-error-message>
           </div>
           <div v-else>
-            <div class="form-control text-center">
-              <img
-                  :src="userStore.userPhotoUrl" class="w-100"/>
-            </div>
+            <span> {{ userStore.user.name }}</span>
           </div>
         </div>
 
-        <div v-if="!editRow" class="mb-2">
-          <button type="button" class="btn btn-primary px-5" @click="editProfile">Edit Profile</button>
+        <div class="profile-field">
+          <label class="profile-label">Email:</label>
+          <!-- Editing Row Email -->
+          <div v-if="editRow">
+            <input
+                type="text"
+                class="form-control"
+                id="inputEmail"
+                placeholder="Enter Email"
+                required
+                v-model="emailInput"
+                @focus="errors != null && errors.email != null ? errors.email = null : null">
+            <field-error-message
+                :errors="errors"
+                fieldName="email"
+            ></field-error-message>
+          </div>
+          <div v-else>
+            <span>{{ userStore.user.email }}</span>
+          </div>
+        </div>
+
+        <div v-if="userStore.user.type == 'C'" class="div-customer-details">
+          <div class="profile-field">
+            <label class="profile-label">Phone Number:</label>
+            <!-- Editing Row Phone -->
+            <div v-if="editRow">
+              <input
+                  type="text"
+                  class="form-control"
+                  id="inputName"
+                  placeholder="Enter Phone"
+                  required
+                  v-model="phoneInput"
+                  @focus="errors != null && errors.phone != null ? errors.phone = null : null">
+              <field-error-message :errors="errors" fieldName="phone"></field-error-message>
+            </div>
+            <div v-else>
+              <span>{{ userStore.customer.phone }}</span>
+            </div>
+          </div>
+
+          <div class="profile-field">
+            <label class="profile-label">NIF:</label>
+            <!-- Editing Row Nif -->
+            <div v-if="editRow">
+              <input
+                  type="text"
+                  class="form-control"
+                  id="inputEmail"
+                  placeholder="Enter NIF"
+                  required
+                  v-model="nifInput"
+                  @focus="errors != null && errors.nif != null ? errors.nif = null : null">
+              <field-error-message :errors="errors" fieldName="nif"></field-error-message>
+            </div>
+            <div v-else>
+              <span> {{ userStore.customer.nif }}</span>
+            </div>
+          </div>
+
+
+          <div class="profile-field">
+            <label class="profile-label">Default Payment Type:</label>
+            <!-- Editing Row Default Payment Type -->
+            <div v-if="editRow">
+              <select class="form-select" id="selectType" v-model="default_payment_typeInput"
+                      @focus="errors != null && errors.payment_type != null ? errors.payment_type = null : null">
+                <option value="visa">Visa</option>
+                <option value="mbway">MBWay</option>
+                <option value="paypal">PayPal</option>
+              </select>
+            </div>
+            <div v-else>
+              <span>{{ userStore.customer.default_payment_type }}</span>
+            </div>
+            <field-error-message
+                :errors="errors"
+                fieldName="payment_type"
+                class="register-field register-error"
+            ></field-error-message>
+          </div>
+          <div class="profile-field">
+            <label class="profile-label">Default Payment Reference:</label>
+            <!-- Editing Row Default Payment Type -->
+            <div v-if="editRow">
+              <div v-if="default_payment_typeInput == 'visa'" style="width: inherit">
+                <input type="text" class="form-control" id="inputVisaReference"
+                       placeholder="Enter Visa Card ID Payment Reference" required
+                       v-model="default_payment_referenceInput"
+                       @focus="errors != null && errors.payment_reference != null ? errors.payment_reference = null : null">
+              </div>
+              <div v-else-if="default_payment_typeInput == 'mbway'" style="width: inherit">
+                <input type="text" class="form-control" id="inputNumberReference"
+                       placeholder="Enter Phone Number Payment Reference" required
+                       v-model="default_payment_referenceInput"
+                       @focus="errors != null && errors.payment_reference != null ? errors.payment_reference = null : null">
+              </div>
+              <div v-else style="width: inherit">
+                <input type="text" class="form-control" id="inputEmailReference"
+                       placeholder="Enter Email Payment Reference"
+                       required v-model="default_payment_referenceInput"
+                       @focus="errors != null && errors.payment_reference != null ? errors.payment_reference = null : null"
+                />
+              </div>
+            </div>
+            <div v-else>
+              <span> {{ userStore.customer.default_payment_reference }}</span>
+            </div>
+          </div>
+          <field-error-message
+              :errors="errors"
+              fieldName="payment_reference"
+              class="register-field register-error"
+          ></field-error-message>
+          <div class="profile-field">
+            <label class="profile-label">Points:</label>
+            <div class="mb-2">
+              <span>{{ userStore.customer.points }}</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    <div v-if="editRow" class="mb-2">
-      <div class="mb-3 d-flex justify-content-end">
-        <button type="button" class="btn btn-primary px-5" @click="save">Save</button>
-        <button type="button" class="btn btn-light px-5" @click="cancel">Cancel</button>
+
+    <div class="w-25">
+      <div class="mb-3">
+        <b class="form-label">Photo:</b>
+
+        <div v-if="editRow">
+          <div class="form-control text-center">
+
+            <div v-if="newPhoto != null" class="mb-2">
+              <img :src="newPhoto" class="w-100"/>
+            </div>
+            <div v-else>
+              <img :src="userStore.userPhotoUrl" class="w-100"/>
+            </div>
+            <input type="file" class="form-control" id="photo_url" name="photo_url"
+                   accept="image/png, image/jpeg, image/jpg" @change="updatePhoto">
+          </div>
+        </div>
+        <div v-else>
+          <div class="form-control text-center">
+            <img
+                :src="userStore.userPhotoUrl" class="w-100"/>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="!editRow">
+      <div class="mb-3 d-flex justify-content-center">
+        <button type="button" class="btn px-5 btn-profile" @click="editProfile">Edit Profile</button>
+      </div>
+    </div>
+    <div v-if="editRow">
+      <div class="mb-3 d-flex justify-content-center">
+        <div class="mx-2 mt-2">
+          <button type="button" class="btn px-5 btn-profile" @click="save" :disabled="profileBool">Save</button>
+        </div>
+        <div class="mx-2 mt-2">
+          <button type="button" class="btn px-5 btn-cancel" @click="cancel">Cancel</button>
+        </div>
       </div>
     </div>
   </form>
@@ -371,58 +419,71 @@ const updatePhoto = (e) => {
 
 <style scoped>
 
-@media (max-width: 800px) {
-  .row {
-    flex-direction: column-reverse;
-  }
-
-  .col-25 {
-    margin-bottom: 20px;
-  }
-}
-
-input[type=text] {
+.div-customer-details {
   width: 100%;
-  margin-bottom: 20px;
-  padding: 12px;
 }
 
-.btn-success:hover {
-  background-color: #0b450f;
+.profile-error {
+  margin-left: 60%;
+  position: relative;
+  top: -15px;
+  margin-bottom: 0px !important;
 }
 
-select {
-  width: 100%;
-  margin-bottom: 20px;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 3px;
+.btn-cancel:hover,
+.btn-cancel:active {
+  background-color: #4d3838;
+  border-color: #4d3838;
+  color: white;
 }
 
-body {
-  font-family: Arial;
-  font-size: 17px;
-  padding: 8px;
+.btn-cancel {
+  height: 3rem;
+  align-self: center;
+  background-color: #5e4444;
+  border-color: #5e4444;
+  color: white;
+  font-weight: bolder;
 }
 
-* {
-  box-sizing: border-box;
+.btn-profile:hover,
+.btn-profile:active {
+  background-color: #ff8300 !important;
+  color: white;
 }
 
-.row {
-  display: -ms-flexbox;
-  /* IE10 */
+.btn-profile {
+  height: 3rem;
+  align-self: center;
+  background-color: #ffa71dd6;
+  border-color: #ffa71dd6;
+  color: white;
+  font-weight: bolder;
+}
+
+.profile-label {
+  width: 40%;
+}
+
+.profile-field {
   display: flex;
-  -ms-flex-wrap: wrap;
-  /* IE10 */
-  flex-wrap: wrap;
-  margin: 0 -16px;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  padding: 10px;
+}
+
+.profile-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 60%;
+  margin: auto;
+}
+
+a {
+  color: #725151;
 }
 
 
-.col-50 {
-  -ms-flex: 50%;
-  /* IE10 */
-  flex: 50%;
-}
 </style>

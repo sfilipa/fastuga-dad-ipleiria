@@ -169,7 +169,7 @@ class OrderController extends Controller
     //Statistics - Customer
     public function getAllCustomerOrders(Request $request, User $user)
     {
-       $this->authorize('statistics', $user);// middleware
+       $this->authorize('customerHistory', $user);// middleware
 
         $id = Customer::where('user_id', $user->id)->pluck('id');
         $query = Order::query();
@@ -197,6 +197,9 @@ class OrderController extends Controller
     //Statistics - Manager - Orders
     public function getTotalOrdersByMonth()
     {
+
+       $this->authorize('statisticsManager', 'App\Models\User');// middleware
+
         $items = Order::orderBy('month', 'ASC')->groupBy('month')
         ->selectRaw('MONTH(date) as month, count(id) as count')
         ->pluck('month','count');
@@ -247,6 +250,8 @@ class OrderController extends Controller
     //Statistics - Manager - Orders - faturacao
     public function getTotalGainedByMonth()
     {
+        $this->authorize('statisticsManager', 'App\Models\User');// middleware
+
         $items = Order::orderBy('month', 'ASC')->where('status', '=', 'D')->groupBy('month')
         ->selectRaw('MONTH(date) as month, sum(total_paid) as sum')
         ->pluck('month','sum');
@@ -297,7 +302,8 @@ class OrderController extends Controller
     //Statistics - Delivery
     public function getAllOrdersDelivered(Request $request, User $user)
     {
-        $this->authorize('statistics', $user); //middleware
+        $this->authorize('deliverHistory', $user); //middleware
+
         $query = Order::query();
         $type = $request->query('type');
         if($type != null){
@@ -314,7 +320,8 @@ class OrderController extends Controller
 
     public function getTotalOrdersDelivered(User $user)
     {
-        $this->authorize('statistics', $user);//middleware
+        $this->authorize('deliverHistory', $user);//middleware
+
         $items = Order::where('delivered_by', $user->id)->orderBy('month', 'ASC')->groupBy('month')
                 ->selectRaw('MONTH(date) as month, count(id) as count')
                 ->pluck('month','count');

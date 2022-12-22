@@ -28,7 +28,7 @@ const orderCompletedDialog = ref(false);
 const ticketNumber = ref(0);
 
 const deleteAllClick = (product) => {
-  const idx = store.items.findIndex((element) => element.name === product.name && element.notes === product.notes);
+  const idx = store.items.findIndex((element) => element.name === product.name && element.notes === (product.notes == 'null' ? null : product.notes));
   if (idx >= 0) {
     store.items.splice(idx, product.count);
   }
@@ -796,7 +796,7 @@ const groupItems = (orderItems) => {
 .order-list-body {
   display: flex;
   flex-direction: column;
-  width: inherit;
+  width: 100%;
   margin-left: 15px;
 }
 

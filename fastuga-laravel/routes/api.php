@@ -28,10 +28,10 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/delivery', [OrderController::class, 'getOrderForDelivery'])
             ->middleware('can:viewDeliveryOrders, App\Models\Order');
         Route::get('/customer/{user}', [OrderController::class, 'getAllCustomerOrders']);//statistics - customers
-        Route::get('/delivered/{user}', [OrderController::class, 'getAllOrdersDelivered']);//statistics - driver
+        Route::get('/delivered/{user}', [OrderController::class, 'getAllOrdersDelivered']);//statistics - delivery
         Route::get('totalOrders/bymonth', [OrderController::class, 'getTotalOrdersByMonth']);//statistics - managers
         Route::get('totalGained/bymonth', [OrderController::class, 'getTotalGainedByMonth']);//statistics - managers
-        Route::get('{user}/totaldelivered/bymonth', [OrderController::class, 'getTotalOrdersDelivered']);
+        Route::get('{user}/totaldelivered/bymonth', [OrderController::class, 'getTotalOrdersDelivered']);//statistics - delivery
     });
 
     Route::prefix('order-items')->group(function () {
