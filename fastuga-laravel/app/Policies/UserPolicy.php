@@ -25,14 +25,29 @@ class UserPolicy
     }
     public function update(User $user, User $model)
     {
-        return $user->type == "EM" || $user->id == $model->id;
+        return /*$user->type == "EM" ||*/ $user->id == $model->id;
     }
     public function updatePassword(User $user, User $model)
     {
         return $user->id == $model->id;
     }
-    public function statistics(User $user, User $model)
+    public function deliverHistory(User $user, User $model)
     {
-        return $user->id == $model->id;
+        return $user->type == "ED" || $user->id == $model->id;
     }
+
+    public function chefHistory(User $user, User $model)
+    {
+        return $user->type == "EC" || $user->id == $model->id;
+    }
+
+     public function customerHistory(User $user, User $model)
+     {
+        return $user->type == "C" || $user->id == $model->id;
+     }
+     public function statisticsManager(User $user)
+     {
+        return $user->type == "EM";
+     }
 }
+

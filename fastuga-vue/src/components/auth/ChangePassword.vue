@@ -10,7 +10,11 @@ const userStore = useUserStore()
 const serverBaseUrl = inject("serverBaseUrl");
 
 const axios = inject("axios");
-const errors = ref(null)
+const errors = ref({
+  current_password: '',
+  password: '',
+  confirm_password: ''
+})
 const passwords = ref({
   current_password: '',
   password: '',
@@ -55,20 +59,23 @@ const changePassword = async () => {
         <label class="password-label">Current Password:</label>
         <input type="password" class="form-control" id="inputCurrentPassword" placeholder="Enter Current Password"
                required
-               v-model="passwords.current_password">
+               v-model="passwords.current_password"
+               @focus="errors != null && errors.current_password != null ? errors.current_password = null : null"/>
       </div>
       <field-error-message :errors="errors" fieldName="current_password" class="password-field password-error"></field-error-message>
       <div class="password-field">
         <label class="password-label">New Password:</label>
         <input type="password" class="form-control" id="inputNewPassword" placeholder="Enter New Password" required
-               v-model="passwords.password">
+               v-model="passwords.password"
+               @focus="errors != null && errors.password != null ? errors.password = null : null">
       </div>
       <field-error-message :errors="errors" fieldName="password" class="password-field password-error"></field-error-message>
       <div class="password-field">
           <label class="password-label">Password Confirmation:</label>
           <input type="password" class="form-control" id="inputPasswordConfirm"
                  placeholder="Enter Password Confirmation" required
-                 v-model="passwords.confirm_password">
+                 v-model="passwords.confirm_password"
+                 @focus="errors != null && errors.confirm_password != null ? errors.confirm_password = null : null">
         </div>
       <field-error-message :errors="errors" fieldName="confirm_password" class="password-field password-error"></field-error-message>
       <div class="mb-3 d-flex justify-content-center">
@@ -120,10 +127,11 @@ a {
 }
 
 .password-error{
-  margin-left: 60%;
+  margin-left: 40%;
   position: relative;
   top: -15px;
   margin-bottom: 0px !important;
+  padding: 0px;
 }
 </style>
 

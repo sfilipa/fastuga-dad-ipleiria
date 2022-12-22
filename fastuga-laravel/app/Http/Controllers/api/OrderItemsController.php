@@ -43,7 +43,7 @@ class OrderItemsController extends Controller
     //Statistics - Chef
     public function getAllChefOrdersPrepared(User $user)
     {//filtrar por dishes
-        $this->authorize('statistics', $user); //middleware
+        $this->authorize('chefHistory', $user);//middleware
 
         $allProducts = Product::where('type', 'hot dish')->get('id');
 
