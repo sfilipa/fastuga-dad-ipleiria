@@ -196,7 +196,6 @@ const cancelClick = () => {
 };
 
 const dialogConfirmAdd = () => {
-  console.log(notes.value);
   const cleanNotes = notes.value.filter((obj) => {
     return obj.text.length != 0;
   });

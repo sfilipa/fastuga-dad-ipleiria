@@ -210,7 +210,6 @@ const updatePhoto = (e) => {
   reader.readAsDataURL(uploadedImage);
   reader.onload = (event) => {
     photoInput.value = event.target.result;
-    console.log(photoInput.value)
   }
 }
 

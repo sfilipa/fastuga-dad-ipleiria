@@ -318,8 +318,6 @@ const groupItems = (orderItems) => {
     };
   });
 
-  console.log(countsExtended);
-
   return countsExtended;
 };
 </script>
