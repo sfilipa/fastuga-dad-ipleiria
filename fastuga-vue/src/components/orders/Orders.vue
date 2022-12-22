@@ -60,11 +60,7 @@
             'value': Number.parseInt(orderObj.total_paid)
           }
           axios.post(`${REFUND_URL}/api/refunds`, requestBody)
-            .then((response) => {
-                console.log(response)
-            })
             .catch((error) => {
-              //coloquei só para o erro 422 pois há valores gerados de pagamentos no seed na BD que nao sao válidos - confirmar
                 if (error.response.status != 422) {
                   toast.error('Refund was not created due to validation errors - ' + error.response.data.message)
                 }

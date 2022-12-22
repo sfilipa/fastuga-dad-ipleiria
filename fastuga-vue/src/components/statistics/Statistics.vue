@@ -159,7 +159,6 @@ async function LoadTotalOrdersDelivered() {
 async function LoadOrdersPrepared() {
   try {
     const response = await axiosLaravel.get(`/order-items/prepared/${userStore.userId}`)
-    console.log(Object.values(response.data))
     totalDishes.value = Object.keys(response.data)
     dishesName.value = Object.values(response.data)
 

@@ -30,7 +30,6 @@ const LoadHotDishes = () => {
 
 const changeStatus = (productInOrder) => {
   const productItemObject = Object.assign({}, productInOrder);
-  console.log(productItemObject);
   axiosLaravel
     .patch(`/order-items/${productInOrder.id}`, {
       userId: user.userId,
@@ -43,7 +42,6 @@ const changeStatus = (productInOrder) => {
         const order = new Object();
         order.name = productInOrder.product_id.name;
         order.chef = user.user;
-        console.log("order");
         socket.emit("hotDishIsReady", order);
       } else {
         toast.success(
@@ -52,7 +50,6 @@ const changeStatus = (productInOrder) => {
         const order = new Object();
         order.name = productInOrder.product_id.name;
         order.chef = user.user;
-        console.log("order");
         socket.emit("hotDishIsPreparing", order);
       }
       LoadHotDishes();

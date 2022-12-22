@@ -31,7 +31,6 @@ const changePassword = async () => {
       .patch(`/users/${userStore.userId}/password`, passwords.value)
       .then((response) => {
         passwordBool.value = false;
-        console.log(response)
         toast.info("Password updated successfully");
         router.back()
       })

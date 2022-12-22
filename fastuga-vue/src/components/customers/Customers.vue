@@ -25,9 +25,7 @@ const loadUsers = (pageNumber) => {
   let URL = "/customers?page=" + pageNumber;
 
   if (filterByName.value.length != 0) {
-    console.log(filterByName.value);
     URL += `&name=${filterByName.value}`;
-    console.log(URL);
   }
   if (filterByEmail.value.length != 0) {
     URL += `&email=${filterByEmail.value}`;
@@ -39,7 +37,6 @@ const loadUsers = (pageNumber) => {
   axios
     .get(URL)
     .then((response) => {
-      console.log(response);
       customers.value = response.data.data;
       lastPage.value = response.data.last_page;
     })
@@ -57,9 +54,7 @@ const show = (customer) => {
 };
 
 const block = async (customer) => {
-  console.log(customer);
   const obj = Object.assign({}, customer);
-  console.log(obj);
   try {
     const { data } = await axios({
       method: "put",
@@ -91,7 +86,6 @@ const block = async (customer) => {
 
 const unblock = async (customer) => {
   const obj = Object.assign({}, customer);
-  console.log(obj);
   try {
     const { data } = await axios({
       method: "put",
@@ -122,7 +116,6 @@ const unblock = async (customer) => {
 };
 
 const deleteFromDatabase = async (customer) => {
-  console.log("Delete");
   const obj = Object.assign({}, customer);
   try {
     const { data } = await axios({

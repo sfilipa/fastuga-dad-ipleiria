@@ -1,12 +1,12 @@
 <script setup>
 import { ref, inject } from "vue";
 import avatarNoneUrl from "@/assets/avatar-none.png";
-import axios from "axios";
 
 import { useRouter } from "vue-router";
 
 const router = useRouter();
 const toast = inject("toast");
+const axios = inject("axios");
 
 const newPhoto = ref(null);
 const emit = defineEmits(["addEmployee"]);
@@ -38,7 +38,6 @@ const updatePhoto = (e) => {
   reader.readAsDataURL(uploadedImage);
   reader.onload = (event) => {
     photoInput.value = event.target.result;
-    console.log(photoInput.value);
   };
 };
 
@@ -54,9 +53,8 @@ const addEmployee = async () => {
   formData.append("photo_url", photoInput.value);
 
   await axios
-    .post(`http://localhost:8081/api/users`, formData)
+    .post(`/users`, formData)
     .then((response) => {
-      console.log(response);
       toast.info("Employee '" + response.data.data.name + "' was created");
       emit("addEmployee");
       router.push({ name: "Employees" });
@@ -89,7 +87,9 @@ const addEmployee = async () => {
           placeholder="Enter Name"
           required
           v-model="nameInput"
-          @focus="errors != null && errors.name != null ? errors.name = null : null"
+          @focus="
+            errors != null && errors.name != null ? (errors.name = null) : null
+          "
         />
       </div>
       <field-error-message
@@ -107,7 +107,11 @@ const addEmployee = async () => {
           placeholder="Enter Email"
           required
           v-model="emailInput"
-          @focus="errors != null && errors.email != null ? errors.email = null : null"
+          @focus="
+            errors != null && errors.email != null
+              ? (errors.email = null)
+              : null
+          "
         />
       </div>
       <field-error-message
@@ -125,7 +129,11 @@ const addEmployee = async () => {
           placeholder="Enter Password"
           required
           v-model="passwordInput"
-          @focus="errors != null && errors.password != null ? errors.password = null : null"
+          @focus="
+            errors != null && errors.password != null
+              ? (errors.password = null)
+              : null
+          "
         />
       </div>
       <field-error-message
@@ -136,7 +144,14 @@ const addEmployee = async () => {
 
       <div class="employee-add-field">
         <label class="employee-add-label">Employee Type:</label>
-        <select class="form-select" id="selectType" v-model="typeInput" @focus="errors != null && errors.type != null ? errors.type = null : null">
+        <select
+          class="form-select"
+          id="selectType"
+          v-model="typeInput"
+          @focus="
+            errors != null && errors.type != null ? (errors.type = null) : null
+          "
+        >
           <option value="EC">Chef</option>
           <option value="ED">Delivery</option>
           <option value="EM">Manager</option>
