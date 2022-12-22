@@ -262,6 +262,7 @@ onUpdated(() => {
       confirmationBtn="Add Item(s)"
       :msg="``"
       @confirmed="dialogConfirmAdd"
+      @hide="addDialog=null"
     >
       <div class="confirmation-middle">
         <div class="confirmation-row">
@@ -271,6 +272,7 @@ onUpdated(() => {
             class="form-control confirmation-dialog-input"
             type="number"
             min="1"
+            @change="resetNotes()"
           />
         </div>
         <div
@@ -299,7 +301,7 @@ onUpdated(() => {
           <input
             v-model="note.text"
             type="text"
-            placeholder="enter note here"
+            placeholder="Enter note here"
             class="form-control"
           />
           <button @click="removeNote(note)" class="btn"><i class="bi bi-x"></i></button>
