@@ -10,8 +10,11 @@
   const axiosLaravel = inject('axios')
   const router = useRouter()
   const toast = inject("toast")
+  const socket = inject("socket")
   const user = useUserStore()
   const componentName = "all_orders"
+  let customer = ref([]);
+
 
   const orders = ref([])
   const orderDate = ref("")
@@ -68,7 +71,18 @@
             })
         }
 
-        toast.success("Order was successfully cancelled!")
+        toast.error("Order was successfully cancelled!")
+
+        // Get User_id from Customer
+        axiosLaravel.get(`/customers/${orderObj.customer_id}`)
+          .then(response => {
+            customer = response.data;
+            orderObj['customerUserID'] = customer.data.user_id.id;
+            socket.emit("orderCancelled", orderObj)
+            LoadOrders(1)
+            return;
+          })
+        socket.emit("orderCancelled", orderObj)
         LoadOrders(1)
       })
       .catch((error)=>{
@@ -79,6 +93,28 @@
   onMounted (() => {
     LoadOrders(1)
   })
+
+//==================================================
+// Web Sockets
+//==================================================
+
+// Listen for the 'message' event from the server and log the data
+// received from the server to the users.
+
+// Order Placed
+socket.on("orderPlaced", () => {
+  LoadOrders(1);
+});
+
+// Order Ready to Deliver
+socket.on("orderReadyToDeliver", (ticket) => {
+  LoadOrders(1);
+});
+
+socket.on("update", () => {
+  LoadOrders(1);
+});
+
 </script>
 
 <template>

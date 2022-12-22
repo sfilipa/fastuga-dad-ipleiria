@@ -127,6 +127,10 @@ socket.on("hotDishIsReady", (order) => {
   toast.success(`${order.name} is ready!`);
   LoadOrders(1);
 });
+
+socket.on("update", () => {
+  LoadOrders(1);
+});
 </script>
 
 <template>
