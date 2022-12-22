@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, inject } from "vue";
+import { ref, onMounted, inject, toRaw } from "vue";
 import ProductTable from "./ProductTable.vue";
 import { useUserStore } from "../../stores/user.js";
 import { useOrderItemsStore } from "@/stores/orderItems.js";
@@ -79,9 +79,28 @@ const cancelEdit = () => {
   errors.value = null;
 };
 
-const addProductToOrder = (product, quantity) => {
-  for (let index = 0; index < quantity; index++) {
-    store.addItem(product);
+const newProduct = (product, notesParam) => {
+    return {id: product.id,
+    name: product.name,
+    description: product.description,
+    price: product.price,
+    type: product.type,
+    photo_url: product.photo_url,
+    notes: notesParam
+    }
+  };
+
+const addProductToOrder = (product, quantity, notes, quantityNotes) => {
+  for (const note of toRaw(notes)){
+    for (let index = 0; index < note.qtd; index++) {
+      store.addItem(newProduct(product, note.text));
+    }
+  }
+
+  if (quantity > quantityNotes ) {
+    for (let index = 0; index < quantity - quantityNotes; index++) {
+      store.addItem(newProduct(product, null));
+    }
   }
 };
 
@@ -191,16 +210,16 @@ socket.on("deleteProduct", (product) => {
       />
       <i class="bi bi-search name-search"></i>
     </div>
-    <div class="mx-2 mt-2 input-group rounded fastuga-font filter-name" v-if="userStore.user == null || userStore.user.type == 'C'">
+    <div
+      class="mx-2 mt-2 input-group rounded fastuga-font filter-name"
+      v-if="userStore.user == null || userStore.user.type == 'C'"
+    >
       <router-link
         class="link-secondary fastuga-font"
         :to="{ name: 'NewOrder' }"
         aria-label="Make a new order"
       >
-        <button
-          type="button"
-          class="btn btn-success hvr-grow make-order"
-        >
+        <button type="button" class="btn btn-success hvr-grow make-order">
           <i class="bi bi-check2-circle menu-bi"></i> Check Order
         </button>
       </router-link>

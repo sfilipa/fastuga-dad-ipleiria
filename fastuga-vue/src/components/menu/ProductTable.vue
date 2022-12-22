@@ -53,6 +53,9 @@ const addItemsToMenuDialog = ref(null);
 const productToAddOrder = ref(null);
 const quantityToAddOrder = ref(1);
 
+const quantityNotes = ref(0);
+const notes = ref([]);
+
 const newProduct = () => {
   return {
     id: null,
@@ -64,7 +67,40 @@ const newProduct = () => {
   };
 };
 
+const newNote = () => {
+  return {
+    qtd: 1,
+    text: "",
+  };
+};
+
 let oldProduct = newProduct();
+
+const addNoteClick = () => {
+  quantityNotes.value = quantityNotes.value + 1;
+  let newNoteObj = newNote();
+  newNoteObj.id = notes.value.length == 0 ? 1 : notes.value.length + 1;
+  notes.value.push(newNoteObj);
+};
+
+const removeNote = (note) => {
+  quantityNotes.value = quantityNotes.value - note.qtd;
+  const index = notes.value.findIndex((obj) => {
+    return obj.id === note.id;
+  });
+  notes.value.splice(index, 1);
+};
+
+const resetNotes = () => {
+  notes.value = [];
+  quantityNotes.value = 0;
+};
+
+const totalQuantityNotes = () => {
+  let total = 0;
+  notes.value.forEach((note) => (total = total + note.qtd));
+  return total;
+};
 
 const showAddDialog = (bool) => {
   addDialog.value = bool;
@@ -160,13 +196,20 @@ const cancelClick = () => {
 };
 
 const dialogConfirmAdd = () => {
-  emit("add", productToAddOrder.value, quantityToAddOrder.value);
+  console.log(notes.value);
+  const cleanNotes = notes.value.filter((obj) => {
+    return obj.text.length != 0;
+  })
+  notes.value = cleanNotes
+
+  emit("add", productToAddOrder.value, quantityToAddOrder.value, notes.value, totalQuantityNotes());
   quantityToAddOrder.value = 1;
   productToAddOrder.value = null;
 };
 
 const addClick = (product) => {
   productToAddOrder.value = product;
+  resetNotes();
   if (addItemsToMenuDialog.value !== null && addDialog.value !== null) {
     addItemsToMenuDialog.value.show();
   }
@@ -196,7 +239,10 @@ onUpdated(() => {
       : (addDialog.value = null);
   }
 
-  if(deleteConfirmationDialog.value == null && addItemsToMenuDialog.value == null){
+  if (
+    deleteConfirmationDialog.value == null &&
+    addItemsToMenuDialog.value == null
+  ) {
     addDialog.value = null;
   }
 });
@@ -212,13 +258,46 @@ onUpdated(() => {
       @confirmed="dialogConfirmAdd"
     >
       <div class="confirmation-middle">
-        <span>{{ productToAddOrderName }}:</span
-        ><input
-          v-model="quantityToAddOrder"
-          class="form-control confirmation-dialog-input"
-          type="number"
-          min="1"
-        />
+        <div class="confirmation-row">
+          <span style="width: 30%">{{ productToAddOrderName }}:</span
+          ><input
+            v-model="quantityToAddOrder"
+            class="form-control confirmation-dialog-input"
+            type="number"
+            min="1"
+          />
+        </div>
+        <div
+          v-if="notes != null"
+          v-for="note in notes"
+          class="confirmation-row"
+        >
+          <span>{{ note.qtd }}</span>
+          <button
+            @click="note.qtd = note.qtd + 1"
+            :disabled="quantityToAddOrder - totalQuantityNotes() == 0"
+          >
+            <i class="bi bi-caret-up"></i>
+          </button>
+          <button @click="note.qtd = note.qtd - 1" :disabled="note.qtd == 1">
+            <i class="bi bi-caret-down"></i>
+          </button>
+
+          <!-- <input v-model="note.qtd" type="number" min="1" :max="quantityToAddOrder-totalQuantityNotes()"/> -->
+          <input
+            v-model="note.text"
+            type="text"
+            placeholder="enter note here"
+          />
+          <button @click="removeNote(note)"><i class="bi bi-x"></i></button>
+        </div>
+        <button
+          class="btn add-notes"
+          @click="addNoteClick"
+          :disabled="totalQuantityNotes() == quantityToAddOrder"
+        >
+          Add note(s)
+        </button>
       </div>
     </ConfirmationDialog>
   </div>
@@ -348,10 +427,7 @@ onUpdated(() => {
       </div>
       <div class="product-body fastuga-colored-font">
         <!-- Editiing Row Description -->
-        <div
-          v-if="editRow && product == editingProduct"
-          style="width: 100%"
-        >
+        <div v-if="editRow && product == editingProduct" style="width: 100%">
           <textarea
             id="inputDescription"
             rows="2"
@@ -443,7 +519,11 @@ onUpdated(() => {
         </div>
 
         <!-- Editiing Row Price -->
-        <div v-if="editRow && product == editingProduct" class="mb-3" style="width: 100%;">
+        <div
+          v-if="editRow && product == editingProduct"
+          class="mb-3"
+          style="width: 100%"
+        >
           <div>
             <input
               type="number"
@@ -484,8 +564,24 @@ onUpdated(() => {
   display: inline;
 }
 
+.add-notes {
+  cursor: pointer;
+  margin-top: 2%;
+}
+
+.confirmation-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+}
+
 .confirmation-middle {
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 80%;
+  margin: auto;
 }
 
 .product-edit {
@@ -501,7 +597,6 @@ onUpdated(() => {
 .confirmation-dialog-input {
   margin-left: 4% !important;
   display: inline !important;
-  width: 20% !important;
 }
 
 .product-button {
@@ -646,4 +741,7 @@ body {
   height: 100%;
 }
 
+a {
+  color: #725151;
+}
 </style>

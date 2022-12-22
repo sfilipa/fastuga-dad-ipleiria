@@ -28,14 +28,14 @@ const orderCompletedDialog = ref(false);
 const ticketNumber = ref(0);
 
 const deleteAllClick = (product) => {
-  const idx = store.items.findIndex((element) => element.name === product.name);
+  const idx = store.items.findIndex((element) => element.name === product.name && element.notes === product.notes);
   if (idx >= 0) {
     store.items.splice(idx, product.count);
   }
 };
 
 const deleteClick = (product) => {
-  const idx = store.items.findIndex((element) => element.name === product.name);
+  const idx = store.items.findIndex((element) => element.name === product.name && element.notes === product.notes);
   if (idx >= 0) {
     store.items.splice(idx, 1);
   }
@@ -66,22 +66,25 @@ const refocus = () => {
 };
 
 const checkCurrentOrdersLimit = () => {
-  axiosLaravel.get('/orders/active')
-      .then((response)=>{
-        const currentOrdersCount = response.data
-        if(currentOrdersCount > 99){
-          return false
-        }
-      })
-      .catch((error)=>{
-        console.log(error)
-      })
-  return true
-}
+  axiosLaravel
+    .get("/orders/active")
+    .then((response) => {
+      const currentOrdersCount = response.data;
+      if (currentOrdersCount > 99) {
+        return false;
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+  return true;
+};
 
 const confirmPayment = () => {
-  if(!checkCurrentOrdersLimit()){
-    toast.error("Can't place a new order - we're currently at full capacity (max. 99 orders)")
+  if (!checkCurrentOrdersLimit()) {
+    toast.error(
+      "Can't place a new order - we're currently at full capacity (max. 99 orders)"
+    );
   }
 
   const paymentBody = {
@@ -275,7 +278,9 @@ const transformatePointsToEuros = (points) => {
 const dialogConfirm = () => {
   user.loadMyCurrentOrders();
   store.resetOrderItems();
-  toast.success("Your Order is Preparing! Ticket Number: " + ticketNumber.value);
+  toast.success(
+    "Your Order is Preparing! Ticket Number: " + ticketNumber.value
+  );
   socket.emit("orderPlaced", ticketNumber.value);
   //   router.push('/publicBoard')
 };
@@ -285,28 +290,35 @@ const groupItems = (orderItems) => {
   var counts = arrayOrderItems.reduce((newArray, product) => {
     if (product != null) {
       var name = product.name;
+      var note = product.notes;
+      var name_note = name + "_" + note;
 
-      if (!newArray.hasOwnProperty(name)) {
-        newArray[name] = 0;
+      if (!newArray.hasOwnProperty(name_note)) {
+        newArray[name_note] = 0;
       }
 
-      newArray[name]++;
+      newArray[name_note]++;
     }
     return newArray;
   }, {});
 
   var countsExtended = Object.keys(counts).map((productName) => {
+    var name = productName.split("_")[0];
+    var note = productName.slice(productName.indexOf("_") + 1);
     return {
-      name: productName,
+      name: name,
       count: counts[productName],
       price: arrayOrderItems.find((product) =>
-        product != null ? product.name == productName : false
+        product != null ? product.name == name : false
       ).price,
       photo_url: arrayOrderItems.find((product) =>
-        product != null ? product.name == productName : false
+        product != null ? product.name == name : false
       ).photo_url,
+      notes: note,
     };
   });
+
+  console.log(countsExtended);
 
   return countsExtended;
 };
@@ -364,7 +376,7 @@ const groupItems = (orderItems) => {
 
             <div class="order-list-row" style="margin-bottom: 2%">
               <span>{{ product.price }}€</span>
-
+              <span class="order-product-notes" v-if="product.notes != 'null'">-- {{ product.notes }}</span>
               <div class="order-right">
                 <div class="order-list-qtd-buttons">
                   <button class="btn order-list-qtd-button">
@@ -487,40 +499,6 @@ const groupItems = (orderItems) => {
             style="font-size: 16px"
           ></field-error-message>
         </div>
-        <!-- <div class="payment-box text-center"> 
-            <div >
-                <input ref="referenceFocus" @change="refocus" type="radio" name="payment" v-model="paymentType" value="visa" id="visa">
-                <label for="visa">Visa</label>
-            
-                <input ref="referenceFocus" @change="refocus" type="radio" name="payment" v-model="paymentType" value="mbway" id="mbway">
-                <label for="mbway">MBWay</label>
-            
-                <input ref="referenceFocus" @change="refocus" type="radio" name="payment" v-model="paymentType" value="paypal" id="paypal">
-                <label for="paypal">PayPal</label>
-            </div>
-            
-             <div class="btn-group payment-choice">
-                <input ref="referenceFocus" @change="refocus" type="radio" class="btn-check" name="payment" v-model="paymentType" value="visa" id="visa">
-                <label class="btn btn-secondary" for="visa">Visa</label>
-            
-                <input ref="referenceFocus" @change="refocus" type="radio" class="btn-check" name="payment" v-model="paymentType" value="mbway" id="mbway">
-                <label class="btn btn-secondary" for="mbway">MBWay</label>
-            
-                <input ref="referenceFocus" @change="refocus" type="radio" class="btn-check" name="payment" v-model="paymentType" value="paypal" id="paypal">
-                <label class="btn btn-secondary" for="paypal">PayPal</label>
-            </div> 
-            
-                <div v-if="paymentType=='visa'">
-                    <input v-model="paymentReference" class="input-group input-group-sm" type="text" placeholder="Insert Visa Card ID"/>
-                </div>
-                <div v-else-if="paymentType=='mbway'">
-                    <input v-model="paymentReference" class="input-group input-group-sm" type="text" placeholder="Insert Phone Number"/>
-                </div>
-                <div v-else>
-                    <input v-model="paymentReference" class="input-group input-group-sm" type="text" placeholder="Insert Email Address"/>
-                </div>
-            
-        </div> -->
         <br />
         <div class="payment-details">
           <div v-if="customer">
@@ -593,8 +571,7 @@ const groupItems = (orderItems) => {
 </template>
 
 <style scoped>
-
-.align-payment-choices{
+.align-payment-choices {
   margin: auto;
   flex-direction: row;
   display: flex;
@@ -749,8 +726,13 @@ const groupItems = (orderItems) => {
   font-size: 19px;
 }
 
+.order-product-notes {
+  width: 100%;
+  margin-left: 5%;
+}
+
 .order-product-name {
-  width: -moz-available;
+  width: 100%;
   font-size: 17px;
   margin-top: 1%;
 }
@@ -802,7 +784,7 @@ const groupItems = (orderItems) => {
 }
 
 .order-right {
-  width: -moz-available;
+  width: 100%;
 }
 
 .order-list-row {
