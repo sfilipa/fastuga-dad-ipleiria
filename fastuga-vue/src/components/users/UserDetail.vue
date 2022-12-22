@@ -219,7 +219,7 @@ const updatePhoto = (e) => {
 <template>
   <form class="row g-3 needs-validation" novalidate @submit.prevent="save">
     <div class="mx-2 fastuga-font">
-      <h3 class="mt-4">{{ userStore.user.name }}</h3>
+      <h3 class="mt-4">{{ userStore.user?.name }}</h3>
     </div>
     <hr/>
 
@@ -244,7 +244,7 @@ const updatePhoto = (e) => {
             ></field-error-message>
           </div>
           <div v-else class="div-detail">
-            <span> {{ userStore.user.name }}</span>
+            <span> {{ userStore.user?.name }}</span>
           </div>
         </div>
 
@@ -266,11 +266,11 @@ const updatePhoto = (e) => {
             ></field-error-message>
           </div>
           <div v-else class="div-detail">
-            <span>{{ userStore.user.email }}</span>
+            <span>{{ userStore.user?.email }}</span>
           </div>
         </div>
 
-        <div v-if="userStore.user.type == 'C'" class="div-customer-details">
+        <div v-if="userStore.user?.type == 'C'" class="div-customer-details">
           <div class="profile-field">
             <label class="profile-label">Phone Number:</label>
             <!-- Editing Row Phone -->
