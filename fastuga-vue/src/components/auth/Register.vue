@@ -1,276 +1,377 @@
 <script setup>
-import {ref, inject} from 'vue'
+import { ref, inject } from "vue";
 
-import axios from 'axios'
-import {useRouter} from 'vue-router'
-import {useUserStore} from '../../stores/user.js'
+import axios from "axios";
+import { useRouter } from "vue-router";
+import { useUserStore } from "../../stores/user.js";
 
-const router = useRouter()
-const toast = inject('toast')
+const router = useRouter();
+const toast = inject("toast");
 
-const errors = ref(null)
+const errors = ref({
+  name: null,
+  email: null,
+  password: null,
+  passwordConfirmation: null,
+  name: null,
+  nif: null,
+  phone: null,
+  payment_type: null,
+  payment_reference: null,
+});
 
-const nameInput = ref('')
-const emailInput = ref('')
-const passwordInput = ref('')
-const confirmationPasswordInput = ref('')
+const nameInput = ref("");
+const emailInput = ref("");
+const passwordInput = ref("");
+const confirmationPasswordInput = ref("");
 
-const phoneInput = ref('')
-const nifInput = ref('')
-const default_payment_typeInput = ref('visa')
-const default_payment_referenceInput = ref('')
+const phoneInput = ref("");
+const nifInput = ref("");
+const default_payment_typeInput = ref("visa");
+const default_payment_referenceInput = ref("");
 
-const emit = defineEmits(['register'])
+const registerBool = ref(false);
+
+const emit = defineEmits(["register"]);
 
 const register = async () => {
-  if (userValidations() == -1) {
-    return
+  registerBool.value = true;
+  const userV = userValidations();
+  const customerV =  customerValidations();
+  const paymentV = paymentReferenceValidations();
+  if (userV == -1 || customerV == -1 || paymentV == -1) {
+    registerBool.value = false;
+    console.log(errors)
+    return;
   }
-  if (customerValidations() == -1) {
-    return
-  }
-  if (paymentReferenceValidations() == -1) {
-    return
-  }
+  // if (customerValidations() == -1) {
+  //   registerBool.value = false;
+  //   return;
+  // }
+  // if (paymentReferenceValidations() == -1) {
+  //   registerBool.value = false;
+  //   return;
+  // }
   let formData = new FormData();
 
-  formData.append('name', nameInput.value);
-  formData.append('email', emailInput.value);
-  formData.append('password', passwordInput.value);
-  formData.append('blocked', 0);
-  formData.append('type', 'C');
-  formData.append('_method', 'POST');
-  formData.append('phone', phoneInput.value);
-  formData.append('nif', nifInput.value);
-  formData.append('default_payment_type', default_payment_typeInput.value);
-  formData.append('default_payment_reference', default_payment_referenceInput.value);
-  formData.append('points', 0);
+  formData.append("name", nameInput.value);
+  formData.append("email", emailInput.value);
+  formData.append("password", passwordInput.value);
+  formData.append("blocked", 0);
+  formData.append("type", "C");
+  formData.append("_method", "POST");
+  formData.append("phone", phoneInput.value);
+  formData.append("nif", nifInput.value);
+  formData.append("default_payment_type", default_payment_typeInput.value);
+  formData.append(
+    "default_payment_reference",
+    default_payment_referenceInput.value
+  );
+  formData.append("points", 0);
 
-  await axios.post(`http://localhost:8081/api/register`, formData)
-      .then((response) => {
-        toast.success('Register Successful.')
-        emit('register')
-        router.push({name: "Login"})
-      })
-      .catch((error) => {
-        const errorSplit = error.response.data.split('.')
-        toast.error("Register Failed - " + errorSplit[0] + ".")
-      });
-}
+  await axios
+    .post(`http://localhost:8081/api/register`, formData)
+    .then((response) => {
+      registerBool.value = false;
+      toast.success("Register Successful.");
+      emit("register");
+      router.push({ name: "Login" });
+    })
+    .catch((error) => {
+      registerBool.value = false;
+      const errorSplit = error.response.data.split(".");
+      toast.error("Register Failed - " + errorSplit[0] + ".");
+    });
+};
 
 const userValidations = () => {
-  if (nameInput.value == '') {
-    errors.value = {
-      name: ["Name field cannot be empty!"]
-    }
-    return -1
+  let invalid = 0;
+  
+  // Name
+  if (nameInput.value == "") {
+    errors.value.name =  ["Name field cannot be empty!"];
+    invalid = -1;
   }
-  if (emailInput.value == '') {
-    errors.value = {
-      email: ["Email field cannot be empty!"]
-    }
-    return -1
+
+  // Email
+  var pattern = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+  if (emailInput.value == "") {
+    errors.value.email = ["Email field cannot be empty!"];
+    invalid = -1;
   }
-  var pattern = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
-  if (!emailInput.value.match(pattern)) {
-    errors.value = {
-      email: ["Invalid Email Format!"]
-    }
-    return -1
+  else if (!emailInput.value.match(pattern)) {
+    errors.value.email = ["Invalid Email Format!"];
+    invalid = -1;
   }
-  if (passwordInput.value == '') {
-    errors.value = {
-      password: ["Password field cannot be empty!"]
-    }
-    return -1
+
+  // Password
+  if (passwordInput.value == "") {
+    errors.value.password = ["Password field cannot be empty!"];
+    invalid = -1;
   }
-  if (!passwordInput.value.match('[0-9a-zA-Z]{8}')) {
-    errors.value = {
-      password: ["Invalid Password Format!"]
-    }
-    return -1
+  else if (!passwordInput.value.match("[0-9a-zA-Z]{8}")) {
+    errors.value.password = ["Invalid Password Format!"];
+    invalid = -1;
   }
-  if (confirmationPasswordInput.value == '') {
-    errors.value = {
-      confirmationPassword: ["Password Confirmation field cannot be empty!"]
-    }
-    return -1
+
+  // Confirmation password
+  if (confirmationPasswordInput.value == "") {
+    errors.value.confirmationPassword = ["Password Confirmation field cannot be empty!"];
+    invalid = -1;
   }
-  if (!confirmationPasswordInput.value.match('[0-9a-zA-Z]{8}')) {
-    errors.value = {
-      confirmationPassword: ["Invalid Confirmation Password Format!"]
-    }
-    return -1
+  else if (!confirmationPasswordInput.value.match("[0-9a-zA-Z]{8}")) {
+    errors.value.confirmationPassword = ["Invalid Confirmation Password Format!"];
+    invalid = -1;
   }
-  if (confirmationPasswordInput.value != passwordInput.value) {
-    errors.value = {
-      confirmationPassword: ["Password and Confirmation Password don't match!"]
-    }
-    return -1
+  else if (confirmationPasswordInput.value != passwordInput.value) {
+    errors.value.confirmationPassword = ["Password and Confirmation Password don't match!"];
+    invalid = -1;
   }
-}
+
+  return invalid;
+};
 
 const customerValidations = () => {
-  if (nifInput.value == '') {
-    errors.value = {
-      nif: ["NIF field cannot be empty!"]
-    }
-    return -1
+  let invalid = 0;
+  if (nifInput.value == "") {
+    errors.value.nif = ["NIF field cannot be empty!"];
+    invalid = -1;
   }
-  var pattern = /^[1-9][0-9]{8}$/
+  var pattern = /^[1-9][0-9]{8}$/;
   if (!nifInput.value.match(pattern)) {
-    errors.value = {
-      nif: ["Invalid NIF Format"]
-    }
-    return -1
+    errors.value.nif = ["Invalid NIF Format"];
+    invalid = -1;
   }
-  if (phoneInput.value == '') {
-    errors.value = {
-      phone: ["Phone field cannot be empty!"]
-    }
-    return -1
+  if (phoneInput.value == "") {
+    errors.value.phone = ["Phone field cannot be empty!"];
+    invalid = -1;
   }
-  var pattern = /^[1-9][0-9]{8}$/
+  var pattern = /^[1-9][0-9]{8}$/;
   if (!phoneInput.value.match(pattern)) {
-    errors.value = {
-      phone: ["Invalid Phone Format"]
-    }
-    return -1
+    errors.value.phone = ["Invalid Phone Format"];
+    invalid = -1;
   }
-}
+  return invalid;
+};
 
 const paymentReferenceValidations = () => {
-  if (default_payment_typeInput.value == 'visa') {
-    if (!default_payment_referenceInput.value.match('[1-9][0-9]{15}')) {
-      errors.value = {
-        visa: ["Invalid Visa Reference"]
-      }
-      return -1
+  let invalid = 0;
+  if (default_payment_typeInput.value == "visa") {
+    if (default_payment_referenceInput.value == "") {
+      errors.value.payment_reference = ["Default Payment Reference field cannot be empty!"];
+      invalid = -1;
+    } else if (!default_payment_referenceInput.value.match("[1-9][0-9]{15}")) {
+      errors.value.payment_reference = ["Invalid Visa Reference"];
+      invalid = -1;
     }
-    if (default_payment_referenceInput.value == '') {
-      errors.value = {
-        visa: ["Default Payment Reference field cannot be empty!"]
-      }
-      return -1
+  } else if (default_payment_typeInput.value == "mbway") {
+    var pattern = /^[1-9][0-9]{8}$/;
+    if (default_payment_referenceInput.value == "") {
+      errors.value.payment_reference = ["Default Payment Reference field cannot be empty!"];
+      invalid = -1;
+    } else if (!default_payment_referenceInput.value.match(pattern)) {
+      errors.value.payment_reference = ["Invalid Phone Number"];
+      invalid = -1;
     }
-  } else if (default_payment_typeInput.value == 'mbway') {
-    var pattern = /^[1-9][0-9]{8}$/
-    if (!default_payment_referenceInput.value.match(pattern)) {
-      errors.value = {
-        mbway: ["Invalid Phone Number"]
-      }
-      return -1
-    }
-    if (default_payment_referenceInput.value == '') {
-      errors.value = {
-        mbway: ["Default Payment Reference field cannot be empty!"]
-      }
-      return -1
-    }
-  } else if (default_payment_typeInput.value == 'paypal') {
-    var pattern = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
-    if (!default_payment_referenceInput.value.match(pattern)) {
-      errors.value = {
-        paypal: ["Invalid Phone Format"]
-      }
-      if (default_payment_referenceInput.value == '') {
-        errors.value = {
-          paypal: ["Default Payment Reference field cannot be empty!"]
-        }
-        return -1
-      }
-      return -1
+  } else if (default_payment_typeInput.value == "paypal") {
+    var pattern = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    if (default_payment_referenceInput.value == "") {
+      errors.value.payment_reference = ["Default Payment Reference field cannot be empty!"];
+      invalid = -1;
+    } else if (!default_payment_referenceInput.value.match(pattern)) {
+      errors.value.payment_reference = ["Invalid Phone Format"];
+      invalid = -1;
     }
   } else {
-    errors.value = {
-      default: ["Payment Type Not Supported"]
-    }
-    toast.error('Order was not created due to validation errors!')
-    return -1
+    errors.value.payment_type = ["Payment Type Not Supported"];
+    invalid = -1;
+    toast.error("Order was not created due to validation errors!");
   }
-}
-
-
-
+  return invalid
+};
 </script>
 
 <template>
-  <form class="row g-3 needs-validation" novalidate @submit.prevent="register">
-    <h3 class="mt-4">Register</h3>
-    <hr>
-    <div class="row">
-      <div class="col-50">
-        <label>Name:</label>
-        <input type="text" class="form-control" id="inputName" placeholder="Enter Name" required
-               v-model="nameInput">
-        <field-error-message :errors="errors" fieldName="name"></field-error-message>
-      </div>
-      <div class="col-50">
-        <label>Email:</label>
-        <input type="text" class="form-control" id="inputEmail" placeholder="Enter Email" required
-               v-model="emailInput">
-        <field-error-message :errors="errors" fieldName="email"></field-error-message>
-      </div>
+  <form class="needs-validation" novalidate @submit.prevent="register">
+    <div class="mx-2 fastuga-font">
+      <h3 class="mt-4">Register</h3>
     </div>
-    <div class="row">
-      <div class="col-50">
-        <label>Password:</label>
-        <input type="password" class="form-control" id="inputPassword" placeholder="Enter Password" required
-               v-model="passwordInput">
-        <field-error-message :errors="errors" fieldName="password"></field-error-message>
+    <hr />
+    <div class="register-body">
+      <div class="register-field">
+        <label class="register-label">Name:</label>
+        <input
+          type="text"
+          class="form-control"
+          id="inputName"
+          placeholder="Enter Name"
+          required
+          v-model="nameInput"
+          @focus="errors != null && errors.name != null ? errors.name = null : null"
+        />
       </div>
-      <div class="col-50">
-        <label>Confirmation Password:</label>
-        <input type="password" class="form-control" id="inputPasswordConfirmation"
-               placeholder="Enter Confirmation Password" required v-model="confirmationPasswordInput">
-        <field-error-message :errors="errors" fieldName="confirmationPassword"></field-error-message>
+      <field-error-message
+        :errors="errors"
+        fieldName="name"
+        class="register-field register-error"
+      ></field-error-message>
+      <div class="register-field">
+        <label class="register-label">Email:</label>
+        <input
+          type="text"
+          class="form-control"
+          id="inputEmail"
+          placeholder="Enter Email"
+          required
+          v-model="emailInput"
+          @focus="errors != null && errors.email != null ? errors.email = null : null"
+        />
       </div>
-    </div>
-    <div class="row">
-      <div class="col-50">
-        <label>NIF:</label>
-        <input type="text" class="form-control" id="inputNif" placeholder="Enter NIF" required
-               v-model="nifInput">
-        <field-error-message :errors="errors" fieldName="nif"></field-error-message>
+      <field-error-message
+        :errors="errors"
+        fieldName="email"
+        class="register-field register-error"
+      ></field-error-message>
+      <div class="register-field">
+        <label class="register-label">Password:</label>
+        <input
+          type="password"
+          class="form-control"
+          id="inputPassword"
+          placeholder="Enter Password"
+          required
+          v-model="passwordInput"
+          @focus="errors != null && errors.password != null ? errors.password = null : null"
+        />
       </div>
-      <div class="col-50">
-        <label>Phone Number:</label>
-        <input type="text" class="form-control" id="inputPhoneNumber" placeholder="Enter Phone Number" required
-               v-model="phoneInput">
-        <field-error-message :errors="errors" fieldName="phone"></field-error-message>
+      <field-error-message
+        :errors="errors"
+        fieldName="password"
+        class="register-field register-error"
+      ></field-error-message>
+      <div class="register-field">
+        <label class="register-label">Confirmation Password:</label>
+        <input
+          type="password"
+          class="form-control"
+          id="inputPasswordConfirmation"
+          placeholder="Enter Confirmation Password"
+          required
+          v-model="confirmationPasswordInput"
+          @focus="errors != null && errors.confirmationPassword != null ? errors.confirmationPassword = null : null"
+        />
       </div>
-    </div>
-    <div class="row">
-      <div class="col-50">
-        <label>Default Payment Type:</label>
-        <select class="form-select" id="selectType" v-model="default_payment_typeInput">
+      <field-error-message
+        :errors="errors"
+        fieldName="confirmationPassword"
+        class="register-field register-error"
+      ></field-error-message>
+      <div class="register-field">
+        <label class="register-label">NIF:</label>
+        <input
+          type="text"
+          class="form-control"
+          id="inputNif"
+          placeholder="Enter NIF"
+          required
+          v-model="nifInput"
+          @focus="errors != null && errors.nif != null ? errors.nif = null : null"
+        />
+      </div>
+      <field-error-message
+        :errors="errors"
+        fieldName="nif"
+        class="register-field register-error"
+      ></field-error-message>
+      <div class="register-field">
+        <label class="register-label">Phone Number:</label>
+        <input
+          type="text"
+          class="form-control"
+          id="inputPhoneNumber"
+          placeholder="Enter Phone Number"
+          required
+          v-model="phoneInput"
+          @focus="errors != null && errors.phone != null ? errors.phone = null : null"
+        />
+      </div>
+      <field-error-message
+        :errors="errors"
+        fieldName="phone"
+        class="register-field register-error"
+      ></field-error-message>
+      <div class="register-field">
+        <label class="register-label">Default Payment Type:</label>
+        <select
+          class="form-select"
+          id="selectType"
+          v-model="default_payment_typeInput"
+          @focus="errors != null && errors.payment_type != null ? errors.payment_type = null : null"
+        >
           <option value="visa">Visa</option>
           <option value="mbway">MBWay</option>
           <option value="paypal">PayPal</option>
         </select>
       </div>
-      <div class="col-50">
-        <label>Default Payment Reference:</label>
-        <div v-if="default_payment_typeInput == 'visa'">
-          <input type="text" class="form-control" id="inputVisaReference"
-                 placeholder="Enter Visa Card ID Payment Reference" required v-model="default_payment_referenceInput">
-          <field-error-message :errors="errors" fieldName="visa"></field-error-message>
+      <field-error-message
+        :errors="errors"
+        fieldName="payment_type"
+        class="register-field register-error"
+      ></field-error-message>
+      <div class="register-field">
+        <label class="register-label">Default Payment Reference:</label>
+        <div v-if="default_payment_typeInput == 'visa'" style="width: inherit">
+          <input
+            type="text"
+            class="form-control"
+            id="inputVisaReference"
+            placeholder="Enter Visa Card ID Payment Reference"
+            required
+            v-model="default_payment_referenceInput"
+            @focus="errors != null && errors.payment_reference != null ? errors.payment_reference = null : null"
+          />
         </div>
-        <div v-else-if="default_payment_typeInput == 'mbway'">
-          <input type="text" class="form-control" id="inputNumberReference"
-                 placeholder="Enter Phone Number Payment Reference" required v-model="default_payment_referenceInput">
-          <field-error-message :errors="errors" fieldName="mbway"></field-error-message>
+        <div
+          v-else-if="default_payment_typeInput == 'mbway'"
+          style="width: inherit"
+        >
+          <input
+            type="text"
+            class="form-control"
+            id="inputNumberReference"
+            placeholder="Enter Phone Number Payment Reference"
+            required
+            v-model="default_payment_referenceInput"
+            @focus="errors != null && errors.payment_reference != null ? errors.payment_reference = null : null"
+          />
         </div>
-        <div v-else>
-          <input type="text" class="form-control" id="inputEmailReference" placeholder="Enter Email Payment Reference"
-                 required v-model="default_payment_referenceInput">
-          <field-error-message :errors="errors" fieldName="paypal"></field-error-message>
+        <div v-else style="width: inherit">
+          <input
+            type="text"
+            class="form-control"
+            id="inputEmailReference"
+            placeholder="Enter Email Payment Reference"
+            required
+            v-model="default_payment_referenceInput"
+            @focus="errors != null && errors.payment_reference != null ? errors.payment_reference = null : null"
+          />
         </div>
       </div>
-    </div>
-
-    <div class="mb-3 d-flex justify-content-center">
-      <button type="button" class="btn btn-success px-5" @click="register">Register</button>
+      <field-error-message
+        :errors="errors"
+        fieldName="payment_reference"
+        class="register-field register-error"
+      ></field-error-message>
+      <div class="mb-3 d-flex justify-content-center">
+        <button
+          type="button"
+          class="btn btn-register px-5"
+          @click="register"
+          :disabled="registerBool"
+        >
+          Register
+        </button>
+      </div>
     </div>
   </form>
 
@@ -282,85 +383,50 @@ const paymentReferenceValidations = () => {
 </template>
 
 <style scoped>
-@media (max-width: 800px) {
-  .row {
-    flex-direction: column-reverse;
-  }
 
-  .col-25 {
-    margin-bottom: 20px;
-  }
+.register-error{
+  margin-left: 60%;
+  position: relative;
+  top: -15px;
+  margin-bottom: 0px !important;
 }
 
-input[type=text] {
-  width: 100%;
-  margin-bottom: 20px;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 3px;
+.btn-register:hover,
+.btn-register:active {
+  background-color: #ff8300 !important;
+  color: white;
 }
 
-input[type=password] {
-  width: 100%;
-  margin-bottom: 20px;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 3px;
+.btn-register {
+  height: 3rem;
+  align-self: center;
+  background-color: #ffa71dd6;
+  border-color: #ffa71dd6;
+  color: white;
+  font-weight: bolder;
 }
 
-.btn:hover {
-  background-color: #0b450f;
+.register-label {
+  width: 40%;
 }
 
-select {
-  width: 100%;
-  margin-bottom: 20px;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 3px;
-}
-
-body {
-  font-family: Arial;
-  font-size: 17px;
-  padding: 8px;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-.row {
-  display: -ms-flexbox;
-  /* IE10 */
+.register-field {
   display: flex;
-  -ms-flex-wrap: wrap;
-  /* IE10 */
-  flex-wrap: wrap;
-  margin: 0 -16px;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  padding: 10px;
 }
 
-.col-25 {
-  -ms-flex: 25%;
-  /* IE10 */
-  flex: 25%;
+.register-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 60%;
+  margin: auto;
 }
 
-.col-50 {
-  -ms-flex: 50%;
-  /* IE10 */
-  flex: 50%;
-}
-
-.col-75 {
-  -ms-flex: 75%;
-  /* IE10 */
-  flex: 75%;
-}
-
-.col-25,
-.col-50,
-.col-75 {
-  padding: 0 16px;
+a {
+  color: #725151;
 }
 </style>
