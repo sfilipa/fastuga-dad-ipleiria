@@ -1,7 +1,6 @@
 import {ref, computed, inject} from "vue";
 import {defineStore} from "pinia";
 import avatarNoneUrl from "@/assets/avatar-none.png";
-import axios from "axios";
 
 export const useUserStore = defineStore("user", () => {
     const axios = inject("axios");
@@ -54,7 +53,7 @@ export const useUserStore = defineStore("user", () => {
 
     async function loadCustomerByUserID() {
         try {
-            const response = await axios.get(`http://localhost:8081/api/customers/user/${user.value.id}`)
+            const response = await axios.get(`/customers/user/${user.value.id}`)
 
             customer.value = response.data.data;
         } catch (error) {
