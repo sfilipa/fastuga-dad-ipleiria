@@ -327,7 +327,8 @@ socket.on("orderCancelled", (order) => {
 }
 
 .menu-logo{
-  width: 189px;
+  width: 150px;
+  height: 56px;
 }
 
 .fastuga-colored-font{
