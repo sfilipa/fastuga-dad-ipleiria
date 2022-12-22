@@ -150,7 +150,7 @@ class OrderController extends Controller
             'status' => $status,
             'price' => $item['price'],
             'preparation_by' => null,
-            'notes' => null,
+            'notes' => $item['notes'] != 'null'? $item['notes'] : null,
             'custom' => null
         ]);
         $validateItem = $itemRequest->validate($itemRequest->rules());

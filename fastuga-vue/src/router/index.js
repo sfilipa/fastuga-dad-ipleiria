@@ -154,29 +154,15 @@ router.beforeEach((to, from, next) => {
       return
     }
   }
-  
- /* if ((to.name == 'Login') || (to.name == 'Home')) {
-    next()
-    return
-  }
-  if (!userStore.user) {
-    next({ name: 'Login' })
-    return
-  }
-  /*if (to.name == 'Reports') {
-    if (userStore.user.type != 'EM') {
-      next({ name: 'home' })
+
+  if(to.name == 'NewOrder'){
+    if(userStore.user && userStore.user.type != 'C'){
+      next({
+        name: "Unauthorized"
+      })
       return
     }
   }
- if (to.name == 'User') {
-    if ((userStore.user.type == 'EM') || (userStore.user.id == to.params.id)) {//ver detalhes do user so o Manager e o proprio user podem ver 
-      next()
-      return
-    }
-    next({ name: 'home' })
-    return
-  }*/
   next()
 })
 
