@@ -10,86 +10,120 @@ const userStore = useUserStore()
 const serverBaseUrl = inject("serverBaseUrl");
 
 const axios = inject("axios");
-  const errors = ref(null)
-  const passwords = ref({
-        current_password: '',
-        password: '',
-        confirm_password: ''
-    })
+const errors = ref(null)
+const passwords = ref({
+  current_password: '',
+  password: '',
+  confirm_password: ''
+})
 
-  const emit = defineEmits(['changedPassword'])
+const passwordBool = ref(false);
 
-  const changePassword = async () => {
-    await axiosLaravel
-        .patch(`/users/${userStore.userId}/password`, passwords.value)
-        .then((response) => {
-          console.log(response)
-          toast.info("Password updated successfully");
-          router.back()
-        })
-        .catch((error) => {
-          console.log(error)
-          errors.value = error.response.data.errors;
-        });
-  }
+const emit = defineEmits(['changedPassword'])
+
+const changePassword = async () => {
+  passwordBool.value = true;
+  await axiosLaravel
+      .patch(`/users/${userStore.userId}/password`, passwords.value)
+      .then((response) => {
+        passwordBool.value = false;
+        console.log(response)
+        toast.info("Password updated successfully");
+        router.back()
+      })
+      .catch((error) => {
+        passwordBool.value = false;
+        console.log(error)
+        errors.value = error.response.data.errors;
+      });
+}
 
 </script>
 
 <template>
   <form
-    class="row g-3 needs-validation"
-    novalidate
-    @submit.prevent="changePassword"
+      class="row g-3 needs-validation"
+      novalidate
+      @submit.prevent="changePassword"
   >
-    <h3 class="mt-5 mb-3">Change Password</h3>
+    <div class="mx-2 fastuga-font">
+      <h3 class="mt-5 mb-3">Change Password</h3>
+    </div>
     <hr>
-    <div class="mb-2">
-      <div class="col-md-offset-5 col-md-4 center">
-        <label>Current Password:</label>
-        <input type="password" class="form-control" id="inputCurrentPassword" placeholder="Enter Current Password" required
+    <div class="password-body">
+      <div class="password-field">
+        <label class="password-label">Current Password:</label>
+        <input type="password" class="form-control" id="inputCurrentPassword" placeholder="Enter Current Password"
+               required
                v-model="passwords.current_password">
-        <field-error-message :errors="errors" fieldName="current_password"></field-error-message>
       </div>
-    </div>
-      <div class="mb-2">
-        <div class="col-md-offset-5 col-md-4 center">
-          <label>New Password:</label>
-          <input type="password" class="form-control" id="inputNewPassword" placeholder="Enter New Password" required
-                 v-model="passwords.password">
-          <field-error-message :errors="errors" fieldName="password"></field-error-message>
+      <field-error-message :errors="errors" fieldName="current_password" class="password-field password-error"></field-error-message>
+      <div class="password-field">
+        <label class="password-label">New Password:</label>
+        <input type="password" class="form-control" id="inputNewPassword" placeholder="Enter New Password" required
+               v-model="passwords.password">
+      </div>
+      <field-error-message :errors="errors" fieldName="password" class="password-field password-error"></field-error-message>
+      <div class="password-field">
+          <label class="password-label">Password Confirmation:</label>
+          <input type="password" class="form-control" id="inputPasswordConfirm"
+                 placeholder="Enter Password Confirmation" required
+                 v-model="passwords.confirm_password">
         </div>
+      <field-error-message :errors="errors" fieldName="confirm_password" class="password-field password-error"></field-error-message>
+      <div class="mb-3 d-flex justify-content-center">
+        <button type="button" class="btn btn-password px-5" @click="changePassword" :disabled="passwordBool">Change Password</button>
       </div>
-    <div class="mb-2">
-      <div class="col-md-offset-5 col-md-4 center">
-        <label>Password Confirmation:</label>
-        <input type="password" class="form-control" id="inputPasswordConfirm" placeholder="Enter Password Confirmation" required
-               v-model="passwords.confirm_password">
-        <field-error-message :errors="errors" fieldName="confirm_password"></field-error-message>
-      </div>
-    </div>
-    <div class="mb-3 d-flex justify-content-center">
-      <button type="button" class="btn btn-success px-5" @click="changePassword">Change Password</button>
     </div>
   </form>
 </template>
 
 <style scoped>
-.center {
-  display: block;
-  margin-right: auto;
-  margin-left: auto;
+
+.btn-password:hover,
+.btn-password:active {
+  background-color: #ff8300 !important;
+  color: white;
 }
 
-.btn:hover {
-  background-color: #0b450f;
+.btn-password {
+  height: 3rem;
+  align-self: center;
+  background-color: #ffa71dd6;
+  border-color: #ffa71dd6;
+  color: white;
+  font-weight: bolder;
 }
 
-input[type=password] {
+.password-label {
+  width: 20%;
+}
+
+.password-field {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   width: 100%;
-  margin-bottom: 10px;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 3px;
+  padding: 20px;
+}
+
+.password-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 50%;
+  margin: auto;
+}
+
+a {
+  color: #725151;
+}
+
+.password-error{
+  margin-left: 60%;
+  position: relative;
+  top: -15px;
+  margin-bottom: 0px !important;
 }
 </style>
 
