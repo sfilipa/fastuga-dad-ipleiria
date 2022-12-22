@@ -29,6 +29,8 @@ Route::middleware('auth:api')->group(function () {
             ->middleware('can:viewDeliveryOrders, App\Models\Order');
         Route::get('/customer/{user}', [OrderController::class, 'getAllCustomerOrders']);//statistics - customers
         Route::get('/delivered/{user}', [OrderController::class, 'getAllOrdersDelivered']);//statistics - driver
+        Route::get('totalOrders/bymonth', [OrderController::class, 'getTotalOrdersByMonth']);//statistics - managers
+        Route::get('totalGained/bymonth', [OrderController::class, 'getTotalGainedByMonth']);//statistics - managers
         Route::get('{user}/totaldelivered/bymonth', [OrderController::class, 'getTotalOrdersDelivered']);
     });
 
@@ -50,6 +52,8 @@ Route::middleware('auth:api')->group(function () {
         Route::post("products", [ProductController::class, 'store']);
     });
 
+    Route::get('/products/top', [ProductController::class, 'getBestProducts']);//statistics - managers
+    Route::get('/products/worst', [ProductController::class, 'getWorstProducts']);//statistics - managers
 });
 
 // User Routes
@@ -94,9 +98,4 @@ Route::get('products/types', [ProductController::class, 'getProductsTypes']);
 
 Route::get("products", [ProductController::class, 'index']);
 
-//Statistics
-Route::get('orders/totalOrders/bymonth', [OrderController::class, 'getTotalOrdersByMonth']);//statistics - managers
-Route::get('orders/totalGained/bymonth', [OrderController::class, 'getTotalGainedByMonth']);//statistics - managers
 
-Route::get('/products/top', [ProductController::class, 'getBestProducts']);
-Route::get('/products/worst', [ProductController::class, 'getWorstProducts']);

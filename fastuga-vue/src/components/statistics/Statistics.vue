@@ -3,22 +3,19 @@ import {ref, computed, onMounted, inject, watch, reactive, toRef} from "vue";
 import HistoryTable from './HistoryTable.vue'
 import BarChart from './BarChart.vue'
 import HistoryTableOrdersDelivered from './HistoryTableOrdersDelivered.vue'
-import HistoryTableDishPrepared from './HistoryTableDishPrepared.vue'
 import Paginate from "vuejs-paginate-next"
 
 import {useUserStore} from "../../stores/user.js"
 
 const axiosLaravel = inject('axios')
 
-let laravelData = ref()
-
 //Customers
 const orders = ref(null)
 
 //bar charts - managers
-const topProducts = ref([])
+const topProducts = ref(null)
 const topProductsTotal = ref(null)
-const worstProducts = ref([])
+const worstProducts = ref(null)
 const worstProductsTotal = ref(null)
 const months = ref([])
 const ordersByMonth = ref(null)
@@ -348,7 +345,7 @@ onMounted(async () => {
 </script>
 <template>
   <div v-if="userStore.user.type == 'EM'">
-    <div class="d-flex justify-content-between">
+    <div class="d-flex justify-content-between customers-header fastuga-font">
       <div class="mx-2">
         <h3 class="mt-4">Statistics</h3>
       </div>
@@ -435,9 +432,9 @@ onMounted(async () => {
     </div>
   </div>
   <div v-if="userStore.user.type == 'C'">
-    <div class="d-flex justify-content-between">
+    <div class="d-flex justify-content-between customers-header fastuga-font">
       <div class="mx-2">
-        <h3 class="mt-4">Orders History</h3>
+        <h3 class="mt-4 " >Orders History</h3>
       </div>
     </div>
     <hr/>
@@ -481,23 +478,26 @@ onMounted(async () => {
     <div v-else>
       <history-table :orders="orders" :filterByPaymentType="filterByPaymentType" :date="filterByDate">
       </history-table>
-      <paginate
-          :page-count="lastPage"
-          :prev-text="'Previous'"
-          :next-text="'Next'"
-          :click-handler="LoadOrders"
-      >
-      </paginate>
+      <div v-if="orders.length != 0 && lastPage > 1" style="display: flex">
+        <paginate
+            :page-count="lastPage"
+            :prev-text="'Previous'"
+            :next-text="'Next'"
+            :click-handler="LoadOrders"
+            class="pagination"
+        >
+        </paginate>
+      </div>
     </div>
   </div>
   <div v-if="userStore.user.type == 'ED'">
-    <div class="d-flex justify-content-between">
+    <div class="d-flex justify-content-between customers-header fastuga-font">
       <div class="mx-2">
         <h3 class="mt-4">Orders Delivered History</h3>
       </div>
     </div>
     <hr/>
-    <div class="mb-3 d-flex justify-content-between flex-wrap">
+    <div   class="mb-3 d-flex justify-content-between flex-wrap search-bar fastuga-font">
       <div class="mx-2 mt-2 flex-grow-1 filter-div">
         <label for="selectType" class="form-label">Filter by Payment Type:</label>
         <select class="form-select"
@@ -518,13 +518,15 @@ onMounted(async () => {
                @change="LoadOrdersDelivered(1)"
                type="date" name="date" class="form-control"/>
       </div>
+      <div class="mx-2 mt-2">
       <button
           type="button"
-          class="btn btn-success hvr-grow make-order"
+          class="btn px-4  btn-show"
           @click="showingBarStatistic = !showingBarStatistic"
       >
-        <i class="bi bi-check2-circle menu-bi"></i>{{ showingBarStatistic ? 'Show History' : 'Show Graph Bar' }}
+        <i class="bi bi-eye-fill menu-bi"></i>{{ showingBarStatistic ? 'Show History' : 'Show Graph Bar' }}
       </button>
+      </div>
     </div>
 
 
@@ -558,18 +560,21 @@ onMounted(async () => {
                                         :date="filterByDate">
         </history-table-orders-delivered>
 
-        <paginate
-            :page-count="lastPage"
-            :prev-text="'Previous'"
-            :next-text="'Next'"
-            :click-handler="LoadOrdersDelivered"
-        >
-        </paginate>
+        <div v-if="ordersDelivered.length != 0 && lastPage > 1" style="display: flex">
+          <paginate
+              :page-count="lastPage"
+              :prev-text="'Previous'"
+              :next-text="'Next'"
+              :click-handler="LoadOrdersDelivered"
+              class="pagination"
+          >
+          </paginate>
+        </div>
       </div>
     </div>
   </div>
   <div v-if="userStore.user.type == 'EC'">
-    <div class="d-flex justify-content-between">
+    <div class="d-flex justify-content-between customers-header fastuga-font">
       <div class="mx-2">
         <h3 class="mt-4">Prepared Dishes</h3>
       </div>
@@ -586,7 +591,7 @@ onMounted(async () => {
       <p style="text-align: center"><b>No statistics to show!</b></p>
     </div>
     <div v-else>
-      <h5 class="center">Total Dishes Prepared</h5>
+      <h5 class="center" >Total Dishes Prepared</h5>
       <bar-chart v-if="chartTotalPreparedDishes.barConfig"
                  :chart-options="chartTotalPreparedDishes.barConfig.options"
                  :chart-data="chartTotalPreparedDishes.barConfig.data" :height="275"/>
@@ -594,23 +599,56 @@ onMounted(async () => {
   </div>
 </template>
 
+<style>
+.pagination .page-item.active a:hover,
+.pagination .page-item.active a:active {
+  background-color: #ff8300 !important;
+  color: white !important;
+  cursor: pointer;
+}
+
+.pagination .page-item.active a {
+  background-color: #ffa71dd6 !important;
+  border-color: #ffa71dd6 !important;
+  color: white !important;
+  cursor: pointer !important;
+}
+
+.pagination .page-item a.page-link:focus {
+  box-shadow: 2px 2px #ffd07b !important;
+}
+
+.pagination .page-item a:hover {
+  color: #ff8300 !important;
+  cursor: pointer;
+}
+
+.pagination .page-item a {
+  color: #ffa71dd6 !important;
+  cursor: pointer;
+}
+
+.pagination {
+  margin: auto;
+}
+</style>
+
 <style scoped>
 .menu-bi {
   font-size: 1rem;
 }
 
-.make-order:hover,
-.btn:first-child:active {
+.btn-show:hover,
+.btn-show:active {
   background-color: #ff8300;
+  color: white !important;
 }
 
-
-.make-order {
-  height: fit-content;
-  align-self: center;
+.btn-show {
   background-color: #ffa71dd6;
   border-color: #ffa71dd6;
   color: white;
+  margin-top : 30px;
   font-weight: bolder;
 }
 
@@ -622,25 +660,5 @@ onMounted(async () => {
   display: block;
   margin-right: auto;
   margin-left: auto;
-}
-
-.hvr-grow {
-  margin-top: 1.90rem;
-  display: inline-block;
-  vertical-align: middle;
-  -webkit-transform: perspective(1px) translateZ(0);
-  transform: perspective(1px) translateZ(0);
-  box-shadow: 0 0 1px rgba(0, 0, 0, 0);
-  -webkit-transition-duration: 0.3s;
-  transition-duration: 0.3s;
-  -webkit-transition-property: transform;
-  transition-property: transform;
-}
-
-.hvr-grow:hover,
-.hvr-grow:focus,
-.hvr-grow:active {
-  -webkit-transform: scale(1.1);
-  transform: scale(1.1);
 }
 </style>

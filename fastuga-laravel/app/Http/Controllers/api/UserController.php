@@ -68,7 +68,7 @@ class UserController extends Controller
 
     public function show(User $user)
     {
-        $this->view('view', $user);// middleware
+       /* $this->view('view', $user);// middleware*/
         return new UserResource($user);
     }
 
@@ -104,7 +104,7 @@ class UserController extends Controller
 
     public function update(UpdateUserRequest $userRequest, User $user)
     {
-        $this->view('update', $user);// middleware
+      /* $this->authorize('update', $user);// middleware*/
 
         $customerRequest = new StoreUpdateCustomerRequest($userRequest->all());
         DB::beginTransaction();
