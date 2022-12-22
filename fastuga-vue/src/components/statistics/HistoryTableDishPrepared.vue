@@ -24,7 +24,7 @@ const showClick = (order) => {
 	<table class="table">
 		<thead>
 			<tr>
-				<th>Photo Url</th>
+				<th>Photo</th>
 				<th>Date</th>
 				<th>Name</th>
 				<th>Description</th>
@@ -35,7 +35,7 @@ const showClick = (order) => {
 			.filter((dish) => (props.filterByName === null ? true: dish.name.toLowerCase().includes(props.filterByName.toLowerCase())))
 			.filter((dish) => (!props.date ? true : moment(String(dish.created_at)).format('MM/DD/YYYY') === moment(String(props.date)).format('MM/DD/YYYY')))" :key="dish.id">
 				<td style="text-align: center;">
-					<img :src='`${serverBaseUrl}/storage/products/${dish.photo_url}`' />
+					<img :src='`${serverBaseUrl}/storage/products/${dish.photo_url}`' alt="Dish" />
 				</td>
 				<td>{{ moment(String(dish.created_at)).format('MM/DD/YYYY hh:mm') }}</td>
 				<td>{{ dish.name }}</td>

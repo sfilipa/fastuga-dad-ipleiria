@@ -447,7 +447,7 @@ onMounted(async () => {
         <div class="inner-addon left-addon">
           <label for="searchbar" class="form-label">Search for Name:</label>
           <i class="glyphicon glyphicon-user"></i>
-          <input v-model="filterByName" type="text" name="name" class="form-control"/>
+          <input v-model="filterByName" type="text" name="name" class="form-control" aria-label="Search by Name"/>
         </div>
       </div>
 
@@ -455,7 +455,7 @@ onMounted(async () => {
         <div class="inner-addon left-addon">
           <label for="searchbar" class="form-label">Filter by Date:</label>
           <i class="glyphicon glyphicon-user"></i>
-          <input v-model="filterByDate" type="date" name="date" class="form-control"/>
+          <input v-model="filterByDate" type="date" name="date" class="form-control" aria-label="Search by Date"/>
         </div>
       </div>
     </div>
