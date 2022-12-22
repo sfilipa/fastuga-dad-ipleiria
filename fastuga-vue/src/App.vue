@@ -114,7 +114,7 @@ socket.on("orderCancelled", (order) => {
 <template>
   <nav class="navbar navbar-dark navbar-expand-md sticky-top flex-md-nowrap p-0 shadow fastuga-navbar">
     <div class="container-fluid">
-      <router-link class="fastuga-colored-font fastuga-logo" :to="{ name: 'Home' }">
+      <router-link class="fastuga-colored-font fastuga-logo" :to="{ name: 'Home' }" aria-label="Back to Home Page">
         <div class="menu-header">
           <img src="@/assets/restaurantFastugaLogo.png" alt="" class="d-inline-block align-text-top menu-logo" />
         </div>

@@ -144,7 +144,7 @@ socket.on("update", () => {
     <div class="mx-2 mt-2 flex-grow-1 filter-div">
       <label for="selectType" class="form-label">Filter by Date:</label>
       <form id="costumerFilter">
-        <input v-model="orderDate" @change="LoadOrders(1)" type="date" name="orderDate" class="form-control">
+        <input v-model="orderDate" @change="LoadOrders(1)" type="date" name="orderDate" class="form-control" aria-label="Search by Date">
       </form>
     </div>
 
@@ -152,7 +152,7 @@ socket.on("update", () => {
       <div class="inner-addon left-addon">
         <label for="selectType" class="form-label">Search for Ticket Number:</label>
         <i class="glyphicon glyphicon-user"></i>
-        <input v-model.lazy="ticketNumber" @change="LoadOrders(1)" type="number" min="0" max="99" name="ticketnumber" class="form-control"/>
+        <input v-model.lazy="ticketNumber" @change="LoadOrders(1)" type="number" min="0" max="99" name="ticketnumber" class="form-control" aria-label="Search by Ticket Number"/>
       </div>
     </div>
 
