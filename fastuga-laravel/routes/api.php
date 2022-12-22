@@ -41,22 +41,21 @@ Route::middleware('auth:api')->group(function () {
     });
 
     // Customer Routes
-    Route::middleware('manager:api')->group(function () {
+    Route::middleware('auth.manager:api')->group(function () {
         Route::apiResource("customers", CustomerController::class);
-        Route::get('users/employees', [UserController::class, 'getAllEmployees']);
         Route::put('users/blockUnblock/{user}', [UserController::class, 'blockUnblockUser']);
-        Route::apiResource("users", UserController::class);
-        Route::post("products", [ProductController::class, 'store']);
+        Route::get('users/employees', [UserController::class, 'getAllEmployees']);
         Route::put("products/{product}", [ProductController::class, 'update']);
         Route::delete("products/{product}", [ProductController::class, 'destroy']);
+        Route::post("products", [ProductController::class, 'store']);
     });
 
 });
 
 // User Routes
+Route::apiResource("users", UserController::class);
 Route::put('users/updatePasswordTAES/{email}', [UserController::class, 'updateTAESPassword']);
 Route::put('users/updateNameTAES/{email}', [UserController::class, 'updateTAESName']);
-Route::apiResource("users", UserController::class);
 
 // Customer Routes
 Route::get('customers/{customer}/user', [UserController::class, 'getUserOfCustomer']);
@@ -69,8 +68,6 @@ Route::prefix('orders')->group(function () {
     Route::get('/statusTAES', [OrderController::class, 'getOrderByStatusTAES']);
     Route::get('/{order}/customer', [CustomerController::class, 'getCostumerOfOrder']);
     Route::get('/{order}/user', [UserController::class, 'getUserOfOrder']);
-    Route::get('/totalOrders/bymonth', [OrderController::class, 'getTotalOrdersByMonth']);//statistics - managers
-    Route::get('/totalGained/bymonth', [OrderController::class, 'getTotalGainedByMonth']);//statistics - managers
     Route::get('/{order_id}/orderItems', [OrderController::class, 'getItemsAndProducts']);
     Route::get('/active', [OrderController::class, 'getNumberOfActiveOrders']); //anyone can see this - even anonymous users
 });
@@ -93,9 +90,12 @@ Route::apiResource("order-items", OrderItemsController::class);
 // Product Routes
 Route::get('products/types', [ProductController::class, 'getProductsTypes']);
 
-//Statistics
-Route::get('/products/top', [ProductController::class, 'getBestProducts']);
-Route::get('/products/worst', [ProductController::class, 'getWorstProducts']);
-
 
 Route::get("products", [ProductController::class, 'index']);
+
+
+//Statistics
+Route::get('orders/totalOrders/bymonth', [OrderController::class, 'getTotalOrdersByMonth']);//statistics - managers
+Route::get('orders/totalGained/bymonth', [OrderController::class, 'getTotalGainedByMonth']);//statistics - managers
+Route::get('/products/top', [ProductController::class, 'getBestProducts']);
+Route::get('/products/worst', [ProductController::class, 'getWorstProducts']);

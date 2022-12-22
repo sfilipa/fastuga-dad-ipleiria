@@ -18,6 +18,33 @@ use Carbon\Carbon;
 
 class OrderController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth.manager', ['except' => [
+            'getOrdersStatus',
+            'getOrderByStatus',
+            'getOrderForDelivery',
+            'getOrderByStatusTAES',
+            'getUnassignedOrders',
+            'getOrderOfOrderItems',
+            'index',
+            'store',
+            'storeTAES',
+            'store_each_order_item',
+            'show',
+            'update',
+            'destroy',
+            'getAllCustomerOrders',
+            'getCustomerCurrentOrders',
+            'getTotalOrdersByMonth',
+            'getTotalGainedByMonth',
+            'getAllOrdersDelivered',
+            'updateOrderStatus',
+            'checkIfOrderIsReady',
+            'getItemsAndProducts',
+            'getNumberOfActiveOrders'
+        ]]);
+    }
 
     public function getOrdersStatus()
     {
