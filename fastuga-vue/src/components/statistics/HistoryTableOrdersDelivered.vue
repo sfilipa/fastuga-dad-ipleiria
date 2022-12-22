@@ -11,9 +11,7 @@ const serverBaseUrl = inject("serverBaseUrl")
 
 const props = defineProps({
   ordersDelivered: Array,
-  default: () => [],
-  filterByPaymentType: String,
-  date: Date
+  default: () => []
 });
 
 const emit = defineEmits(["show"]);
@@ -50,33 +48,31 @@ const showOrder = (order, indexRow) => {
     </tr>
     </thead>
     <tbody>
-    <tr v-for="(order, index) in props.ordersDelivered
-			.filter((order) => (props.filterByPaymentType === 'A' ? true : order.payment_type === props.filterByPaymentType))
-			.filter((order) => (!props.date ? true : order.date === props.date))" :key="order.id">
-      <td v-if="order.id === undefined && order.product != null" class="products">
+    <tr v-for="(order, index) in props.ordersDelivered" :key="order.id">
+      <td v-if="order.ticket_number === undefined && order.product != null" class="products">
       </td>
       <td v-else>
         {{ order.id }}
       </td>
       <td v-if="order.ticket_number === undefined && order.product != null" class="products">
+        <img class="picture" :src='`${serverBaseUrl}/storage/products/${order.product.photo_url}`'/>
       </td>
       <td v-else>
         {{ order.ticket_number }}
       </td>
       <td v-if="order.date === undefined && order.product != null"  style="text-align: center;" class="products">
-        <img class="picture" :src='`${serverBaseUrl}/storage/products/${order.product.photo_url}`'/>
+        {{ order.product.name }}
       </td>
       <td v-else>
         {{ order.date }}
       </td>
       <td v-if="order.payment_type === undefined && order.product != null" class="products">
-        {{ order.product.name }}
+        {{ order.product.type }}
       </td>
       <td v-else>
         {{ order.payment_type }}
       </td>
       <td v-if="order.payment_reference === undefined && order.product != null" class="products">
-        {{ order.product.type }}
       </td>
       <td v-else>
         {{ order.payment_reference }}

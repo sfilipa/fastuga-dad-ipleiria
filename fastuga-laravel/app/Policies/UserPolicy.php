@@ -31,11 +31,7 @@ class UserPolicy
     {
         return $user->id == $model->id;
     }
-    public function viewHistory(User $user, User $model)
-    {
-        return $user->id == $model->id;
-    }
-    public function updateProfile(User $user, User $model)
+    public function statistics(User $user, User $model)
     {
         return $user->id == $model->id;
     }

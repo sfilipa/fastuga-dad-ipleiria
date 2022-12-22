@@ -177,10 +177,22 @@ class OrderController extends Controller
     }
 
     //Statistics - Customer
-    public function getAllCustomerOrders(User $user)
+    public function getAllCustomerOrders(Request $request, User $user)
     {
+       $this->authorize('statistics', $user);// middleware
+
         $id = Customer::where('user_id', $user->id)->pluck('id');
-        return Order::where('customer_id', $id[0])->with("orderItems", "orderItems.product")->paginate(10);
+        $query = Order::query();
+        $type = $request->query('type');
+        if($type != null){
+            $query->where('payment_type',$type);
+        }
+
+        $date = $request->query('date');
+        if($date != null){
+            $query->where('date',$date);
+        }
+        return $query->where('customer_id', $id[0])->with("orderItems", "orderItems.product")->paginate(10);
     }
 
     public function getCustomerCurrentOrders($user_id)
@@ -196,8 +208,8 @@ class OrderController extends Controller
     public function getTotalOrdersByMonth()
     {
         $items = Order::orderBy('month', 'ASC')->groupBy('month')
-        ->selectRaw('MONTH(date) as month, sum(id) as sum')
-        ->pluck('month','sum');
+        ->selectRaw('MONTH(date) as month, count(id) as count')
+        ->pluck('month','count');
 
         foreach($items as $key =>$item){
          switch ($item){
@@ -292,11 +304,72 @@ class OrderController extends Controller
         return $total;
     }
 
-    //Statistics - Driver
-    public function getAllOrdersDelivered($user)
+    //Statistics - Delivery
+    public function getAllOrdersDelivered(Request $request, User $user)
     {
-        $orders = Order::where('delivered_by', $user)->with("orderItems", "orderItems.product")->paginate(10);
+        $this->authorize('statistics', $user); //middleware
+        $query = Order::query();
+        $type = $request->query('type');
+        if($type != null){
+            $query->where('payment_type',$type);
+        }
+
+        $date = $request->query('date');
+        if($date != null){
+           $query->where('date',$date);
+        }
+        $orders = $query->where('delivered_by', $user->id)->with("orderItems", "orderItems.product")->paginate(10);
         return $orders;
+    }
+
+    public function getTotalOrdersDelivered(User $user)
+    {
+        $this->authorize('statistics', $user);//middleware
+        $items = Order::where('delivered_by', $user->id)->orderBy('month', 'ASC')->groupBy('month')
+                ->selectRaw('MONTH(date) as month, count(id) as count')
+                ->pluck('month','count');
+
+        foreach($items as $key =>$item){
+        switch ($item){
+            case 1:
+                $item = 'Janeiro';
+                break;
+            case 2:
+                $item = 'Fevereiro';
+                break;
+            case 3:
+                $item = 'Março';
+                break;
+            case 4:
+                $item = 'Abril';
+                break;
+            case 5:
+                $item = 'Maio';
+                break;
+            case 6:
+                $item = 'Junho';
+                break;
+            case 7:
+                $item = 'Julho';
+                break;
+            case 8:
+                $item = 'Agosto';
+                break;
+            case 9:
+                $item = 'Setembro';
+                break;
+            case 10:
+                $item = 'Outubro';
+                break;
+            case 11:
+                $item = 'Novembro';
+                break;
+            default:
+                $item = 'Dezembro';
+        }
+        $total[$item] = $key;
+        }
+        return $total;
     }
 
     public function updateOrderStatus(Request $request, Order $order, $status)

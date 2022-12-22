@@ -41,14 +41,22 @@ class OrderItemsController extends Controller
     }
 
     //Statistics - Chef
-    public function getAllChefOrdersPrepared($user_id)
-    {//flitrar por dishes
-        $products_id = OrderItems::where('preparation_by', $user_id)->get('product_id');
+    public function getAllChefOrdersPrepared(User $user)
+    {//filtrar por dishes
+        $this->authorize('statistics', $user); //middleware
 
-        $allProducts = Product::whereIn('id', $products_id)->where('type', 'hot dish')->paginate(10);
+        $allProducts = Product::where('type', 'hot dish')->get('id');
 
-        return  $allProducts;
+        $products = OrderItems::where('preparation_by', $user->id)->whereIn('product_id', $allProducts)->groupBy('product_id')
+        ->selectRaw('product_id as id, count(product_id) as count')
+        ->orderBy('id', 'ASC')
+        ->pluck('id','count');
 
+        foreach($products as $key =>$item){
+            $products[$key] = Product::where('id', $item)->pluck('name');
+        }
+
+        return  $products;
     }
 
     public function getHotDishesToPrepare($chefId)

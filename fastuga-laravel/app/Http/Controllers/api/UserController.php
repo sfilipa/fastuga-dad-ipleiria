@@ -68,6 +68,7 @@ class UserController extends Controller
 
     public function show(User $user)
     {
+       /* $this->view('view', $user);// middleware*/
         return new UserResource($user);
     }
 
@@ -103,6 +104,7 @@ class UserController extends Controller
 
     public function update(UpdateUserRequest $userRequest, User $user)
     {
+      /* $this->authorize('update', $user);// middleware*/
 
         $customerRequest = new StoreUpdateCustomerRequest($userRequest->all());
         DB::beginTransaction();
@@ -182,7 +184,7 @@ class UserController extends Controller
 
     public function update_password(UpdatePasswordRequest $request, User $user)
     {
-       $this->authorize('updatePassword', $user);// substitui middleware - mudar dps
+       $this->authorize('updatePassword', $user);// middleware
 
         if (!Hash::check($request->get('current_password'), $user->password))
         {
