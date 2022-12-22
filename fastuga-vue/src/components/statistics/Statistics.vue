@@ -351,8 +351,8 @@ onMounted(async () => {
     <hr/>
     <div class="mb-3 d-flex justify-content-between flex-wrap">
       <div class="mx-2 mt-2 flex-grow-1 filter-div">
-        <label for="selectType" class="form-label">Filter by Payment Type:</label>
-        <select class="form-select" id="selectType" v-model="filterByPaymentType">
+        <label for="selectType" class="form-label" >Filter by Payment Type:</label>
+        <select class="form-select" id="selectType" aria-label="Filter by Payment Type" v-model="filterByPaymentType">
           <option value="A">Any</option>
           <option value="VISA">VISA</option>
           <option value="PAYPAL">PAYPAL</option>
@@ -362,9 +362,9 @@ onMounted(async () => {
 
       <div class="mx-2 mt-2 flex-grow-1 filter-div">
         <div class="inner-addon left-addon">
-          <label for="searchbar" class="form-label">Filter by Payment Date:</label>
+          <label for="searchbar" class="form-label" >Filter by Payment Date:</label>
           <i class="glyphicon glyphicon-user"></i>
-          <input v-model="filterByDate" type="date" name="date" class="form-control"/>
+          <input v-model="filterByDate" type="date" name="date" class="form-control" aria-label="Filter by Payment Date"/>
         </div>
       </div>
     </div>
