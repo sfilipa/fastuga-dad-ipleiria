@@ -44,14 +44,6 @@ const register = async () => {
     console.log(errors)
     return;
   }
-  // if (customerValidations() == -1) {
-  //   registerBool.value = false;
-  //   return;
-  // }
-  // if (paymentReferenceValidations() == -1) {
-  //   registerBool.value = false;
-  //   return;
-  // }
   let formData = new FormData();
 
   formData.append("name", nameInput.value);
