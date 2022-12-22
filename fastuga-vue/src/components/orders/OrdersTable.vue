@@ -88,6 +88,7 @@ const deleteClick = (order) => {
           <div class="d-flex justify-content-end" v-if="order.ticket_number !== undefined">
 
             <button
+              aria-label="Show Items"
               class="btn btn-xs btn-light"
               @click="showItems(order, index)"
               >
@@ -96,6 +97,7 @@ const deleteClick = (order) => {
 
             <div v-if="props.parent ==='all_orders' && user.user?.type === 'EM' && (order.status === 'P' || order.status === 'R')">
               <button
+                aria-label="Delete Order"
                 class="btn btn-xs btn-light"
                 @click="deleteClick(order)"
                 v-if="props.parent == 'all_orders'"
@@ -106,6 +108,7 @@ const deleteClick = (order) => {
 
             <div v-if="props.parent ==='delivery_orders' && user.user?.type === 'ED'">
               <button
+                  aria-label="Change Order Status"
                   class="btn btn-xs btn-light"
                   @click="changeOrderClick(order)"
               >

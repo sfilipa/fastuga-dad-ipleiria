@@ -84,7 +84,7 @@ const showOrder = (order, indexRow) => {
       <td v-if="order.points_gained === undefined" class="products">
       </td>
       <td v-else class="text-end">
-        <button class="btn btn-xs btn-light" @click="showOrder(order, index)">
+        <button aria-label="Show Order" class="btn btn-xs btn-light" @click="showOrder(order, index)">
           <i class="bi bi-xs bi-search"></i>
         </button>
       </td>
