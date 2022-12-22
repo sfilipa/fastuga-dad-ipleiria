@@ -14,7 +14,7 @@ const router = createRouter({
     {
       path: '/unauthorized',
       name: 'Unauthorized',
-      component: () => import('../components/global/Unauthorized.vue')
+      component: () => import('../components/errors/Unauthorized.vue')
     },
     {
       path: '/:pathMatch(.*)*',
@@ -155,7 +155,7 @@ router.beforeEach((to, from, next) => {
     }
   }
 
-  if(to.name == 'NewOrder'){
+  if(to.name == 'NewOrder' || to.name == 'AddProduct' || to.name == 'Orders'){
     if(userStore.user && userStore.user.type != 'C'){
       next({
         name: "Unauthorized"
@@ -163,6 +163,25 @@ router.beforeEach((to, from, next) => {
       return
     }
   }
+
+  if(to.name == 'ChefsDishes'){
+    if(!userStore.user || userStore.user.type != 'EC'){
+      next({
+        name: "Unauthorized"
+      })
+      return
+    }
+  }
+
+  if(to.name == 'OrdersEmployees'){
+    if(!userStore.user || userStore.user.type != 'ED'){
+      next({
+        name: "Unauthorized"
+      })
+      return
+    }
+  }
+
   next()
 })
 
